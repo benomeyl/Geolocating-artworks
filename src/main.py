@@ -3,10 +3,12 @@ import api.aic as aic
 def main():
     print("Geolocating Artworks")
 
-    results = aic.search_all_artworks("Paris", max_pages=10, limit=5)
+    queries = ["Paris", "Chicago"]
 
-    for artwork in results["data"]:
-        print(artwork["id"], artwork["title"])
+    results = aic.search_multiple_queries(queries, limit=5, max_pages=2)
+
+    for artwork in results.values():
+        print(artwork["artwork"]["id"], artwork["artwork"]["title"])
 
 
 if __name__ == "__main__":
