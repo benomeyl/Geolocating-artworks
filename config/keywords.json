@@ -1,0 +1,58 @@
+{
+    "urban": {
+        "strong": [
+            "street",
+            "rue",
+            "cityscape",
+            "townscape"
+        ],
+        "medium": [
+            "avenue",
+            "boulevard",
+            "square",
+            "place"
+        ],
+        "weak": [
+            "city",
+            "town"
+        ]
+    },
+
+    "infrastructure": {
+        "strong": [
+            "bridge",
+            "pont"
+        ],
+        "medium": [
+            "quay",
+            "harbor",
+            "port"
+        ],
+        "weak": [
+            "road"
+        ]
+    },
+
+    "architecture": {
+        "strong": [
+            "cathedral",
+            "monument",
+            "palace"
+        ],
+        "medium": [
+            "church",
+            "tower"
+        ],
+        "weak": [
+            "building",
+            "house",
+            "architecture"
+        ]
+    },
+
+    "location": {
+        "strong": ["Paris", "London", "Rome", "New York", "Berlin", "Madrid", "Moscow", "Tokyo", "Beijing", "Sydney"],
+        "medium": [],
+        "weak": []
+    }
+}

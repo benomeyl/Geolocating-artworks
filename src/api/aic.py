@@ -6,7 +6,7 @@ from pathlib import Path
 import requests
 
 
-BASE_URL = "https://api.artic.edu/api/v1/artworks/search"
+BASE_URL = "https://api.artic.edu/api/v1/artworks"
 
 
 def _sanitize_query_for_filename(query):
@@ -72,24 +72,26 @@ def save_artworks_response(payload, query=None, limit=10, page=1, output_dir=Non
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
 
     if isinstance(payload, dict) and "unique_artworks" in payload:
-        search_queries = list(search_queries or payload.get("search_queries", []))
+        stored_queries = search_queries if search_queries is not None else payload.get("search_queries")
+        stored_queries = list(stored_queries or [])
         file_payload = {
-            "search_queries": search_queries,
-            "unique_artworks": _normalize_artwork_records(payload["unique_artworks"], search_queries),
+            "search_queries": stored_queries,
+            "unique_artworks": _normalize_artwork_records(payload["unique_artworks"], stored_queries),
         }
     elif search_queries is not None:
+        stored_queries = list(search_queries)
         file_payload = {
-            "search_queries": list(search_queries),
-            "unique_artworks": _deduplicate_artworks(payload, search_queries),
+            "search_queries": stored_queries,
+            "unique_artworks": _deduplicate_artworks(payload, stored_queries),
         }
     else:
-        search_queries = [query] if query else []
+        stored_queries = [query] if query else []
         file_payload = {
-            "search_queries": search_queries,
-            "unique_artworks": _deduplicate_artworks({query or "query": payload}, search_queries),
+            "search_queries": stored_queries,
+            "unique_artworks": _deduplicate_artworks({query or "query": payload}, stored_queries),
         }
 
-    safe_query = _sanitize_query_for_filename("_".join(search_queries or [query or "multiple_queries"]))
+    safe_query = _sanitize_query_for_filename("_".join(stored_queries or ["all_artworks"]))
     filename = f"search_multiple_queries_{safe_query}_{timestamp}.json"
     output_path = output_dir / filename
 
@@ -99,9 +101,9 @@ def save_artworks_response(payload, query=None, limit=10, page=1, output_dir=Non
     return output_path
 
 
-def search_artworks(query, page=1, limit=10, output_dir=None):
+def search_artworks(query=None, page=1, limit=10, output_dir=None):
+
     params = {
-        "q": query,
         "limit": limit,
         "page": page,
         "fields": (
@@ -118,7 +120,14 @@ def search_artworks(query, page=1, limit=10, output_dir=None):
         )
     }
 
-    response = requests.get(BASE_URL, params=params)
+    url = BASE_URL
+
+    #if query is not empty or not None, add it to the params
+    if query is not None and query != "":
+        params["q"] = query
+        url = f"{BASE_URL}/search"
+
+    response = requests.get(url, params=params)
     response.raise_for_status()
 
     payload = response.json()
@@ -126,7 +135,7 @@ def search_artworks(query, page=1, limit=10, output_dir=None):
     return payload
 
 
-def search_all_artworks(query, max_pages=None, limit=10):
+def search_all_artworks(query=None, max_pages=None, limit=10):
     first_page = search_artworks(query, page=1, limit=limit)
     all_data = list(first_page["data"])
     total_pages = first_page["pagination"]["total_pages"]
@@ -164,13 +173,11 @@ def search_multiple_queries(queries, max_pages=None, limit=10, output_dir=None):
             if query not in artworks_by_id[artwork_id]["matched_queries"]:
                 artworks_by_id[artwork_id]["matched_queries"].append(query)
 
-    payload = {
-        "search_queries": list(queries),
-        "unique_artworks": list(artworks_by_id.values()),
-    }
-
     save_artworks_response(
-        payload,
+        {
+            "search_queries": list(queries),
+            "unique_artworks": list(artworks_by_id.values()),
+        },
         search_queries=queries,
         output_dir=output_dir,
     )
