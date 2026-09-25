@@ -11,8 +11,10 @@ else:
 
 import json
 from pathlib import Path
+import sqlite3
 import requests
 import pandas as pd
+import geolocation.gazetter as gaz
 
 
 def test_request():
@@ -96,7 +98,14 @@ def test_ner():
         ner.display_named_entities(results)
 
 def main():
-    print("Starting the main process...")
+    conn = sqlite3.connect("data/gazetter/geonames.db")
+  
+    results = gaz.get_location_info("My House", conn)
+   
+    for result in results:
+        print(result)
+
+
 
 
 def get_corpus(queries=None, max_pages=5, limit=10, output_dir="data/raw/aic"):
