@@ -6,7 +6,11 @@ __pycache__/
 data/raw/
 data/processed/
 results/
+/data/gazetter/allCountries*
+/data/gazetter/geonames.db
 
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+
+
