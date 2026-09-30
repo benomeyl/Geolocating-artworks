@@ -127,7 +127,7 @@ def search_artworks(query=None, page=1, limit=10, output_dir=None):
         params["q"] = query
         url = f"{BASE_URL}/search"
 
-    response = requests.get(url, params=params)
+    response = requests.get(url, params=params, timeout=20)
     response.raise_for_status()
 
     payload = response.json()
@@ -135,13 +135,13 @@ def search_artworks(query=None, page=1, limit=10, output_dir=None):
     return payload
 
 
-def search_all_artworks(query=None, max_pages=None, limit=10):
+def search_all_artworks(query=None, max_pages=5, limit=10):
     first_page = search_artworks(query, page=1, limit=limit)
     all_data = list(first_page["data"])
     total_pages = first_page["pagination"]["total_pages"]
 
-    if max_pages is not None:
-        total_pages = min(total_pages, max_pages)
+
+    total_pages = min(total_pages, max_pages)
 
     for page in range(2, total_pages + 1):
         page_data = search_artworks(query, page=page, limit=limit)

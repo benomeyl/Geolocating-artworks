@@ -2,6 +2,26 @@
 import re
 import pandas as pd
 
+POSITIVES_LABELS = [
+    "view of", "depicting", "depicts", "shows", "showing", "landscape of",
+    "vue de", "vue du", "représente", "représentant", "paysage de", "scène à",
+]
+NEGATIVES_LABELS = [
+    "born in", "died in", "studied in", "trained in", "exhibited in", "acquired",
+    "né à", "mort à", "formé à", "exposé à", "collection", "purchased", "donated",
+    "moved to", "returned to", "during his stay", "painted in", "peint à",
+]
+
+FIELDS_WEIGHTS = {
+    "title": 0.4,
+    "themes": 0.3,
+    "subjects": 0.2,
+    "description": 0.0,
+    "short_description": 0.0,
+    "styles": -0.1,  # "Dutch School", "French Impressionism" = rarement un lieu représenté
+}
+
+
 
 def _flatten_keywords(keywords):
     if isinstance(keywords, dict):
@@ -57,3 +77,55 @@ def filter_by_keywords(combined_texts, keywords):
     ].to_dict(orient="records")
 
     return {"filtered_artworks": filtered_artworks}
+
+def extract_candidate_artwork(artwork, ner, seuil=0.85):
+    """
+    item : un objet au format {"artwork": {...}, "matched_queries": [...]}
+    Retourne les candidats LOC détectés, avec le champ d'origine et la
+    position dans ce champ (nécessaire pour le calcul du contexte).
+    """
+    
+
+    fields = {
+        "title": artwork.get("title") or "",
+        "description": artwork.get("description") or "",
+        "short_description": artwork.get("short_description") or "",
+        "themes": " ".join(artwork.get("theme_titles") or []),
+        "subjects": " ".join(artwork.get("subject_titles") or []),
+        "styles": " ".join(artwork.get("style_titles") or []),
+    }
+
+    candidats = []
+    for field, text in fields.items():
+        if not text.strip():
+            continue
+        resultats = ner(text)
+        for r in resultats:
+            if r["entity_group"] == "LOC" and r["score"] >= seuil:
+                candidats.append({
+                    "lieu": r["word"],
+                    "score_ner": round(float(r["score"]), 3),
+                    "field": field,
+                    "start": r["start"],
+                    "end": r["end"],
+                    "source_text": text,
+                })
+    return candidats
+
+
+def local_context(text, start, end, window=60):
+    """
+    get the local context around a slice of the text
+    """
+    return text[max(0, start - window):end + window].lower()
+
+def score_candidat(candidat):
+    score = FIELDS_WEIGHTS.get(candidat["field"], 0.0)
+
+    ctx = local_context(candidat["source_text"], candidat["start"], candidat["end"])
+    if any(m in ctx for m in POSITIVES_LABELS):
+        score += 0.3
+    if any(m in ctx for m in NEGATIVES_LABELS):
+        score -= 0.4
+
+    return score

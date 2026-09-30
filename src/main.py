@@ -2,19 +2,32 @@ if __package__ in (None, ""):
     import api.aic as aic
     import utils
     import data.filtering as filt
-    import data.ner as ner
+    try:
+        import data.ner as ner
+    except ModuleNotFoundError:
+        ner = None
+    try:
+        import geolocation.gazetter as gaz
+    except ModuleNotFoundError:
+        gaz = None
 else:
     from src.api import aic
     from src import utils
     from src.data import filtering as filt
-    from src.data import ner
+    try:
+        from src.data import ner
+    except ModuleNotFoundError:
+        ner = None
+    try:
+        from src.geolocation import gazetter as gaz
+    except ModuleNotFoundError:
+        gaz = None
 
 import json
 from pathlib import Path
 import sqlite3
 import requests
 import pandas as pd
-import geolocation.gazetter as gaz
 
 
 def test_request():
@@ -22,7 +35,7 @@ def test_request():
     url = f"{BASE_URL}/artworks"
     params = {"limit": 10}
 
-    response = requests.get(url, params=params)
+    response = requests.get(url, params=params, timeout=20)
     response.raise_for_status()
     return response.json()
 
@@ -48,62 +61,80 @@ def test_filtering(combined_texts):
     return filtered_artworks
 
 def test_ner():
+    if ner is None:
+        raise ModuleNotFoundError(
+            "Le module NER est indisponible. Installez les dépendances du projet pour l'utiliser."
+        )
+
     # 1) Charger le corpus
-        corpus = utils.read_all_json_files_and_combine_text_fields("data/raw/aic")
-    
-        if isinstance(corpus, pd.DataFrame):
-            texts_by_id = corpus.set_index("id")["text"].fillna("").to_dict()
-        elif isinstance(corpus, dict):
-            texts_by_id = {
-                artwork_id: (text if isinstance(text, str) else "" if text is None else str(text))
-                for artwork_id, text in corpus.items()
-            }
-        else:
-            raise TypeError(
-                "Le corpus doit être un DataFrame ou un dictionnaire id -> texte combiné. "
-                f"Type reçu : {type(corpus).__name__}"
-            )
-    
-        # 3) Charger les mots-clés
-        keywords_path = Path("config/keywords.json")
-        with keywords_path.open("r", encoding="utf-8") as f:
-            keywords = json.load(f)
-    
-        # 4) Filtrer les artworks
-        filtered_artworks = filt.filter_by_keywords(texts_by_id, keywords)
-    
-        filtered_ids = [artwork["id"] for artwork in filtered_artworks["filtered_artworks"]]
-        filtered_texts = {
-            artwork_id: texts_by_id[artwork_id]
-            for artwork_id in filtered_ids
-            if artwork_id in texts_by_id
+    corpus = utils.read_all_json_files_and_combine_text_fields("data/raw/aic")
+
+    if isinstance(corpus, pd.DataFrame):
+        texts_by_id = corpus.set_index("id")["text"].fillna("").to_dict()
+    elif isinstance(corpus, dict):
+        texts_by_id = {
+            artwork_id: (text if isinstance(text, str) else "" if text is None else str(text))
+            for artwork_id, text in corpus.items()
         }
-    
-        if not filtered_texts:
-            print("Aucun artwork n’a été retenu par les filtres de mots-clés. Arrêt avant le NER.")
-            return
-    
-        # 5) Appliquer le NER sur les textes combinés filtrés
-        ner_model = ner.load_ner_model()
-        results = ner.extract_named_entities(filtered_texts, ner_model)
-    
-        # Ne garde que les entités de type "LOC" avec un score >= 0.85
-        for artwork_id, entities in results.items():
-            results[artwork_id] = [
-                entity for entity in entities
-                if entity["entity_group"] == "LOC" and entity["score"] >= 0.85
-            ]
-    
-        # 6) Afficher les entités détectées (dont les lieux)
-        ner.display_named_entities(results)
+    else:
+        raise TypeError(
+            "Le corpus doit être un DataFrame ou un dictionnaire id -> texte combiné. "
+            f"Type reçu : {type(corpus).__name__}"
+        )
+
+    # 3) Charger les mots-clés
+    keywords_path = Path("config/keywords.json")
+    with keywords_path.open("r", encoding="utf-8") as f:
+        keywords = json.load(f)
+
+    # 4) Filtrer les artworks
+    filtered_artworks = filt.filter_by_keywords(texts_by_id, keywords)
+
+    filtered_ids = [artwork["id"] for artwork in filtered_artworks["filtered_artworks"]]
+    filtered_texts = {
+        artwork_id: texts_by_id[artwork_id]
+        for artwork_id in filtered_ids
+        if artwork_id in texts_by_id
+    }
+
+    if not filtered_texts:
+        print("Aucun artwork n’a été retenu par les filtres de mots-clés. Arrêt avant le NER.")
+        return
+
+    # 5) Appliquer le NER sur les textes combinés filtrés
+    ner_model = ner.load_ner_model()
+    results = ner.extract_named_entities(filtered_texts, ner_model)
+
+    # Ne garde que les entités de type "LOC" avec un score >= 0.85
+    for artwork_id, entities in results.items():
+        results[artwork_id] = [
+            entity for entity in entities
+            if entity["entity_group"] == "LOC" and entity["score"] >= 0.85
+        ]
+
+    # 6) Afficher les entités détectées (dont les lieux)
+    ner.display_named_entities(results)
 
 def main():
-    conn = sqlite3.connect("data/gazetter/geonames.db")
-  
-    results = gaz.get_location_info("My House", conn)
+    if ner is None:
+        raise ModuleNotFoundError(
+            "Le module NER est indisponible. Installez les dépendances du projet pour l'utiliser."
+        )
+
+    # 1) Charger le corpus
+    artowrks = utils.read_artworks_from_json("data/raw/aic/smaller_set/set.json")
+    ner_model = ner.load_ner_model()
+
+    for artwork in artowrks.values():
+        candidtats = filt.extract_candidate_artwork(artwork, ner=ner_model)
+
+        for candidat in candidtats:
+            score = filt.score_candidat(candidat=candidat)
+
+
    
-    for result in results:
-        print(result)
+
+    
 
 
 
