@@ -25,7 +25,6 @@ else:
 
 import json
 from pathlib import Path
-import sqlite3
 import requests
 import pandas as pd
 
@@ -61,6 +60,7 @@ def test_filtering(combined_texts):
     return filtered_artworks
 
 def test_ner():
+    
     if ner is None:
         raise ModuleNotFoundError(
             "Le module NER est indisponible. Installez les dépendances du projet pour l'utiliser."
@@ -122,14 +122,22 @@ def main():
         )
 
     # 1) Charger le corpus
-    artowrks = utils.read_artworks_from_json("data/raw/aic/smaller_set/set.json")
+    artowrks = utils.read_artworks_from_json("data/raw/aic/search_multiple_queries_all_artworks_20261001T134855Z.json")
     ner_model = ner.load_ner_model()
 
     for artwork in artowrks.values():
-        candidtats = filt.extract_candidate_artwork(artwork, ner=ner_model)
+        results = filt.evaluate_artwork(artwork, ner_model)
 
-        for candidat in candidtats:
-            score = filt.score_candidat(candidat=candidat)
+        #print results with heuristic score > 0.6
+        for result in results:
+            if result['score_heuristique'] >= 0.55:
+                print(f"Artwork ID: {artwork.get('id')}, Place: {result['place']}, "
+                      f"Score NER Max: {result['score_ner_max']}, "
+                      f"Heuristic Score: {result['score_heuristique']}, "
+                      f"Fields: {result['champs']}")
+
+    
+
 
 
    

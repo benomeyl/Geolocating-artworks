@@ -1,6 +1,6 @@
-
 import re
 import pandas as pd
+from collections import defaultdict
 
 POSITIVES_LABELS = [
     "view of", "depicting", "depicts", "shows", "showing", "landscape of",
@@ -18,7 +18,7 @@ FIELDS_WEIGHTS = {
     "subjects": 0.2,
     "description": 0.0,
     "short_description": 0.0,
-    "styles": -0.1,  # "Dutch School", "French Impressionism" = rarement un lieu représenté
+    "styles": -0.1,  # "Dutch School" and "French Impressionism" rarely indicate depicted places.
 }
 
 
@@ -78,13 +78,11 @@ def filter_by_keywords(combined_texts, keywords):
 
     return {"filtered_artworks": filtered_artworks}
 
-def extract_candidate_artwork(artwork, ner, seuil=0.85):
+def extract_candidate_artwork(artwork, ner, threshold=0.85):
     """
-    item : un objet au format {"artwork": {...}, "matched_queries": [...]}
-    Retourne les candidats LOC détectés, avec le champ d'origine et la
-    position dans ce champ (nécessaire pour le calcul du contexte).
+    Extract detected LOC candidates, including their source field and position
+    within that field (required for context scoring).
     """
-    
 
     fields = {
         "title": artwork.get("title") or "",
@@ -95,22 +93,22 @@ def extract_candidate_artwork(artwork, ner, seuil=0.85):
         "styles": " ".join(artwork.get("style_titles") or []),
     }
 
-    candidats = []
+    candidates = []
     for field, text in fields.items():
         if not text.strip():
             continue
-        resultats = ner(text)
-        for r in resultats:
-            if r["entity_group"] == "LOC" and r["score"] >= seuil:
-                candidats.append({
-                    "lieu": r["word"],
-                    "score_ner": round(float(r["score"]), 3),
+        results = ner(text)
+        for result in results:
+            if result["entity_group"] == "LOC" and result["score"] >= threshold:
+                candidates.append({
+                    "place": result["word"],
+                    "score_ner": round(float(result["score"]), 3),
                     "field": field,
-                    "start": r["start"],
-                    "end": r["end"],
+                    "start": result["start"],
+                    "end": result["end"],
                     "source_text": text,
                 })
-    return candidats
+    return candidates
 
 
 def local_context(text, start, end, window=60):
@@ -119,13 +117,47 @@ def local_context(text, start, end, window=60):
     """
     return text[max(0, start - window):end + window].lower()
 
-def score_candidat(candidat):
-    score = FIELDS_WEIGHTS.get(candidat["field"], 0.0)
+def score_candidate(candidate):
+    score = FIELDS_WEIGHTS.get(candidate["field"], 0.0)
 
-    ctx = local_context(candidat["source_text"], candidat["start"], candidat["end"])
-    if any(m in ctx for m in POSITIVES_LABELS):
+    context = local_context(candidate["source_text"], candidate["start"], candidate["end"])
+    if any(marker in context for marker in POSITIVES_LABELS):
         score += 0.3
-    if any(m in ctx for m in NEGATIVES_LABELS):
+    if any(marker in context for marker in NEGATIVES_LABELS):
         score -= 0.4
 
     return score
+
+def merge_candidate_places(candidates):
+    """
+    Merge candidates that refer to the same place (case-insensitive) and
+    compute a heuristic score for each unique place.
+    """
+    groups = defaultdict(list)
+    for candidate in candidates:
+        place_key = candidate["place"].lower().strip()
+        groups[place_key].append(candidate)
+
+    merged_places = []
+    for place_key, occurrences in groups.items():
+        heuristic_score = max(score_candidate(candidate) for candidate in occurrences)
+        found_fields = {candidate["field"] for candidate in occurrences}
+
+        # Add a bonus when the place appears in multiple independent fields.
+        if len(found_fields) > 1:
+            heuristic_score += 0.15
+
+        merged_places.append({
+            "place": occurrences[0]["place"],  # Preserve the original spelling and capitalization.
+            "score_ner_max": max(candidate["score_ner"] for candidate in occurrences),
+            "score_heuristique": round(heuristic_score, 3),
+            "champs": sorted(found_fields),
+            "occurrences": occurrences,  # Kept for debugging and traceability.
+        })
+
+    return sorted(merged_places, key=lambda place: place["score_heuristique"], reverse=True)
+
+def evaluate_artwork(artwork, ner, threshold=0.85):
+    candidates = extract_candidate_artwork(artwork, ner, threshold=threshold)
+    merged_places = merge_candidate_places(candidates)
+    return merged_places
