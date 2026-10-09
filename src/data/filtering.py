@@ -3,8 +3,9 @@ import pandas as pd
 from collections import defaultdict
 
 POSITIVES_LABELS = [
-    "view of", "depicting", "depicts", "shows", "showing", "landscape of",
-    "vue de", "vue du", "représente", "représentant", "paysage de", "scène à",
+    "view of", "depicting", "depicts", "shows", "showing", "landscape of", "painting of", "painting depicting", "painting showing", "vue sur",
+    "vue de", "vue du", "représente", "représentant", "paysage de", "scène à", "peinture de", "peinture représentant", "peinture montrant",
+    "photo de", "photographie de", "photographie représentant", "photographie montrant",
 ]
 NEGATIVES_LABELS = [
     "born in", "died in", "studied in", "trained in", "exhibited in", "acquired",
@@ -113,7 +114,7 @@ def extract_candidate_artwork(artwork, ner, threshold=0.85):
 
 def local_context(text, start, end, window=60):
     """
-    get the local context around a slice of the text
+    Get the local context around a slice of text.
     """
     return text[max(0, start - window):end + window].lower()
 
@@ -157,7 +158,53 @@ def merge_candidate_places(candidates):
 
     return sorted(merged_places, key=lambda place: place["score_heuristique"], reverse=True)
 
+
 def evaluate_artwork(artwork, ner, threshold=0.85):
     candidates = extract_candidate_artwork(artwork, ner, threshold=threshold)
     merged_places = merge_candidate_places(candidates)
     return merged_places
+
+
+def compare_heuristic_places_with_annotations(records, heuristic_results, threshold=0.4):
+    """Compare heuristic acceptance with singular depicted-place annotations."""
+    real_depicted_artworks = []
+    heuristic_accepted_artworks = []
+    artworks_with_discrepancy = []
+    real_depicted_places = 0
+    heuristic_accepted_places = 0
+
+    for record in records:
+        artwork = record.get("artwork", record)
+        artwork_id = artwork.get("id")
+        annotations = record.get("annotations", {})
+        is_real_depicted = (
+            annotations.get("place_status") == "depicted"
+            and annotations.get("depicted_place") is not None
+        )
+
+        accepted_places = [
+            place for place in heuristic_results.get(artwork_id, [])
+            if place.get("score_heuristique", 0) >= threshold
+        ]
+
+        if is_real_depicted:
+            real_depicted_artworks.append(artwork_id)
+            real_depicted_places += 1
+        if accepted_places:
+            heuristic_accepted_artworks.append(artwork_id)
+            heuristic_accepted_places += len(accepted_places)
+
+        if is_real_depicted != bool(accepted_places):
+            artworks_with_discrepancy.append({
+                "id": artwork_id,
+                "real_depicted": is_real_depicted,
+                "accepted": bool(accepted_places),
+            })
+
+    return {
+        "real_depicted_artworks": len(real_depicted_artworks),
+        "heuristic_accepted_artworks": len(heuristic_accepted_artworks),
+        "real_depicted_places": real_depicted_places,
+        "heuristic_accepted_places": heuristic_accepted_places,
+        "artworks_with_discrepancy": artworks_with_discrepancy,
+    }

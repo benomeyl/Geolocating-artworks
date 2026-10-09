@@ -37,7 +37,7 @@ with open("data/gazetter/allCountries.txt", encoding="utf-8") as f:
 
 conn.commit()
 
-# Index pour accélérer les recherches par nom
+# Index to speed up searches by name
 cur.execute("CREATE INDEX IF NOT EXISTS idx_name ON geonames(name)")
 cur.execute("CREATE INDEX IF NOT EXISTS idx_asciiname ON geonames(asciiname)")
 conn.commit()

@@ -1,5 +1,7 @@
 """
-Use a NER model to extract named entities from the text. used after filtering the artworks by keywords. The named entities can be used to geolocate the artworks.
+Use a NER model to extract named entities from the text. This is used after
+filtering artworks by keywords. The named entities can be used to geolocate
+the artworks.
 """
 from transformers import AutoTokenizer, AutoModelForTokenClassification, pipeline
 

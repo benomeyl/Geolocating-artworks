@@ -106,11 +106,11 @@ if __name__ == "__main__":
 """,
 
     "src/api/aic.py": """\
-# Client pour l'API de l'Art Institute of Chicago.
+# Client for the Art Institute of Chicago API.
 """,
 
     "src/data/filtering.py": """\
-# Fonctions de filtrage et de nettoyage des données.
+# Data filtering and cleaning functions.
 """,
 }
 

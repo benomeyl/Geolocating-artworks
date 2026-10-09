@@ -63,10 +63,10 @@ def test_ner():
     
     if ner is None:
         raise ModuleNotFoundError(
-            "Le module NER est indisponible. Installez les dépendances du projet pour l'utiliser."
+            "The NER module is unavailable. Install the project dependencies to use it."
         )
 
-    # 1) Charger le corpus
+    # 1) Load the corpus
     corpus = utils.read_all_json_files_and_combine_text_fields("data/raw/aic")
 
     if isinstance(corpus, pd.DataFrame):
@@ -78,16 +78,16 @@ def test_ner():
         }
     else:
         raise TypeError(
-            "Le corpus doit être un DataFrame ou un dictionnaire id -> texte combiné. "
-            f"Type reçu : {type(corpus).__name__}"
+            "The corpus must be a DataFrame or an id -> combined text dictionary. "
+            f"Received type: {type(corpus).__name__}"
         )
 
-    # 3) Charger les mots-clés
+    # 3) Load the keywords
     keywords_path = Path("config/keywords.json")
     with keywords_path.open("r", encoding="utf-8") as f:
         keywords = json.load(f)
 
-    # 4) Filtrer les artworks
+    # 4) Filter the artworks
     filtered_artworks = filt.filter_by_keywords(texts_by_id, keywords)
 
     filtered_ids = [artwork["id"] for artwork in filtered_artworks["filtered_artworks"]]
@@ -98,53 +98,89 @@ def test_ner():
     }
 
     if not filtered_texts:
-        print("Aucun artwork n’a été retenu par les filtres de mots-clés. Arrêt avant le NER.")
+        print("No artworks were selected by the keyword filters. Stopping before NER.")
         return
 
-    # 5) Appliquer le NER sur les textes combinés filtrés
+    # 5) Apply NER to the filtered combined texts
     ner_model = ner.load_ner_model()
     results = ner.extract_named_entities(filtered_texts, ner_model)
 
-    # Ne garde que les entités de type "LOC" avec un score >= 0.85
+    # Keep only "LOC" entities with a score >= 0.85
     for artwork_id, entities in results.items():
         results[artwork_id] = [
             entity for entity in entities
             if entity["entity_group"] == "LOC" and entity["score"] >= 0.85
         ]
 
-    # 6) Afficher les entités détectées (dont les lieux)
+    # 6) Display the detected entities (including locations)
     ner.display_named_entities(results)
 
-def main():
-    if ner is None:
-        raise ModuleNotFoundError(
-            "Le module NER est indisponible. Installez les dépendances du projet pour l'utiliser."
-        )
 
-    # 1) Charger le corpus
-    artowrks = utils.read_artworks_from_json("data/raw/aic/search_multiple_queries_all_artworks_20261001T134855Z.json")
+def test_heuristic():
+    if ner is None:
+            raise ModuleNotFoundError(
+                "The NER module is unavailable. Install the project dependencies to use it."
+            )
+    
+    # 1) Load the corpus
+    artowrks = utils.read_artworks_from_json("data/raw/gold_standard/gold_standard.json")
     ner_model = ner.load_ner_model()
 
     for artwork in artowrks.values():
         results = filt.evaluate_artwork(artwork, ner_model)
 
-        #print results with heuristic score > 0.6
+        # Print results with a heuristic score > 0.55
         for result in results:
-            if result['score_heuristique'] >= 0.55:
+            if result['score_heuristique'] >= 0.4:
                 print(f"Artwork ID: {artwork.get('id')}, Place: {result['place']}, "
-                      f"Score NER Max: {result['score_ner_max']}, "
-                      f"Heuristic Score: {result['score_heuristique']}, "
-                      f"Fields: {result['champs']}")
+                        f"Score NER Max: {result['score_ner_max']}, "
+                        f"Heuristic Score: {result['score_heuristique']}, "
+                        f"Fields: {result['champs']}")
 
-    
+                
+def main():
+    if ner is None:
+        raise ModuleNotFoundError(
+            "The NER module is unavailable. Install the project dependencies to use it."
+        )
 
+    # 1) Load the gold-standard records once
+    with Path("data/raw/gold_standard/oeuvres_wikidata.json").open(
+        "r", encoding="utf-8"
+    ) as f:
+        artwork_records = json.load(f)["unique_artworks"]
 
+    ner_model = ner.load_ner_model()
 
-   
+    # 2) Evaluate each artwork and retain all heuristic results
+    heuristic_results = {}
+    for record in artwork_records:
+        artwork = record["artwork"]
+        heuristic_results[artwork["id"]] = filt.evaluate_artwork(artwork, ner_model)
 
-    
+    # 3) Compare heuristic acceptance with annotations
+    comparison = filt.compare_heuristic_places_with_annotations(
+        artwork_records,
+        heuristic_results,
+        threshold=0.4,
+    )
 
+    # 4) Display a readable summary
+    print("─" * 60)
+    print("Comparaison des lieux : heuristique vs. annotations")
+    print("─" * 60)
+    print(f"Œuvres avec un lieu réellement représenté : {comparison['real_depicted_artworks']}")
+    print(f"Œuvres acceptées par l’heuristique : {comparison['heuristic_accepted_artworks']}")
+    print(f"Lieux réellement représentés : {comparison['real_depicted_places']}")
+    print(f"Lieux acceptés par l’heuristique : {comparison['heuristic_accepted_places']}")
+    print(f"Œuvres en divergence : {len(comparison['artworks_with_discrepancy'])}")
 
+    for discrepancy in comparison["artworks_with_discrepancy"]:
+        artwork_id = discrepancy["id"]
+        print(
+            f"- Artwork {artwork_id}: réel={discrepancy['real_depicted']}, "
+            f"accepté={discrepancy['accepted']}"
+        )
 
 
 def get_corpus(queries=None, max_pages=5, limit=10, output_dir="data/raw/aic"):

@@ -1,1 +1,1 @@
-# Fonctions de filtrage et de nettoyage des données.
+# Data filtering and cleaning functions.

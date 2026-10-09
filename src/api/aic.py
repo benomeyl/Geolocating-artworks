@@ -122,7 +122,7 @@ def search_artworks(query=None, page=1, limit=10, output_dir=None):
 
     url = BASE_URL
 
-    #if query is not empty or not None, add it to the params
+    # If the query is not empty or None, add it to the parameters.
     if query is not None and query != "":
         params["q"] = query
         url = f"{BASE_URL}/search"
