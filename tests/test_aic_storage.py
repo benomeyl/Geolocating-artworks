@@ -1,6 +1,11 @@
 import json
 
-from src.api.aic import save_artworks_response, search_multiple_queries
+from src.api.aic import (
+    get_corpus_from_dump,
+    load_artworks_from_dump,
+    save_artworks_response,
+    search_multiple_queries,
+)
 
 
 def test_search_multiple_queries_writes_one_json_file_with_queries_and_unique_artworks(tmp_path, monkeypatch):
@@ -62,3 +67,27 @@ def test_save_artworks_response_supports_custom_payload_output(tmp_path):
     assert stored["search_queries"] == ["Paris"]
     assert stored["unique_artworks"][0]["artwork"] == {"id": 1, "title": "Painting"}
     assert stored["unique_artworks"][0]["matched_queries"] == ["Paris"]
+
+
+def test_load_artworks_from_dump_reads_local_json_files(tmp_path):
+    artworks_dir = tmp_path / "artworks"
+    artworks_dir.mkdir()
+    (artworks_dir / "101.json").write_text(json.dumps({"id": 101, "title": "Paris Street"}), encoding="utf-8")
+    (artworks_dir / "102.json").write_text(json.dumps({"id": 102, "title": "Roman Forum"}), encoding="utf-8")
+
+    artworks = load_artworks_from_dump(artworks_dir)
+
+    assert [art["id"] for art in artworks] == [101, 102]
+
+
+def test_get_corpus_from_dump_filters_records_by_query(tmp_path):
+    artworks_dir = tmp_path / "artworks"
+    artworks_dir.mkdir()
+    (artworks_dir / "101.json").write_text(json.dumps({"id": 101, "title": "Paris Street"}), encoding="utf-8")
+    (artworks_dir / "102.json").write_text(json.dumps({"id": 102, "title": "Roman Forum"}), encoding="utf-8")
+
+    corpus = get_corpus_from_dump(queries=["Paris"], dump_dir=artworks_dir)
+
+    assert list(corpus) == [101]
+    assert corpus[101]["matched_queries"] == ["Paris"]
+    assert corpus[101]["artwork"]["title"] == "Paris Street"

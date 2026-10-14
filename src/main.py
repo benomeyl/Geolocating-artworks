@@ -28,6 +28,11 @@ from pathlib import Path
 import requests
 import pandas as pd
 
+try:
+    from src.api import aic as api
+except ImportError:  # pragma: no cover - fallback for script execution
+    import api.aic as api
+
 
 def test_request():
     BASE_URL = "https://api.artic.edu/api/v1"
@@ -115,7 +120,6 @@ def test_ner():
     # 6) Display the detected entities (including locations)
     ner.display_named_entities(results)
 
-
 def test_heuristic():
     if ner is None:
             raise ModuleNotFoundError(
@@ -137,50 +141,95 @@ def test_heuristic():
                         f"Heuristic Score: {result['score_heuristique']}, "
                         f"Fields: {result['champs']}")
 
-                
-def main():
+def train_heuristic():
     if ner is None:
         raise ModuleNotFoundError(
             "The NER module is unavailable. Install the project dependencies to use it."
         )
 
     # 1) Load the gold-standard records once
-    with Path("data/raw/gold_standard/oeuvres_wikidata.json").open(
+    with Path("data/raw/gold_standard/gold_dataset.json").open(
         "r", encoding="utf-8"
     ) as f:
         artwork_records = json.load(f)["unique_artworks"]
 
     ner_model = ner.load_ner_model()
 
-    # 2) Evaluate each artwork and retain all heuristic results
-    heuristic_results = {}
-    for record in artwork_records:
-        artwork = record["artwork"]
-        heuristic_results[artwork["id"]] = filt.evaluate_artwork(artwork, ner_model)
+    optimization = filt.optimize_heuristic_parameters(artwork_records, ner_model)
+    metrics = optimization["cv_metrics"]
 
-    # 3) Compare heuristic acceptance with annotations
-    comparison = filt.compare_heuristic_places_with_annotations(
-        artwork_records,
-        heuristic_results,
-        threshold=0.4,
+    print("─" * 60)
+    print("Évaluation binaire stratifiée : lieu représenté ou non")
+    print("─" * 60)
+    print(f"Précision : {metrics['precision']:.3f}")
+    print(f"Rappel : {metrics['recall']:.3f}")
+    print(f"F1 : {metrics['f1']:.3f}")
+    print(
+        "Matrice de confusion (TP/FP/TN/FN) : "
+        f"{metrics['true_positives']}/{metrics['false_positives']}/"
+        f"{metrics['true_negatives']}/{metrics['false_negatives']}"
     )
-
-    # 4) Display a readable summary
-    print("─" * 60)
-    print("Comparaison des lieux : heuristique vs. annotations")
-    print("─" * 60)
-    print(f"Œuvres avec un lieu réellement représenté : {comparison['real_depicted_artworks']}")
-    print(f"Œuvres acceptées par l’heuristique : {comparison['heuristic_accepted_artworks']}")
-    print(f"Lieux réellement représentés : {comparison['real_depicted_places']}")
-    print(f"Lieux acceptés par l’heuristique : {comparison['heuristic_accepted_places']}")
-    print(f"Œuvres en divergence : {len(comparison['artworks_with_discrepancy'])}")
-
-    for discrepancy in comparison["artworks_with_discrepancy"]:
-        artwork_id = discrepancy["id"]
+    print("Meilleurs paramètres ajustés sur l’ensemble gold :")
+    for parameter, value in optimization["best_parameters"].items():
+        print(f"{parameter}: {value}")
+    selection_objective = optimization.get("selection_objective")
+    if selection_objective:
+        print("Objectif : minimiser les faux positifs")
         print(
-            f"- Artwork {artwork_id}: réel={discrepancy['real_depicted']}, "
-            f"accepté={discrepancy['accepted']}"
+            "Rappel minimum visé : "
+            f"{selection_objective['minimum_recall']:.0%}"
         )
+
+    print("─" * 60)
+    if "fold_metrics" in optimization:
+        print("Identifiants des faux positifs et faux négatifs par fold :")
+        for fold_index, fold_metrics in enumerate(optimization["fold_metrics"]):
+            print(f"Fold {fold_index + 1}:")
+            errors_by_id = {
+                error.get("id"): error
+                for error in fold_metrics.get("errors", [])
+            }
+            print("Faux positifs :")
+            for artwork_id in fold_metrics.get("false_positive_ids", []):
+                error = errors_by_id.get(artwork_id, {})
+                places = error.get("predicted_places", [])
+                if places:
+                    place_details = ", ".join(
+                        f"{place.get('place')} ({place.get('score_heuristique', 0):.3f})"
+                        for place in places
+                    )
+                    print(f"  {artwork_id} : {place_details}")
+                else:
+                    print(f"  {artwork_id} : lieu non disponible")
+            print(f"Faux négatifs : {fold_metrics.get('false_negative_ids', [])}")
+            print("Prédictions rejetées à revoir :")
+            for prediction in fold_metrics.get("flagged_predictions", []):
+                places = ", ".join(
+                    f"{place.get('place')} ({place.get('score_heuristique', 0):.3f})"
+                    for place in prediction.get("rejected_places", [])
+                )
+                print(f"  {prediction.get('id')} : {places}")
+    elif "false_positive_ids" in optimization or "false_negative_ids" in optimization:
+        print("Identifiants des faux positifs et faux négatifs :")
+        print(f"Faux positifs : {optimization.get('false_positive_ids', [])}")
+        print(f"Faux négatifs : {optimization.get('false_negative_ids', [])}")
+    else:
+        print("Identifiants des faux positifs et faux négatifs : non fournis.")
+                
+def main():
+    """queries = None
+
+    corpus = api.get_corpus_from_dump(queries=queries, dump_dir="data/raw/artic-api-data/json/artworks", limit=20000)
+
+    #save the coprus to a json file
+    output_file = "data/processed/aic_useful_fields.json"
+    api.export_useful_artworks(list(corpus.values()), output_file)
+    print(f"Exporté dans {output_file}")"""
+
+    train_heuristic()
+
+
+    
 
 
 def get_corpus(queries=None, max_pages=5, limit=10, output_dir="data/raw/aic"):
