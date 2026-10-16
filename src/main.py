@@ -24,6 +24,7 @@ else:
         gaz = None
 
 import json
+import argparse
 from pathlib import Path
 import requests
 import pandas as pd
@@ -126,22 +127,9 @@ def test_heuristic():
                 "The NER module is unavailable. Install the project dependencies to use it."
             )
     
-    # 1) Load the corpus
-    artowrks = utils.read_artworks_from_json("data/raw/gold_standard/gold_standard.json")
-    ner_model = ner.load_ner_model()
+    train_heuristic()
 
-    for artwork in artowrks.values():
-        results = filt.evaluate_artwork(artwork, ner_model)
-
-        # Print results with a heuristic score > 0.55
-        for result in results:
-            if result['score_heuristique'] >= 0.4:
-                print(f"Artwork ID: {artwork.get('id')}, Place: {result['place']}, "
-                        f"Score NER Max: {result['score_ner_max']}, "
-                        f"Heuristic Score: {result['score_heuristique']}, "
-                        f"Fields: {result['champs']}")
-
-def train_heuristic():
+def train_heuristic(ner_model=None):
     if ner is None:
         raise ModuleNotFoundError(
             "The NER module is unavailable. Install the project dependencies to use it."
@@ -153,13 +141,16 @@ def train_heuristic():
     ) as f:
         artwork_records = json.load(f)["unique_artworks"]
 
-    ner_model = ner.load_ner_model()
+    if ner_model is None:
+        ner_model = ner.load_ner_model()
 
-    optimization = filt.optimize_heuristic_parameters(artwork_records, ner_model)
+    candidates_by_artwork = filt.extract_all_candidates(artwork_records, ner_model)
+    table = filt.build_training_table(artwork_records, candidates_by_artwork)
+    optimization = filt.train_logistic_model(table)
     metrics = optimization["cv_metrics"]
 
     print("─" * 60)
-    print("Évaluation binaire stratifiée : lieu représenté ou non")
+    print("Évaluation croisée de la classification par candidat")
     print("─" * 60)
     print(f"Précision : {metrics['precision']:.3f}")
     print(f"Rappel : {metrics['recall']:.3f}")
@@ -169,67 +160,84 @@ def train_heuristic():
         f"{metrics['true_positives']}/{metrics['false_positives']}/"
         f"{metrics['true_negatives']}/{metrics['false_negatives']}"
     )
-    print("Meilleurs paramètres ajustés sur l’ensemble gold :")
-    for parameter, value in optimization["best_parameters"].items():
-        print(f"{parameter}: {value}")
-    selection_objective = optimization.get("selection_objective")
-    if selection_objective:
-        print("Objectif : minimiser les faux positifs")
-        print(
-            "Rappel minimum visé : "
-            f"{selection_objective['minimum_recall']:.0%}"
+    print(f"C de régularisation : {optimization['C']}")
+    print(f"Seuil d’acceptation : {optimization['threshold']:.3f}")
+
+    return optimization, ner_model
+
+
+def predict_artworks_file(input_path, output_path, model, ner_model, review_margin=0.1):
+    input_path = Path(input_path)
+    output_path = Path(output_path)
+    with input_path.open("r", encoding="utf-8") as input_file:
+        payload = json.load(input_file)
+
+    if isinstance(payload, list):
+        records = payload
+    elif isinstance(payload, dict):
+        records = next(
+            (payload[key] for key in ("unique_artworks", "artworks", "data")
+             if isinstance(payload.get(key), list)),
+            [payload],
+        )
+    else:
+        raise ValueError("The input JSON must contain an artwork or a list of artworks.")
+
+    predictions = []
+    candidates_by_artwork = filt.extract_all_candidates(records, ner_model)
+    places_by_artwork = filt.predict_with_model(records, candidates_by_artwork, model)
+    acceptance_threshold = model["threshold"]
+    for record in records:
+        if not isinstance(record, dict):
+            raise ValueError("Each artwork entry in the input JSON must be an object.")
+        artwork = record.get("artwork", record)
+        places = places_by_artwork.get(artwork.get("id"), [])
+        accepted_places = [
+            {
+                "place": place["place"],
+                "score": place["score_heuristique"],
+            }
+            for place in places
+            if place["score_heuristique"] >= acceptance_threshold
+        ]
+        flagged_places = [
+            {
+                "place": place["place"],
+                "score": place["score_heuristique"],
+            }
+            for place in places
+            if acceptance_threshold - review_margin
+            <= place["score_heuristique"]
+            < acceptance_threshold
+        ]
+        predictions.append({
+            "id": artwork.get("id"),
+            "has_predicted_place": bool(accepted_places),
+            "predicted_places": accepted_places,
+            "flagged_places": flagged_places,
+        })
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with output_path.open("w", encoding="utf-8") as output_file:
+        json.dump({"predictions": predictions}, output_file, ensure_ascii=False, indent=2)
+    return predictions
+
+def main(predict_input=None, prediction_output="data/processed/heuristic_predictions.json"):
+    if ner is None:
+        raise ModuleNotFoundError(
+            "The NER module is unavailable. Install the project dependencies to use it."
         )
 
-    print("─" * 60)
-    if "fold_metrics" in optimization:
-        print("Identifiants des faux positifs et faux négatifs par fold :")
-        for fold_index, fold_metrics in enumerate(optimization["fold_metrics"]):
-            print(f"Fold {fold_index + 1}:")
-            errors_by_id = {
-                error.get("id"): error
-                for error in fold_metrics.get("errors", [])
-            }
-            print("Faux positifs :")
-            for artwork_id in fold_metrics.get("false_positive_ids", []):
-                error = errors_by_id.get(artwork_id, {})
-                places = error.get("predicted_places", [])
-                if places:
-                    place_details = ", ".join(
-                        f"{place.get('place')} ({place.get('score_heuristique', 0):.3f})"
-                        for place in places
-                    )
-                    print(f"  {artwork_id} : {place_details}")
-                else:
-                    print(f"  {artwork_id} : lieu non disponible")
-            print(f"Faux négatifs : {fold_metrics.get('false_negative_ids', [])}")
-            print("Prédictions rejetées à revoir :")
-            for prediction in fold_metrics.get("flagged_predictions", []):
-                places = ", ".join(
-                    f"{place.get('place')} ({place.get('score_heuristique', 0):.3f})"
-                    for place in prediction.get("rejected_places", [])
-                )
-                print(f"  {prediction.get('id')} : {places}")
-    elif "false_positive_ids" in optimization or "false_negative_ids" in optimization:
-        print("Identifiants des faux positifs et faux négatifs :")
-        print(f"Faux positifs : {optimization.get('false_positive_ids', [])}")
-        print(f"Faux négatifs : {optimization.get('false_negative_ids', [])}")
-    else:
-        print("Identifiants des faux positifs et faux négatifs : non fournis.")
-                
-def main():
-    """queries = None
-
-    corpus = api.get_corpus_from_dump(queries=queries, dump_dir="data/raw/artic-api-data/json/artworks", limit=20000)
-
-    #save the coprus to a json file
-    output_file = "data/processed/aic_useful_fields.json"
-    api.export_useful_artworks(list(corpus.values()), output_file)
-    print(f"Exporté dans {output_file}")"""
-
-    train_heuristic()
-
-
-    
+    optimization, ner_model = train_heuristic()
+    if predict_input is not None:
+        predictions = predict_artworks_file(
+            predict_input,
+            prediction_output,
+            optimization,
+            ner_model,
+        )
+        print(f"Prédictions exportées : {len(predictions)} dans {prediction_output}")
+    return optimization
 
 
 def get_corpus(queries=None, max_pages=5, limit=10, output_dir="data/raw/aic"):
@@ -271,4 +279,17 @@ def get_corpus(queries=None, max_pages=5, limit=10, output_dir="data/raw/aic"):
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Évaluer et appliquer l’heuristique de géolocalisation.")
+    parser.add_argument(
+        "--predict-input",
+        type=Path,
+        help="Fichier JSON contenant les œuvres à prédire.",
+    )
+    parser.add_argument(
+        "--prediction-output",
+        type=Path,
+        default=Path("data/processed/heuristic_predictions.json"),
+        help="Fichier JSON de sortie des prédictions.",
+    )
+    arguments = parser.parse_args()
+    main(arguments.predict_input, arguments.prediction_output)

@@ -1,8 +1,12 @@
+import json
 from src.data.filtering import (
+    build_training_table,
     compare_heuristic_places_with_annotations,
     evaluate_binary_predictions,
+    evaluate_place_identity,
     filter_by_keywords,
-    optimize_heuristic_parameters,
+    predict_with_model,
+    train_logistic_model,
 )
 from types import SimpleNamespace
 
@@ -119,17 +123,19 @@ def test_binary_evaluation_flags_rejected_places_near_threshold():
     }]
 
 
-def test_optimizer_uses_stratified_out_of_fold_predictions():
+def test_logistic_model_trains_with_grouped_candidates_and_predicts_identity():
     records = []
     candidates_by_artwork = {}
-    for artwork_id in range(1, 9):
-        is_depicted = artwork_id <= 4
+    for index in range(1, 9):
+        artwork_id = index if index % 2 else f"art-{index}"
+        is_depicted = index <= 4
         place = "Paris" if is_depicted else "Rome"
         source_text = f"view of {place}" if is_depicted else f"born in {place}"
         records.append({
             "artwork": {"id": artwork_id},
             "annotations": {
                 "place_status": "depicted" if is_depicted else "none",
+                "depicted_place": {"name": "Paris"} if is_depicted else None,
             },
         })
         candidates_by_artwork[artwork_id] = [{
@@ -141,75 +147,64 @@ def test_optimizer_uses_stratified_out_of_fold_predictions():
             "source_text": source_text,
         }]
 
-    result = optimize_heuristic_parameters(
-        records,
-        candidates_by_artwork=candidates_by_artwork,
-        n_splits=2,
+    table = build_training_table(records, candidates_by_artwork)
+    model = train_logistic_model(table, n_splits=2)
+    results = predict_with_model(records, candidates_by_artwork, model)
+    identity = evaluate_place_identity(records, results)
+
+    assert model["cv_metrics"]["true_positives"] == 4
+    assert model["cv_metrics"]["true_negatives"] == 4
+    assert model["cv_metrics"]["f1"] == 1.0
+    assert identity["identity_accuracy"] == 1.0
+
+
+def test_predict_artworks_file_writes_model_predictions(tmp_path, monkeypatch):
+    import src.main as main_module
+
+    input_path = tmp_path / "artworks.json"
+    output_path = tmp_path / "nested" / "predictions.json"
+    input_path.write_text(json.dumps({
+        "unique_artworks": [
+            {"artwork": {"id": 101, "title": "Paris"}},
+            {"artwork": {"id": 102, "title": "Unknown"}},
+        ]
+    }), encoding="utf-8")
+    monkeypatch.setattr(
+        main_module.filt,
+        "extract_all_candidates",
+        lambda records, ner_model: {101: [], 102: []},
     )
-
-    assert result["cv_metrics"]["true_positives"] == 4
-    assert result["cv_metrics"]["true_negatives"] == 4
-    assert result["cv_metrics"]["f1"] == 1.0
-    assert len(result["fold_metrics"]) == 2
-    assert result["false_positive_ids"] == []
-    assert result["false_negative_ids"] == []
-
-
-def test_parameter_grid_varies_each_field_weight():
-    from src.data.filtering import _heuristic_parameter_grid
-
-    field_weights = _heuristic_parameter_grid()["field_weights"]
-
-    assert len(field_weights) > 3
-    for field in ("title", "description", "short_description", "themes", "subjects", "styles"):
-        assert len({weights[field] for weights in field_weights}) > 1
-
-
-def test_optimizer_minimizes_false_positives_with_recall_constraint():
-    records = []
-    candidates_by_artwork = {}
-    for artwork_id in range(1, 9):
-        is_depicted = artwork_id <= 4
-        records.append({
-            "artwork": {"id": artwork_id},
-            "annotations": {"place_status": "depicted" if is_depicted else "none"},
-        })
-        if is_depicted:
-            candidates_by_artwork[artwork_id] = [{
-                "place": "Paris",
-                "score_ner": 0.9,
-                "field": "title",
-                "start": 0,
-                "end": 5,
-                "source_text": "Paris",
-            }]
-        elif artwork_id == 5:
-            candidates_by_artwork[artwork_id] = [{
-                "place": "Rome",
-                "score_ner": 0.9,
-                "field": "themes",
-                "start": 0,
-                "end": 4,
-                "source_text": "Rome",
-            }]
-
-    result = optimize_heuristic_parameters(
-        records,
-        candidates_by_artwork=candidates_by_artwork,
-        parameter_grid={
-            "field_weights": [{"title": 0.8, "themes": 0.6}],
-            "positive_context_bonus": [0.0],
-            "negative_context_penalty": [0.0],
-            "multi_field_bonus": [0.0],
-            "acceptance_threshold": [0.5, 0.7],
-            "ner_threshold": [0.5],
+    monkeypatch.setattr(
+        main_module.filt,
+        "predict_with_model",
+        lambda records, candidates, model: {
+            101: [{"place": "Paris", "score_heuristique": 0.9}],
+            102: [{"place": "Lyon", "score_heuristique": 0.55}],
         },
-        n_splits=2,
-        inner_splits=2,
+    )
+    model = {"threshold": 0.6}
+
+    predictions = main_module.predict_artworks_file(
+        input_path, output_path, model, ner_model=object()
     )
 
-    assert result["best_parameters"]["acceptance_threshold"] == 0.7
-    assert result["cv_metrics"]["false_positives"] == 0
+    assert predictions == [
+        {
+            "id": 101,
+            "has_predicted_place": True,
+            "predicted_places": [{"place": "Paris", "score": 0.9}],
+            "flagged_places": [],
+        },
+        {
+            "id": 102,
+            "has_predicted_place": False,
+            "predicted_places": [],
+            "flagged_places": [{"place": "Lyon", "score": 0.55}],
+        },
+    ]
+    assert json.loads(output_path.read_text(encoding="utf-8")) == {
+        "predictions": predictions,
+    }
 
 
 def test_main_requires_ner_module(monkeypatch):
@@ -223,7 +218,7 @@ def test_main_requires_ner_module(monkeypatch):
         main_module.main()
 
 
-def test_main_comparison_prints_summary(monkeypatch, capsys):
+def test_main_prints_logistic_model_metrics(monkeypatch, capsys):
     import src.main as main_module
 
     records = [
@@ -237,6 +232,8 @@ def test_main_comparison_prints_summary(monkeypatch, capsys):
         },
     ]
     optimization = {
+        "C": 1.0,
+        "threshold": 0.5,
         "cv_metrics": {
             "precision": 0.75,
             "recall": 0.6,
@@ -246,58 +243,25 @@ def test_main_comparison_prints_summary(monkeypatch, capsys):
             "true_negatives": 4,
             "false_negatives": 2,
         },
-        "best_parameters": {"acceptance_threshold": 0.5},
-        "selection_objective": {
-            "name": "minimize_false_positives",
-            "minimum_recall": 0.8,
-            "review_margin": 0.1,
-        },
-        "fold_metrics": [{
-            "false_positive_ids": [2],
-            "false_negative_ids": [1],
-            "flagged_predictions": [{
-                "id": 3,
-                "rejected_places": [
-                    {"place": "Lyon", "score_heuristique": 0.59}
-                ],
-            }],
-            "errors": [{
-                "id": 2,
-                "actual": False,
-                "predicted": True,
-                "predicted_places": [
-                    {"place": "Rome", "score_heuristique": 0.7}
-                ],
-            }],
-        }],
     }
 
-    monkeypatch.setattr(
-        main_module,
-        "ner",
-        SimpleNamespace(load_ner_model=lambda: object()),
-    )
-    monkeypatch.setattr(
-        main_module.filt,
-        "optimize_heuristic_parameters",
-        lambda records, model: optimization,
-    )
+    monkeypatch.setattr(main_module, "ner", SimpleNamespace(load_ner_model=lambda: object()))
     monkeypatch.setattr(
         main_module.Path,
         "open",
         lambda self, *args, **kwargs: __import__("io").StringIO(
-            __import__("json").dumps({"unique_artworks": records})
+            json.dumps({"unique_artworks": records})
         ),
     )
+    monkeypatch.setattr(main_module.filt, "extract_all_candidates", lambda records, model: {})
+    monkeypatch.setattr(main_module.filt, "build_training_table", lambda records, candidates: object())
+    monkeypatch.setattr(main_module.filt, "train_logistic_model", lambda table: optimization)
     main_module.main()
 
     output = capsys.readouterr().out
+    assert "classification par candidat" in output
     assert "Précision : 0.750" in output
     assert "Rappel : 0.600" in output
     assert "F1 : 0.667" in output
-    assert "Objectif : minimiser les faux positifs" in output
-    assert "Rappel minimum visé : 80%" in output
-    assert "2 : Rome (0.700)" in output
-    assert "Faux négatifs : [1]" in output
-    assert "3 : Lyon (0.590)" in output
-    assert "acceptance_threshold: 0.5" in output
+    assert "C de régularisation : 1.0" in output
+    assert "Seuil d’acceptation : 0.500" in output
