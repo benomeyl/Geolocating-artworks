@@ -60,6 +60,21 @@ La commande classe chaque candidat au niveau le plus précis justifié
 négatifs géographiques ont le niveau `no_match`. Nominatim est utilisé en
 fallback; ajouter `--no-nominatim` pour rester hors ligne.
 
+Pour entraîner le modèle hiérarchique et évaluer ses seuils sur des folds
+externes groupés par cible géographique :
+
+```bash
+python src/run_pipeline.py train \
+	--records data/raw/gold_standard/gold_dataset.json \
+	--model-out results/model_hierarchical.joblib \
+	--nominatim-user-agent "GeolocatingArtworks/0.1 (contact: votre-email)"
+```
+
+Les seuils visent une précision empirique minimale de 95 % (lieu exact),
+93 % (quartier) et 90 % (ville/région/pays), avec un rappel œuvre souhaité
+de 50 %. Un niveau insuffisamment représenté s'abstient. L'ancien modèle
+par noms reste reproductible avec `train-legacy`.
+
 Le cache Nominatim est versionné afin que les anciennes réponses sans
 hiérarchie d'adresse ne soient pas réutilisées.
 

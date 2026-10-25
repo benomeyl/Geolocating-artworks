@@ -33,12 +33,13 @@ Usage typique :
 
 import difflib
 import re
-from collections import defaultdict
+from collections import Counter, defaultdict
 
+import numpy as np
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import precision_recall_curve
-from sklearn.model_selection import StratifiedGroupKFold
+from sklearn.model_selection import GroupKFold, StratifiedGroupKFold
 import unicodedata
 
 try:
@@ -90,6 +91,34 @@ FEATURE_COLUMNS = [f"field_{field}" for field in FIELD_NAMES] + [
     "has_positive_marker",
     "has_negative_marker",
     "score_ner_max",
+]
+
+GEOGRAPHIC_LEVELS = [
+    "exact_place",
+    "neighborhood",
+    "city",
+    "region",
+    "country",
+]
+GEOGRAPHIC_TARGET_PRECISION = {
+    "exact_place": 0.95,
+    "neighborhood": 0.93,
+    "city": 0.90,
+    "region": 0.90,
+    "country": 0.90,
+}
+GEOGRAPHIC_FEATURE_COLUMNS = FEATURE_COLUMNS + [
+    f"geo_level_{level}" for level in GEOGRAPHIC_LEVELS
+] + [
+    "geo_resolved",
+    "geo_source_geonames",
+    "geo_source_nominatim",
+    "geo_has_neighborhood",
+    "geo_has_city",
+    "geo_has_region",
+    "geo_has_country",
+    "geo_importance",
+    "geo_place_rank",
 ]
 
 
@@ -348,6 +377,82 @@ def _candidate_geographic_level(location):
     return None
 
 
+def _add_geographic_features(features, location):
+    location = location or {}
+    candidate_level = _candidate_geographic_level(location)
+    hierarchy = location.get("hierarchy") or {}
+    result = dict(features)
+    for level in GEOGRAPHIC_LEVELS:
+        result[f"geo_level_{level}"] = int(candidate_level == level)
+    result.update({
+        "geo_resolved": int(bool(location)),
+        "geo_source_geonames": int(location.get("source") == "GeoNames"),
+        "geo_source_nominatim": int(location.get("source") == "Nominatim"),
+        "geo_has_neighborhood": int(bool(hierarchy.get("neighborhood"))),
+        "geo_has_city": int(bool(hierarchy.get("city"))),
+        "geo_has_region": int(bool(hierarchy.get("region"))),
+        "geo_has_country": int(bool(hierarchy.get("country") or location.get("country_code"))),
+        "geo_importance": float(location.get("importance") or 0.0),
+        "geo_place_rank": float(location.get("place_rank") or 0.0),
+    })
+    return result
+
+
+def _target_group_key(place):
+    wikidata_id = place.get("wikidata_id")
+    if wikidata_id:
+        return f"wikidata:{wikidata_id}"
+    geoname_id = place.get("geonameid")
+    if geoname_id:
+        return f"geonames:{geoname_id}"
+    coordinates = _valid_coordinates(place)
+    if coordinates is not None:
+        return (
+            f"coordinates:{coordinates[0]:.4f},{coordinates[1]:.4f}:"
+            f"{place.get('precision', 'unknown')}"
+        )
+    name = _normalize_place_name(place.get("name"))
+    return f"name:{name}:{place.get('precision', 'unknown')}" if name else None
+
+
+def _artwork_target_cv_groups(records):
+    parents = {}
+
+    def find(item):
+        parents.setdefault(item, item)
+        if parents[item] != item:
+            parents[item] = find(parents[item])
+        return parents[item]
+
+    def union(left, right):
+        left_root = find(left)
+        right_root = find(right)
+        if left_root != right_root:
+            parents[right_root] = left_root
+
+    artwork_nodes = []
+    for record in records:
+        artwork_id = (record.get("artwork", record)).get("id")
+        artwork_node = f"artwork:{artwork_id}"
+        find(artwork_node)
+        artwork_nodes.append((artwork_id, artwork_node))
+        annotations = record.get("annotations", {})
+        targets = annotations.get("depicted_places") or [
+            annotations.get("depicted_place")
+        ]
+        for target in targets:
+            if not target:
+                continue
+            target_key = _target_group_key(target)
+            if target_key:
+                union(artwork_node, f"target:{target_key}")
+
+    return {
+        artwork_id: find(artwork_node)
+        for artwork_id, artwork_node in artwork_nodes
+    }
+
+
 def geographic_candidate_label(
     record,
     candidate_location,
@@ -510,27 +615,25 @@ def build_geographic_label_table(
     """Build inspectable hierarchical labels without forcing unresolved cases negative."""
     rows = []
     location_cache = {}
+    cv_groups = _artwork_target_cv_groups(records)
     for record in records:
         artwork = record.get("artwork", record)
         artwork_id = artwork.get("id")
         groups = group_candidates_by_place(candidates_by_artwork.get(artwork_id, []))
         for occurrences in groups.values():
             place_name = occurrences[0]["place"]
-            status = record.get("annotations", {}).get("place_status")
-            location = None
-            if status == "depicted":
-                cache_key = place_name.casefold().strip()
-                if cache_key not in location_cache:
-                    if gazetteer_conn is None and nominatim_client is None:
-                        location_cache[cache_key] = None
-                    else:
-                        location_cache[cache_key] = resolve_location(
-                            place_name,
-                            gazetteer_conn,
-                            nominatim_client=nominatim_client,
-                            include_hierarchy=True,
-                        )
-                location = location_cache[cache_key]
+            cache_key = place_name.casefold().strip()
+            if cache_key not in location_cache:
+                if gazetteer_conn is None and nominatim_client is None:
+                    location_cache[cache_key] = None
+                else:
+                    location_cache[cache_key] = resolve_location(
+                        place_name,
+                        gazetteer_conn,
+                        nominatim_client=nominatim_client,
+                        include_hierarchy=True,
+                    )
+            location = location_cache[cache_key]
 
             label = geographic_candidate_label(
                 record,
@@ -539,9 +642,11 @@ def build_geographic_label_table(
                 neighborhood_tolerance_km=neighborhood_tolerance_km,
                 city_tolerance_km=city_tolerance_km,
             )
-            row = candidate_features(occurrences)
+            row = _add_geographic_features(candidate_features(occurrences), location)
             row.update({
                 "artwork_id": artwork_id,
+                "cv_group": cv_groups.get(artwork_id, f"artwork:{artwork_id}"),
+                "place_status": record.get("annotations", {}).get("place_status"),
                 "place": place_name,
                 "label_level": label["level"],
                 "label_status": label["status"],
@@ -551,7 +656,14 @@ def build_geographic_label_table(
                 "candidate_geolocation": location,
             })
             rows.append(row)
-    return pd.DataFrame(rows)
+    table = pd.DataFrame(rows)
+    table.attrs["artwork_statuses"] = {
+        (record.get("artwork", record)).get("id"):
+        record.get("annotations", {}).get("place_status")
+        for record in records
+    }
+    table.attrs["artwork_cv_groups"] = cv_groups
+    return table
 
 
 def build_training_table(records, candidates_by_artwork, fuzzy_threshold=0.85):
@@ -695,6 +807,667 @@ def train_logistic_model(
             "f1": f1,
         },
     }
+
+
+def _threshold_for_precision(
+    labels,
+    probabilities,
+    groups,
+    target_precision,
+    minimum_predictions,
+    minimum_prediction_groups,
+):
+    best = None
+    for threshold in sorted(set(float(value) for value in probabilities), reverse=True):
+        accepted = probabilities >= threshold
+        prediction_count = int(accepted.sum())
+        accepted_groups = len(set(groups[accepted]))
+        if prediction_count < minimum_predictions or accepted_groups < minimum_prediction_groups:
+            continue
+        true_positives = int(((labels == 1) & accepted).sum())
+        precision = true_positives / prediction_count
+        if precision < target_precision:
+            continue
+        recall = true_positives / int((labels == 1).sum())
+        candidate = {
+            "threshold": threshold,
+            "precision": precision,
+            "recall": recall,
+            "support": prediction_count,
+            "prediction_groups": accepted_groups,
+            "true_positives": true_positives,
+            "false_positives": prediction_count - true_positives,
+        }
+        if best is None or (
+            candidate["recall"],
+            candidate["precision"],
+            candidate["threshold"],
+        ) > (
+            best["recall"],
+            best["precision"],
+            best["threshold"],
+        ):
+            best = candidate
+    return best
+
+
+def train_hierarchical_model(
+    table,
+    *,
+    n_splits=5,
+    random_state=42,
+    regularization_values=(0.1, 1.0, 10.0),
+    target_precisions=None,
+    minimum_recall=0.5,
+    minimum_positive_groups=5,
+    minimum_prediction_groups=5,
+    minimum_predictions=5,
+):
+    """Fit one grouped-CV classifier per geographic precision level.
+
+    Thresholds are chosen only when out-of-fold decisions meet the requested
+    empirical precision and support floors. Under-supported levels abstain.
+    """
+    if table.empty:
+        raise ValueError("Geographic label table is empty.")
+    target_precisions = target_precisions or GEOGRAPHIC_TARGET_PRECISION
+    feature_columns = [
+        column for column in GEOGRAPHIC_FEATURE_COLUMNS if column in table.columns
+    ]
+    if len(feature_columns) != len(GEOGRAPHIC_FEATURE_COLUMNS):
+        missing = sorted(set(GEOGRAPHIC_FEATURE_COLUMNS) - set(feature_columns))
+        raise ValueError(f"Missing geographic model features: {missing}")
+
+    matrix = table[feature_columns].fillna(0).to_numpy(dtype=float)
+    statuses = table["label_status"].to_numpy()
+    label_levels = table["label_level"].to_numpy()
+    groups = table["cv_group"].astype(str).to_numpy()
+    specificity = {level: index for index, level in enumerate(GEOGRAPHIC_LEVELS)}
+    per_level = {}
+
+    for level in GEOGRAPHIC_LEVELS:
+        positive_levels = {
+            candidate_level
+            for candidate_level in GEOGRAPHIC_LEVELS
+            if specificity[candidate_level] <= specificity[level]
+        }
+        eligible = (statuses == "negative") | (statuses == "match")
+        row_indices = np.flatnonzero(eligible)
+        level_labels = np.asarray([
+            int(
+                statuses[index] == "match"
+                and label_levels[index] in positive_levels
+            )
+            for index in row_indices
+        ])
+        level_groups = groups[row_indices]
+        positive_group_count = len(set(level_groups[level_labels == 1]))
+        negative_group_count = len(set(level_groups[level_labels == 0]))
+        target_precision = float(target_precisions[level])
+
+        if positive_group_count < minimum_positive_groups:
+            per_level[level] = {
+                "status": "insufficient_positive_groups",
+                "target_precision": target_precision,
+                "positive_groups": positive_group_count,
+                "minimum_positive_groups": minimum_positive_groups,
+                "model": None,
+                "threshold": None,
+            }
+            continue
+        if negative_group_count < 2:
+            per_level[level] = {
+                "status": "insufficient_negative_groups",
+                "target_precision": target_precision,
+                "negative_groups": negative_group_count,
+                "model": None,
+                "threshold": None,
+            }
+            continue
+
+        n_level_splits = min(n_splits, positive_group_count, negative_group_count)
+        if n_level_splits < 2:
+            per_level[level] = {
+                "status": "insufficient_cv_groups",
+                "target_precision": target_precision,
+                "model": None,
+                "threshold": None,
+            }
+            continue
+
+        X = matrix[row_indices]
+        best = None
+        cv = StratifiedGroupKFold(
+            n_splits=n_level_splits,
+            shuffle=True,
+            random_state=random_state,
+        )
+        for C in regularization_values:
+            oof = np.full(len(row_indices), np.nan)
+            try:
+                folds = cv.split(X, level_labels, level_groups)
+                for train_idx, test_idx in folds:
+                    classifier = LogisticRegression(
+                        C=C,
+                        class_weight="balanced",
+                        max_iter=1000,
+                    )
+                    classifier.fit(X[train_idx], level_labels[train_idx])
+                    oof[test_idx] = classifier.predict_proba(X[test_idx])[:, 1]
+            except ValueError:
+                continue
+            if not np.isfinite(oof).all():
+                continue
+            selected = _threshold_for_precision(
+                level_labels,
+                oof,
+                level_groups,
+                target_precision,
+                minimum_predictions,
+                minimum_prediction_groups,
+            )
+            if selected is None:
+                continue
+            candidate = {**selected, "C": C, "oof_probabilities": oof}
+            if best is None or (
+                candidate["recall"],
+                candidate["precision"],
+                -candidate["false_positives"],
+            ) > (
+                best["recall"],
+                best["precision"],
+                -best["false_positives"],
+            ):
+                best = candidate
+
+        if best is None:
+            per_level[level] = {
+                "status": "precision_target_unmet",
+                "target_precision": target_precision,
+                "positive_groups": positive_group_count,
+                "negative_groups": negative_group_count,
+                "model": None,
+                "threshold": None,
+            }
+            continue
+
+        final_classifier = LogisticRegression(
+            C=best["C"],
+            class_weight="balanced",
+            max_iter=1000,
+        )
+        final_classifier.fit(X, level_labels)
+        per_level[level] = {
+            "status": "active",
+            "model": final_classifier,
+            "C": best["C"],
+            "threshold": best["threshold"],
+            "target_precision": target_precision,
+            "oof_precision": best["precision"],
+            "oof_recall": best["recall"],
+            "oof_support": best["support"],
+            "oof_prediction_groups": best["prediction_groups"],
+            "positive_groups": positive_group_count,
+            "negative_groups": negative_group_count,
+            "cv_splits": n_level_splits,
+            "false_positives": best["false_positives"],
+            "true_positives": best["true_positives"],
+            "oof_row_indices": row_indices.tolist(),
+            "oof_probabilities": best["oof_probabilities"].tolist(),
+        }
+
+    active_levels = [level for level in GEOGRAPHIC_LEVELS if per_level[level]["status"] == "active"]
+    model_bundle = {
+        "model_type": "hierarchical_geographic_logistic_regression",
+        "model_version": 1,
+        "feature_columns": feature_columns,
+        "levels": per_level,
+        "specificity_order": GEOGRAPHIC_LEVELS,
+        "target_precisions": dict(target_precisions),
+        "minimum_work_recall": minimum_recall,
+        "minimum_positive_groups": minimum_positive_groups,
+        "minimum_prediction_groups": minimum_prediction_groups,
+        "active_levels": active_levels,
+        "cv_grouping": "connected_artwork_and_target_entities",
+        "cv_metrics_are_threshold_tuning_estimates": True,
+    }
+    oof_scores_by_row = defaultdict(dict)
+    for level in active_levels:
+        level_model = per_level[level]
+        for row_index, probability in zip(
+            level_model["oof_row_indices"],
+            level_model["oof_probabilities"],
+        ):
+            oof_scores_by_row[row_index][level] = probability
+    model_bundle["threshold_tuning_work_metrics"] = evaluate_hierarchical_work_predictions(
+        table,
+        oof_scores_by_row,
+        per_level,
+        specificity,
+        records=table.attrs.get("artwork_statuses"),
+    )
+    model_bundle["minimum_work_recall_met"] = (
+        model_bundle["threshold_tuning_work_metrics"]["recall"] >= minimum_recall
+    )
+    for level_model in per_level.values():
+        level_model.pop("oof_row_indices", None)
+        level_model.pop("oof_probabilities", None)
+    return model_bundle
+
+
+def _select_hierarchical_level(candidate_level, level_scores, levels, specificity):
+    candidate_level_rank = specificity.get(candidate_level)
+    if candidate_level_rank is None:
+        return None
+    decisions = []
+    for level, probability in level_scores.items():
+        level_model = levels[level]
+        if level_model["status"] != "active":
+            continue
+        if candidate_level_rank > specificity[level]:
+            continue
+        if probability >= level_model["threshold"]:
+            decisions.append((specificity[level], -probability, level))
+    return min(decisions)[2] if decisions else None
+
+
+def evaluate_hierarchical_work_predictions(
+    table,
+    scores_by_row,
+    levels,
+    specificity,
+    records=None,
+):
+    """Compute correct-location precision/recall for one hierarchical choice per artwork."""
+    rows_by_artwork = defaultdict(list)
+    for row_index, row in table.iterrows():
+        rows_by_artwork[row["artwork_id"]].append((row_index, row))
+
+    if isinstance(records, dict):
+        artwork_statuses = records
+    elif records is None:
+        artwork_statuses = {
+            row["artwork_id"]: row.get("place_status")
+            for _, row in table.iterrows()
+        }
+    else:
+        artwork_statuses = {
+            (record.get("artwork", record)).get("id"):
+            record.get("annotations", {}).get("place_status")
+            for record in records
+        }
+
+    true_positives = false_positives = true_negatives = false_negatives = 0
+    mislocated_count = 0
+    for artwork_id, actual_status in artwork_statuses.items():
+        candidates = []
+        for row_index, row in rows_by_artwork.get(artwork_id, []):
+            row_scores = scores_by_row.get(row_index, {})
+            selected_level = _select_hierarchical_level(
+                row.get("candidate_level"),
+                row_scores,
+                levels,
+                specificity,
+            )
+            if selected_level is not None:
+                actual_level = row.get("label_level")
+                actual_is_correct_at_level = (
+                    row.get("label_status") == "match"
+                    and actual_level in specificity
+                    and specificity[actual_level] <= specificity[selected_level]
+                )
+                candidates.append((
+                    specificity[selected_level],
+                    -row_scores[selected_level],
+                    actual_is_correct_at_level,
+                ))
+        selected = min(candidates) if candidates else None
+        actual_depicted = actual_status == "depicted"
+        predicted = selected is not None
+        correct_location = predicted and selected[2]
+        if actual_depicted and correct_location:
+            true_positives += 1
+        elif actual_depicted:
+            false_negatives += 1
+            if predicted:
+                false_positives += 1
+                mislocated_count += 1
+        elif predicted:
+            false_positives += 1
+        else:
+            true_negatives += 1
+
+    precision = (
+        true_positives / (true_positives + false_positives)
+        if true_positives + false_positives else 0.0
+    )
+    recall = (
+        true_positives / (true_positives + false_negatives)
+        if true_positives + false_negatives else 0.0
+    )
+    return {
+        "true_positives": true_positives,
+        "false_positives": false_positives,
+        "true_negatives": true_negatives,
+        "false_negatives": false_negatives,
+        "mislocated_count": mislocated_count,
+        "precision": precision,
+        "recall": recall,
+        "f1": 2 * precision * recall / (precision + recall) if precision + recall else 0.0,
+        "accuracy": (
+            (true_positives + true_negatives) / len(artwork_statuses)
+            if artwork_statuses else 0.0
+        ),
+        "artwork_count": len(artwork_statuses),
+        "depicted_artwork_count": true_positives + false_negatives,
+        "metrics_are_threshold_tuning_estimates": True,
+    }
+
+
+def evaluate_hierarchical_grouped_cv(
+    records,
+    table,
+    *,
+    n_splits=5,
+    random_state=42,
+    training_options=None,
+):
+    """Evaluate a full level/threshold selection process on outer grouped folds."""
+    artwork_statuses = {
+        (record.get("artwork", record)).get("id"):
+        record.get("annotations", {}).get("place_status")
+        for record in records
+    }
+    artwork_groups = table.attrs.get("artwork_cv_groups") or _artwork_target_cv_groups(records)
+    artwork_ids = list(artwork_statuses)
+    group_values = [str(artwork_groups.get(artwork_id, f"artwork:{artwork_id}")) for artwork_id in artwork_ids]
+    unique_groups = len(set(group_values))
+    effective_splits = min(n_splits, unique_groups)
+    if effective_splits < 2:
+        raise ValueError("At least two geographic CV groups are required.")
+
+    y = np.asarray([int(artwork_statuses[artwork_id] == "depicted") for artwork_id in artwork_ids])
+    splitter = GroupKFold(n_splits=effective_splits)
+    totals = Counter()
+    level_totals = {level: Counter() for level in GEOGRAPHIC_LEVELS}
+    level_prediction_groups = {level: set() for level in GEOGRAPHIC_LEVELS}
+    folds = []
+    training_options = training_options or {}
+
+    for fold_number, (train_work_idx, test_work_idx) in enumerate(
+        splitter.split(np.zeros(len(artwork_ids)), y, group_values),
+        start=1,
+    ):
+        train_ids = {artwork_ids[index] for index in train_work_idx}
+        test_ids = {artwork_ids[index] for index in test_work_idx}
+        train_table = table[table["artwork_id"].isin(train_ids)].reset_index(drop=True)
+        test_table = table[table["artwork_id"].isin(test_ids)].reset_index(drop=True)
+        train_table.attrs["artwork_statuses"] = {
+            artwork_id: artwork_statuses[artwork_id] for artwork_id in train_ids
+        }
+        train_table.attrs["artwork_cv_groups"] = {
+            artwork_id: artwork_groups.get(artwork_id, f"artwork:{artwork_id}")
+            for artwork_id in train_ids
+        }
+
+        if train_table.empty:
+            model = {
+                "levels": {
+                    level: {"status": "no_training_rows", "threshold": None}
+                    for level in GEOGRAPHIC_LEVELS
+                },
+                "specificity_order": GEOGRAPHIC_LEVELS,
+            }
+        else:
+            model = train_hierarchical_model(train_table, **training_options)
+
+        scores_by_row = defaultdict(dict)
+        if not test_table.empty:
+            feature_columns = model.get("feature_columns", GEOGRAPHIC_FEATURE_COLUMNS)
+            matrix = test_table[feature_columns].fillna(0).to_numpy(dtype=float)
+            for row_position, (_, row) in enumerate(test_table.iterrows()):
+                candidate_level = row.get("candidate_level")
+                candidate_level_rank = GEOGRAPHIC_LEVELS.index(candidate_level) if candidate_level in GEOGRAPHIC_LEVELS else None
+                if candidate_level_rank is None:
+                    continue
+                for level, level_model in model["levels"].items():
+                    if level_model["status"] != "active":
+                        continue
+                    if candidate_level_rank > GEOGRAPHIC_LEVELS.index(level):
+                        continue
+                    scores_by_row[row_position][level] = float(
+                        level_model["model"].predict_proba(matrix[row_position:row_position + 1])[0][1]
+                    )
+
+        metrics = evaluate_hierarchical_work_predictions(
+            test_table,
+            scores_by_row,
+            model["levels"],
+            {level: index for index, level in enumerate(GEOGRAPHIC_LEVELS)},
+            records={artwork_id: artwork_statuses[artwork_id] for artwork_id in test_ids},
+        )
+        for row_position, (_, row) in enumerate(test_table.iterrows()):
+            if row.get("label_status") == "unevaluable":
+                continue
+            row_scores = scores_by_row.get(row_position, {})
+            for level, probability in row_scores.items():
+                level_model = model["levels"][level]
+                cumulative_positive_levels = {
+                    candidate_level
+                    for candidate_level in GEOGRAPHIC_LEVELS
+                    if GEOGRAPHIC_LEVELS.index(candidate_level) <= GEOGRAPHIC_LEVELS.index(level)
+                }
+                actual_positive = (
+                    row.get("label_status") == "match"
+                    and row.get("label_level") in cumulative_positive_levels
+                )
+                predicted_positive = probability >= level_model["threshold"]
+                level_totals[level]["evaluated"] += 1
+                if actual_positive:
+                    level_totals[level]["actual_positives"] += 1
+                if predicted_positive:
+                    level_totals[level]["predictions"] += 1
+                    level_prediction_groups[level].add(str(row.get("cv_group")))
+                    if actual_positive:
+                        level_totals[level]["true_positives"] += 1
+                    else:
+                        level_totals[level]["false_positives"] += 1
+                elif actual_positive:
+                    level_totals[level]["false_negatives"] += 1
+        for metric in (
+            "true_positives",
+            "false_positives",
+            "true_negatives",
+            "false_negatives",
+            "mislocated_count",
+            "artwork_count",
+            "depicted_artwork_count",
+        ):
+            totals[metric] += metrics[metric]
+        folds.append({
+            "fold": fold_number,
+            "test_artworks": len(test_ids),
+            "active_levels": [
+                level for level in GEOGRAPHIC_LEVELS
+                if model["levels"][level]["status"] == "active"
+            ],
+            "metrics": metrics,
+        })
+
+    tp = totals["true_positives"]
+    fp = totals["false_positives"]
+    fn = totals["false_negatives"]
+    tn = totals["true_negatives"]
+    precision = tp / (tp + fp) if tp + fp else 0.0
+    recall = tp / (tp + fn) if tp + fn else 0.0
+    per_level = {}
+    for level, counts in level_totals.items():
+        predictions = counts["predictions"]
+        actual_positives = counts["actual_positives"]
+        true_positives = counts["true_positives"]
+        per_level[level] = {
+            "precision": true_positives / predictions if predictions else None,
+            "recall": true_positives / actual_positives if actual_positives else None,
+            "true_positives": true_positives,
+            "false_positives": counts["false_positives"],
+            "false_negatives": counts["false_negatives"],
+            "predictions": predictions,
+            "prediction_groups": len(level_prediction_groups[level]),
+            "evaluated_candidates": counts["evaluated"],
+        }
+    return {
+        "fold_count": effective_splits,
+        "true_positives": tp,
+        "false_positives": fp,
+        "true_negatives": tn,
+        "false_negatives": fn,
+        "mislocated_count": totals["mislocated_count"],
+        "precision": precision,
+        "recall": recall,
+        "f1": 2 * precision * recall / (precision + recall) if precision + recall else 0.0,
+        "accuracy": (tp + tn) / totals["artwork_count"] if totals["artwork_count"] else 0.0,
+        "artwork_count": totals["artwork_count"],
+        "depicted_artwork_count": totals["depicted_artwork_count"],
+        "metrics_by_level": per_level,
+        "grouping": "connected_artwork_and_target_entities",
+        "thresholds_tuned_inside_outer_training_folds": True,
+        "folds": folds,
+    }
+
+
+def predict_with_hierarchical_model(
+    records,
+    candidates_by_artwork,
+    model,
+    *,
+    gazetteer_conn=None,
+    nominatim_client=None,
+    geocode_top_k=3,
+):
+    """Predict the most specific sufficiently precise geographic level."""
+    if geocode_top_k < 1:
+        raise ValueError("geocode_top_k must be at least 1.")
+
+    feature_columns = model["feature_columns"]
+    levels = model["levels"]
+    specificity = {
+        level: index for index, level in enumerate(model["specificity_order"])
+    }
+    location_cache = {}
+    results = {}
+
+    for record in records:
+        artwork = record.get("artwork", record)
+        artwork_id = artwork.get("id")
+        grouped_candidates = list(
+            group_candidates_by_place(
+                candidates_by_artwork.get(artwork_id, [])
+            ).values()
+        )
+        grouped_candidates.sort(
+            key=lambda occurrences: max(
+                occurrence.get("score_ner", 0.0) for occurrence in occurrences
+            ),
+            reverse=True,
+        )
+
+        scored_candidates = []
+        for candidate_index, occurrences in enumerate(grouped_candidates):
+            place_name = occurrences[0]["place"]
+            location = None
+            if candidate_index < geocode_top_k:
+                cache_key = place_name.casefold().strip()
+                if cache_key not in location_cache:
+                    if gazetteer_conn is not None or nominatim_client is not None:
+                        location_cache[cache_key] = resolve_location(
+                            place_name,
+                            gazetteer_conn,
+                            nominatim_client=nominatim_client,
+                            include_hierarchy=True,
+                        )
+                    else:
+                        location_cache[cache_key] = None
+                location = location_cache[cache_key]
+
+            features = _add_geographic_features(
+                candidate_features(occurrences),
+                location,
+            )
+            feature_row = np.asarray(
+                [[features[column] for column in feature_columns]],
+                dtype=float,
+            )
+            candidate_level = _candidate_geographic_level(location)
+            candidate_level_rank = specificity.get(candidate_level)
+            level_scores = {}
+            decisions = []
+
+            if candidate_level_rank is not None:
+                for level in model["specificity_order"]:
+                    level_model = levels[level]
+                    if level_model["status"] != "active":
+                        continue
+                    deployable_levels = model.get("deployable_levels")
+                    if deployable_levels is not None and level not in deployable_levels:
+                        continue
+                    if candidate_level_rank > specificity[level]:
+                        continue
+                    probability = float(
+                        level_model["model"].predict_proba(feature_row)[0][1]
+                    )
+                    level_scores[level] = probability
+                    if probability >= level_model["threshold"]:
+                        decisions.append({
+                            "level": level,
+                            "model_score": probability,
+                            "confidence": level_model.get(
+                                "outer_cv_precision",
+                                level_model.get("oof_precision"),
+                            ),
+                            "confidence_basis": "outer_grouped_cv_empirical_precision",
+                            "confidence_support": level_model.get(
+                                "outer_cv_prediction_groups",
+                                level_model.get("oof_prediction_groups"),
+                            ),
+                            "target_precision": level_model["target_precision"],
+                            "threshold": level_model["threshold"],
+                        })
+
+            decisions.sort(
+                key=lambda decision: (
+                    specificity[decision["level"]],
+                    -decision["model_score"],
+                )
+            )
+            scored_candidates.append({
+                "place": place_name,
+                "score_ner_max": max(
+                    occurrence.get("score_ner", 0.0) for occurrence in occurrences
+                ),
+                "geolocation": location,
+                "candidate_level": candidate_level,
+                "level_scores": level_scores,
+                "decision": decisions[0] if decisions else None,
+                "champs": sorted({occurrence["field"] for occurrence in occurrences}),
+            })
+
+        accepted = [
+            candidate for candidate in scored_candidates if candidate["decision"]
+        ]
+        accepted.sort(
+            key=lambda candidate: (
+                specificity[candidate["decision"]["level"]],
+                -candidate["decision"]["model_score"],
+                -candidate["score_ner_max"],
+            )
+        )
+        results[artwork_id] = {
+            "place_status_predicted": bool(accepted),
+            "prediction": accepted[0] if accepted else None,
+            "candidates": scored_candidates,
+        }
+
+    return results
 
 
 def predict_with_model(records, candidates_by_artwork, model):
