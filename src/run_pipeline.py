@@ -22,11 +22,13 @@ import sys
 from pathlib import Path
 
 import joblib
+import pandas as pd
 
 from geolocation.gazetter import NominatimClient, geocode_candidates
 from data.filtering_logreg import (
     extract_all_candidates,
     build_training_table,
+    build_geographic_label_table,
     train_logistic_model,
     predict_with_model,
     evaluate_binary_predictions,
@@ -163,6 +165,58 @@ def cmd_train(args):
     print(f"\n[ok] Modèle sauvegardé dans {args.model_out}")
 
 
+def cmd_audit_labels(args):
+    payload = load_records(args.records)
+    records = payload.get("unique_artworks", []) if isinstance(payload, dict) else payload
+    if not isinstance(records, list):
+        raise ValueError("The input JSON must contain a list of artwork records.")
+
+    print(f"[info] {len(records)} œuvres chargées; extraction des candidats NER...")
+    candidates_by_artwork = extract_all_candidates(records, load_ner_pipeline())
+    gazetteer_conn = None
+    if Path(args.gazetteer).is_file():
+        gazetteer_conn = sqlite3.connect(args.gazetteer)
+    elif args.no_nominatim:
+        print(f"[avertissement] Gazetteer introuvable: {args.gazetteer}.")
+
+    nominatim_client = None
+    if not args.no_nominatim:
+        nominatim_client = NominatimClient(
+            endpoint=args.nominatim_url,
+            reverse_endpoint=args.nominatim_reverse_url,
+            user_agent=args.nominatim_user_agent,
+            cache_path=args.nominatim_cache,
+        )
+
+    try:
+        table = build_geographic_label_table(
+            records,
+            candidates_by_artwork,
+            gazetteer_conn=gazetteer_conn,
+            nominatim_client=nominatim_client,
+            exact_tolerance_km=args.exact_tolerance_km,
+            neighborhood_tolerance_km=args.neighborhood_tolerance_km,
+            city_tolerance_km=args.city_tolerance_km,
+        )
+    finally:
+        if gazetteer_conn is not None:
+            gazetteer_conn.close()
+
+    output_path = Path(args.output)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    report = {
+        "label_counts": table["label_level"].value_counts().to_dict(),
+        "status_counts": table["label_status"].value_counts().to_dict(),
+        "labels": json.loads(table.to_json(orient="records", force_ascii=False)),
+    }
+    with output_path.open("w", encoding="utf-8") as output_file:
+        json.dump(report, output_file, ensure_ascii=False, indent=2)
+
+    print(f"[info] Répartition des niveaux: {report['label_counts']}")
+    print(f"[info] Répartition des statuts: {report['status_counts']}")
+    print(f"[ok] Étiquettes exportées dans {output_path}")
+
+
 def cmd_predict(args):
     print(f"[info] Chargement du modèle depuis {args.model_in}...")
     model = joblib.load(args.model_in)
@@ -246,6 +300,28 @@ def main():
     train_parser.add_argument("--city-tolerance-km", type=float, default=30.0, help="Rayon de proximité du centre-ville annoté, en km.")
     add_geocoder_arguments(train_parser)
     train_parser.set_defaults(func=cmd_train)
+
+    labels_parser = subparsers.add_parser(
+        "audit-labels",
+        help="Génère les étiquettes géographiques hiérarchiques pour inspection.",
+    )
+    labels_parser.add_argument("--records", required=True, help="JSON du gold standard.")
+    labels_parser.add_argument(
+        "--output",
+        default="results/geographic_candidate_labels.json",
+        help="Fichier JSON de sortie pour les étiquettes auditables.",
+    )
+    labels_parser.add_argument("--gazetteer", default="data/gazetter/geonames.db")
+    labels_parser.add_argument("--exact-tolerance-km", type=float, default=0.25)
+    labels_parser.add_argument("--neighborhood-tolerance-km", type=float, default=2.0)
+    labels_parser.add_argument("--city-tolerance-km", type=float, default=25.0)
+    labels_parser.add_argument(
+        "--no-nominatim",
+        action="store_true",
+        help="N'utiliser que GeoNames local; les candidats non résolus restent non évaluables.",
+    )
+    add_geocoder_arguments(labels_parser)
+    labels_parser.set_defaults(func=cmd_audit_labels)
 
     predict_parser = subparsers.add_parser("predict", help="Applique un modèle entraîné à de nouvelles œuvres.")
     predict_parser.add_argument("--records", required=True, help="JSON des œuvres à traiter (annotations optionnelles).")

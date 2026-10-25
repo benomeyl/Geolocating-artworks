@@ -298,8 +298,260 @@ def label_candidate(record, place_name, fuzzy_threshold=0.85):
     annotations = record.get("annotations", {})
     if annotations.get("place_status") != "depicted":
         return 0
-    depicted = annotations.get("depicted_place") or {}
-    return int(fuzzy_match(place_name, depicted.get("name"), fuzzy_threshold))
+    depicted_places = annotations.get("depicted_places") or [
+        annotations.get("depicted_place") or {}
+    ]
+    return int(any(
+        fuzzy_match(place_name, depicted.get("name"), fuzzy_threshold)
+        for depicted in depicted_places
+    ))
+
+
+_GEOGRAPHIC_LABEL_LEVELS = {
+    "exact_place",
+    "neighborhood",
+    "city",
+    "region",
+    "country",
+}
+
+
+def _candidate_geographic_level(location):
+    if not location:
+        return None
+    feature_code = str(location.get("feature_code") or "").upper()
+    place_type = str(location.get("feature_code") or "").casefold()
+    place_class = str(location.get("place_class") or "").casefold()
+
+    if feature_code.startswith("PCLI") or place_type == "country":
+        return "country"
+    if feature_code.startswith("ADM") or (
+        place_class == "boundary" and place_type in {"administrative", "region"}
+    ):
+        return "region"
+    if feature_code.startswith("PPL") or place_type in {
+        "city", "town", "village", "municipality", "hamlet",
+    }:
+        return "city"
+    if place_type in {"neighbourhood", "neighborhood", "suburb", "quarter", "borough"}:
+        return "neighborhood"
+
+    try:
+        if int(location.get("place_rank") or 0) >= 25:
+            return "exact_place"
+    except (TypeError, ValueError):
+        pass
+    if location.get("source") == "GeoNames":
+        return "exact_place"
+    if place_class and place_class not in {"place", "boundary"}:
+        return "exact_place"
+    return None
+
+
+def geographic_candidate_label(
+    record,
+    candidate_location,
+    *,
+    exact_tolerance_km=0.25,
+    neighborhood_tolerance_km=2.0,
+    city_tolerance_km=25.0,
+):
+    """Label a candidate at the most specific level supported by its location."""
+    if min(exact_tolerance_km, neighborhood_tolerance_km, city_tolerance_km) < 0:
+        raise ValueError("Geographic label tolerances must be non-negative.")
+    annotations = record.get("annotations", {})
+    place_status = annotations.get("place_status")
+    if place_status == "undeterminable":
+        return {"level": "unevaluable", "status": "unevaluable", "distance_km": None}
+    if place_status != "depicted":
+        return {"level": "none", "status": "negative", "distance_km": None}
+
+    depicted_places = annotations.get("depicted_places") or []
+    if len(depicted_places) > 1:
+        labels = [
+            geographic_candidate_label(
+                {"annotations": {
+                    **annotations,
+                    "depicted_place": depicted_place,
+                    "depicted_places": [],
+                }},
+                candidate_location,
+                exact_tolerance_km=exact_tolerance_km,
+                neighborhood_tolerance_km=neighborhood_tolerance_km,
+                city_tolerance_km=city_tolerance_km,
+            )
+            for depicted_place in depicted_places
+        ]
+        specificity = {
+            "exact_place": 0,
+            "neighborhood": 1,
+            "city": 2,
+            "region": 3,
+            "country": 4,
+        }
+        matching_labels = [label for label in labels if label["status"] == "match"]
+        if matching_labels:
+            return min(matching_labels, key=lambda label: specificity[label["level"]])
+        if any(label["status"] == "unevaluable" for label in labels):
+            return {
+                "level": "unevaluable",
+                "status": "unevaluable",
+                "distance_km": next(
+                    (label.get("distance_km") for label in labels if label.get("distance_km") is not None),
+                    None,
+                ),
+                "candidate_level": labels[0].get("candidate_level"),
+                "geocoder_source": labels[0].get("geocoder_source"),
+            }
+        return labels[0]
+
+    actual = annotations.get("depicted_place") or {}
+    precision = actual.get("precision")
+    if precision not in _GEOGRAPHIC_LABEL_LEVELS:
+        return {"level": "unevaluable", "status": "unevaluable", "distance_km": None}
+    actual_coordinates = _valid_coordinates(actual)
+    predicted_coordinates = _valid_coordinates(candidate_location)
+    if actual_coordinates is None or predicted_coordinates is None:
+        return {"level": "unevaluable", "status": "unevaluable", "distance_km": None}
+
+    distance = haversine_distance_km(*actual_coordinates, *predicted_coordinates)
+    candidate_level = _candidate_geographic_level(candidate_location)
+    hierarchy = candidate_location.get("hierarchy") or {}
+
+    def value_matches(field):
+        target_value = _normalize_place_name(actual.get(field))
+        resolved_value = _normalize_place_name(hierarchy.get(field))
+        if not resolved_value and candidate_level == field:
+            resolved_value = _normalize_place_name(candidate_location.get("name"))
+        return bool(target_value and resolved_value and target_value == resolved_value)
+
+    country_matches = value_matches("country")
+    region_matches = value_matches("region")
+    city_matches = value_matches("city")
+    neighborhood_name = _normalize_place_name(actual.get("name"))
+    resolved_neighborhood = _normalize_place_name(hierarchy.get("neighborhood"))
+    neighborhood_matches = bool(
+        neighborhood_name
+        and (
+            resolved_neighborhood == neighborhood_name
+            or (
+                candidate_level == "neighborhood"
+                and _normalize_place_name(candidate_location.get("name")) == neighborhood_name
+            )
+        )
+    )
+
+    matched_level = None
+    if precision == "exact_place":
+        if candidate_level == "exact_place" and distance <= exact_tolerance_km:
+            matched_level = "exact_place"
+        elif city_matches:
+            matched_level = "city"
+    elif precision == "neighborhood":
+        if neighborhood_matches or (
+            candidate_level == "exact_place" and distance <= neighborhood_tolerance_km
+        ):
+            matched_level = "neighborhood"
+        elif city_matches:
+            matched_level = "city"
+    elif precision == "city":
+        if city_matches or (
+            candidate_level in {"exact_place", "neighborhood", "city"}
+            and distance <= city_tolerance_km
+        ):
+            matched_level = "city"
+    elif precision == "region" and region_matches:
+        matched_level = "region"
+    elif precision == "country" and country_matches:
+        matched_level = "country"
+
+    if matched_level is None:
+        if precision not in {"region", "country"} and region_matches:
+            matched_level = "region"
+        elif country_matches:
+            matched_level = "country"
+
+    if matched_level is None:
+        required_hierarchy = {
+            "exact_place": ("city", "region", "country"),
+            "neighborhood": ("city", "region", "country"),
+            "city": ("city", "region", "country"),
+            "region": ("region", "country"),
+            "country": ("country",),
+        }[precision]
+        if not any(hierarchy.get(field) for field in required_hierarchy):
+            return {
+                "level": "unevaluable",
+                "status": "unevaluable",
+                "distance_km": distance,
+                "candidate_level": candidate_level,
+                "geocoder_source": candidate_location.get("source"),
+            }
+
+    return {
+        "level": matched_level or "no_match",
+        "status": "match" if matched_level else "negative",
+        "distance_km": distance,
+        "candidate_level": candidate_level,
+        "geocoder_source": candidate_location.get("source"),
+    }
+
+
+def build_geographic_label_table(
+    records,
+    candidates_by_artwork,
+    *,
+    gazetteer_conn=None,
+    nominatim_client=None,
+    exact_tolerance_km=0.25,
+    neighborhood_tolerance_km=2.0,
+    city_tolerance_km=25.0,
+):
+    """Build inspectable hierarchical labels without forcing unresolved cases negative."""
+    rows = []
+    location_cache = {}
+    for record in records:
+        artwork = record.get("artwork", record)
+        artwork_id = artwork.get("id")
+        groups = group_candidates_by_place(candidates_by_artwork.get(artwork_id, []))
+        for occurrences in groups.values():
+            place_name = occurrences[0]["place"]
+            status = record.get("annotations", {}).get("place_status")
+            location = None
+            if status == "depicted":
+                cache_key = place_name.casefold().strip()
+                if cache_key not in location_cache:
+                    if gazetteer_conn is None and nominatim_client is None:
+                        location_cache[cache_key] = None
+                    else:
+                        location_cache[cache_key] = resolve_location(
+                            place_name,
+                            gazetteer_conn,
+                            nominatim_client=nominatim_client,
+                            include_hierarchy=True,
+                        )
+                location = location_cache[cache_key]
+
+            label = geographic_candidate_label(
+                record,
+                location,
+                exact_tolerance_km=exact_tolerance_km,
+                neighborhood_tolerance_km=neighborhood_tolerance_km,
+                city_tolerance_km=city_tolerance_km,
+            )
+            row = candidate_features(occurrences)
+            row.update({
+                "artwork_id": artwork_id,
+                "place": place_name,
+                "label_level": label["level"],
+                "label_status": label["status"],
+                "distance_km": label.get("distance_km"),
+                "candidate_level": label.get("candidate_level"),
+                "geocoder_source": label.get("geocoder_source"),
+                "candidate_geolocation": location,
+            })
+            rows.append(row)
+    return pd.DataFrame(rows)
 
 
 def build_training_table(records, candidates_by_artwork, fuzzy_threshold=0.85):

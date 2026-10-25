@@ -1,6 +1,10 @@
 import sqlite3
 
-from src.data.filtering_logreg import evaluate_place_identity
+from src.data.filtering_logreg import (
+    build_geographic_label_table,
+    evaluate_place_identity,
+    geographic_candidate_label,
+)
 from src.geolocation.gazetter import NominatimClient, geocode_candidates, resolve_location
 
 
@@ -20,6 +24,128 @@ class FakeNominatim:
             "source": "Nominatim",
             "attribution": "© OpenStreetMap contributors",
         }]
+
+
+def test_geographic_candidate_label_falls_back_from_exact_place_to_city():
+    record = {
+        "annotations": {
+            "place_status": "depicted",
+            "depicted_place": {
+                "name": "Schiedamse poort",
+                "precision": "exact_place",
+                "latitude": 52.004166666,
+                "longitude": 4.361111111,
+                "city": "Delft",
+                "region": "South Holland",
+                "country": "Netherlands",
+            },
+        }
+    }
+    city_candidate = {
+        "name": "Delft",
+        "feature_code": "PPL",
+        "source": "GeoNames",
+        "latitude": 52.010,
+        "longitude": 4.360,
+        "hierarchy": {
+            "city": "Delft",
+            "region": "South Holland",
+            "country": "Netherlands",
+        },
+    }
+    exact_candidate = {
+        **city_candidate,
+        "name": "Schiedamse poort",
+        "feature_code": "RSTN",
+        "latitude": 52.0042,
+        "longitude": 4.3611,
+    }
+
+    assert geographic_candidate_label(record, city_candidate)["level"] == "city"
+    assert geographic_candidate_label(record, exact_candidate)["level"] == "exact_place"
+
+
+def test_geographic_candidate_label_does_not_force_unresolved_to_negative():
+    record = {
+        "annotations": {
+            "place_status": "depicted",
+            "depicted_place": {
+                "name": "Delft",
+                "precision": "city",
+                "latitude": 52.0,
+                "longitude": 4.0,
+                "city": "Delft",
+                "region": "South Holland",
+                "country": "Netherlands",
+            },
+        }
+    }
+
+    label = geographic_candidate_label(record, None)
+
+    assert label["level"] == "unevaluable"
+    assert label["status"] == "unevaluable"
+
+
+def test_geographic_candidate_label_marks_no_place_records_negative():
+    record = {"annotations": {"place_status": "mentioned_only"}}
+
+    assert geographic_candidate_label(record, None)["level"] == "none"
+
+
+def test_geographic_label_table_resolves_candidate_and_emits_city_label():
+    class DelftGeocoder:
+        def search(self, query):
+            return [{
+                "name": "Delft",
+                "country_code": "NL",
+                "latitude": 52.010,
+                "longitude": 4.360,
+                "feature_code": "city",
+                "source": "Nominatim",
+                "hierarchy": {
+                    "neighborhood": None,
+                    "city": "Delft",
+                    "region": "South Holland",
+                    "country": "Netherlands",
+                },
+            }]
+
+    records = [{
+        "artwork": {"id": "delft-artwork"},
+        "annotations": {
+            "place_status": "depicted",
+            "depicted_place": {
+                "name": "Schiedamse poort",
+                "precision": "exact_place",
+                "latitude": 52.004166666,
+                "longitude": 4.361111111,
+                "city": "Delft",
+                "region": "South Holland",
+                "country": "Netherlands",
+            },
+        },
+    }]
+    candidates = {
+        "delft-artwork": [{
+            "place": "Delft",
+            "score_ner": 0.9,
+            "field": "title",
+            "start": 0,
+            "end": 5,
+            "source_text": "Delft",
+        }],
+    }
+
+    table = build_geographic_label_table(
+        records,
+        candidates,
+        nominatim_client=DelftGeocoder(),
+    )
+
+    assert table.iloc[0]["label_level"] == "city"
+    assert table.iloc[0]["label_status"] == "match"
+    assert table.iloc[0]["candidate_geolocation"]["name"] == "Delft"
 
 
 def test_resolve_location_uses_nominatim_only_when_geonames_has_no_match():

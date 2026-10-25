@@ -33,10 +33,14 @@ def audit_annotations(records):
         for record in records
         if record.get("annotations", {}).get("place_status") == "depicted"
     ]
-    places = [
-        (record, (record.get("annotations", {}).get("depicted_place") or {}))
-        for record in depicted_records
-    ]
+    places = []
+    for record in depicted_records:
+        annotations = record.get("annotations", {})
+        targets = annotations.get("depicted_places") or [
+            annotations.get("depicted_place")
+        ]
+        for target in targets:
+            places.append((record, target or {}))
     precision_counts = Counter(
         place.get("precision", "<missing>") for _, place in places
     )
@@ -93,11 +97,17 @@ def audit_annotations(records):
         "depicted_records": len(depicted_records),
         "precision_counts": dict(sorted(precision_counts.items())),
         "canonical_precision_levels": sorted(CANONICAL_PRECISION_LEVELS),
-        "missing_ids": missing,
-        "missing_counts": {field: len(ids) for field, ids in missing.items()},
-        "not_applicable_ids": not_applicable,
+        "missing_ids": {
+            field: list(dict.fromkeys(ids)) for field, ids in missing.items()
+        },
+        "missing_counts": {
+            field: len(set(ids)) for field, ids in missing.items()
+        },
+        "not_applicable_ids": {
+            field: list(dict.fromkeys(ids)) for field, ids in not_applicable.items()
+        },
         "not_applicable_counts": {
-            field: len(ids) for field, ids in not_applicable.items()
+            field: len(set(ids)) for field, ids in not_applicable.items()
         },
     }
 
