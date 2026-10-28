@@ -26,7 +26,7 @@ def load_ner_model(model_name="Babelscape/wikineural-multilingual-ner"):
     ner_pipeline = pipeline("ner", 
                             model=model, 
                             tokenizer=tokenizer, 
-                            aggregation_strategy="simple",
+                            aggregation_strategy="first",  # avoids split sub-word fragments ("##kirche")
                             device=0  # Use GPU if available, otherwise use CPU
     )
                             

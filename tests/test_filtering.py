@@ -1,5 +1,5 @@
 import json
-from src.data.filtering import (
+from src.data.filtering_logreg import (
     build_training_table,
     compare_heuristic_places_with_annotations,
     evaluate_binary_predictions,

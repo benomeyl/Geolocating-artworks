@@ -75,6 +75,66 @@ Les seuils visent une précision empirique minimale de 95 % (lieu exact),
 de 50 %. Un niveau insuffisamment représenté s'abstient. L'ancien modèle
 par noms reste reproductible avec `train-legacy`.
 
+Pour préparer une revue manuelle des prédictions et d'un échantillon
+stratifié des abstentions :
+
+```bash
+python scripts/create_manual_review_sample.py \
+	--predictions results/predictions_echantillon.json \
+	--records data/raw/aic/search_multiple_queries_all_artworks_20260917T125145Z.json \
+	--model results/model_hierarchical.joblib \
+	--output results/manual_review_sample.csv \
+	--metadata-output results/manual_review_sample_metadata.json \
+	--seed 42
+```
+
+Toutes les prédictions acceptées sont incluses; les abstentions sont tirées
+par cause (absence de candidat, proximité du seuil, géocodage ou niveau
+inclassable). Le manifeste contient les tailles des populations et
+échantillons par strate; utiliser `population / échantillon` comme poids
+pour estimer une métrique globale. Les colonnes `actual_*`, `review_outcome`
+et `review_notes` sont à remplir pendant l'annotation.
+
+Une fois la revue terminée, les lignes annotées sont ajoutées au gold
+standard (aperçu par défaut, écriture avec `--write`) :
+
+```bash
+python scripts/integrate_manual_review.py
+python scripts/integrate_manual_review.py --write
+```
+
+Les variantes de saisie (`mentionned_only`, `neighbourhood`, virgule
+décimale) sont normalisées; les lignes sans `actual_place_status` sont
+ignorées et une œuvre déjà présente dans le gold n'est jamais écrasée (les
+désaccords sont signalés). Attention : l'échantillon inclut toutes les
+prédictions acceptées, il sur-représente donc les cas faciles.
+
+Pour annoter les œuvres restées `uncertain` lors d'un test aléatoire
+(`scripts/predict_sample_csv.py`) :
+
+```bash
+python scripts/create_annotation_csv.py --predictions-csv results/test_sample_500_v3.csv \
+	--output results/annotation_uncertain_v3.csv
+python scripts/integrate_manual_review.py --review-csv results/annotation_uncertain_v3.csv
+```
+
+Dans ce CSV, `actual_place_status` accepte `d` (depicted), `n` (none),
+`m` (mentioned_only) et `u` (undeterminable). Si la suggestion
+(`suggested_*`) est juste, mettre `oui` dans `use_suggestion` : elle est
+recopiée dans les colonnes `actual_*` laissées vides, une valeur saisie
+restant prioritaire (par exemple `actual_precision` = `city` si seule la
+ville est sûre).
+
+Pour les œuvres AIC, `train`, `audit-labels` et `predict` complètent les
+champs de contexte depuis le dump local (`--aic-dump-dir`, par défaut
+`raw/artic-api-data/json/artworks`). `alt_titles` est une source de
+candidats comme le titre. `place_of_origin`, `artist_display`,
+`exhibition_history`, `provenance_text` et `credit_line` ne produisent
+jamais de candidat : ils indiquent seulement si un lieu déjà détecté est
+aussi le lieu d'origine, figure dans la biographie de l'artiste ou dans la
+provenance / les expositions. `latitude`, `longitude` et `gallery_title`
+désignent la salle du musée à Chicago et ne sont pas utilisés.
+
 Le cache Nominatim est versionné afin que les anciennes réponses sans
 hiérarchie d'adresse ne soient pas réutilisées.
 

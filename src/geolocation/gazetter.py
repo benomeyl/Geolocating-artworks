@@ -93,7 +93,9 @@ class NominatimClient:
             "latitude": latitude,
             "longitude": longitude,
             "feature_code": result.get("type"),
-            "place_class": result.get("class"),
+            # jsonv2 nomme la classe OSM "category" ("class" en format json).
+            "place_class": result.get("category") or result.get("class"),
+            "addresstype": result.get("addresstype"),
             "place_rank": result.get("place_rank"),
             "importance": result.get("importance"),
             "osm_type": result.get("osm_type"),
@@ -231,9 +233,27 @@ def get_location_info(name, conn):
         FROM geonames
         WHERE name = ? OR asciiname = ?
         ORDER BY population DESC
-        LIMIT 5
+        LIMIT 10
     """, (name, name))
     return cur.fetchall()
+
+
+def _prefer_populated_place(locations, max_distance_km=30.0):
+    """Put a city before the administrative unit that shares its name and area.
+
+    GeoNames often ranks the commune or district first ("Paris" ADM3, 4.4M
+    inhabitants, ahead of "Paris" PPLC), which would label the candidate as
+    a region. A populated place (PPL*) close to that unit is preferred.
+    """
+    top = locations[0]
+    if not str(top.get("feature_code") or "").startswith("ADM"):
+        return locations
+    for index, location in enumerate(locations[1:], start=1):
+        if str(location.get("feature_code") or "").startswith("PPL") and haversine_distance_km(
+            top["latitude"], top["longitude"], location["latitude"], location["longitude"],
+        ) <= max_distance_km:
+            return [location] + locations[:index] + locations[index + 1:]
+    return locations
 
 
 def haversine_distance_km(latitude_a, longitude_a, latitude_b, longitude_b):
@@ -283,6 +303,7 @@ def resolve_location(
             }
             for result in results
         ]
+        locations = _prefer_populated_place(locations)
     elif nominatim_client is not None:
         locations = nominatim_client.search(name)
     else:

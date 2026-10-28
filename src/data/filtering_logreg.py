@@ -76,7 +76,9 @@ NEGATIVES_LABELS = [
 # d'un poids choisi à la main par champ, chaque champ devient une colonne
 # binaire ("field_title", "field_themes", ...) dont le modèle apprend le
 # coefficient lui-même.
-FIELD_NAMES = ["title", "themes", "subjects", "description", "short_description", "styles"]
+FIELD_NAMES = [
+    "title", "alt_titles", "themes", "subjects", "description", "short_description", "styles",
+]
 
 # Seuil plancher appliqué à l'extraction NER (voir extract_candidate_artwork).
 # Volontairement bas : le score NER devient une FEATURE continue
@@ -119,6 +121,11 @@ GEOGRAPHIC_FEATURE_COLUMNS = FEATURE_COLUMNS + [
     "geo_has_country",
     "geo_importance",
     "geo_place_rank",
+] + [
+    "object_non_pictorial",
+    "in_place_of_origin",
+    "in_artist_display",
+    "in_provenance_or_exhibition",
 ]
 
 
@@ -178,6 +185,102 @@ def filter_by_keywords(combined_texts, keywords):
     return {"filtered_artworks": filtered_artworks}
 
 
+# Mots qui ne sont jamais un lieu à eux seuls (artefacts NER : "of", "La").
+_ENTITY_STOPWORDS = _GENERIC_WORDS | {"a", "an", "and", "with", "et", "y", "e", "und"}
+# Connecteurs qui, en tête d'entité, signalent un début tronqué
+# ("of Control" pour "Line of Control").
+_LEADING_CONNECTORS = {
+    "of", "the", "de", "du", "des", "del", "della", "di", "da", "von", "van", "der",
+}
+# Séparateurs autorisés entre deux morceaux d'une même entité ("N" "." "Y").
+# Pas d'espace : deux entités séparées par un espace ou ". " sont distinctes
+# (« Dresden. Albert Square »).
+_ENTITY_JOINERS = set(".-–'’")
+_STRIPPED_PUNCTUATION = " \t\n,;:!?()[]{}\"«»“”‘’'"
+
+
+def _is_word_char(character):
+    return character.isalnum() or unicodedata.category(character) == "Mn"
+
+
+def _in_word(text, index):
+    """True if text[index] belongs to a word; an apostrophe between letters does (« Akbar's »)."""
+    if not 0 <= index < len(text):
+        return False
+    if _is_word_char(text[index]):
+        return True
+    return (
+        text[index] in "'’"
+        and 0 < index < len(text) - 1
+        and _is_word_char(text[index - 1])
+        and _is_word_char(text[index + 1])
+    )
+
+
+def _clean_entity_spans(text, entities):
+    """
+    Corrige les spans LOC bruts du NER à partir du texte source.
+
+    Les noms sont relus dans `text` via les offsets (et non depuis le
+    `word` décodé par le tokenizer, qui insère des espaces : « Saint - Lazare »).
+    Les spans coupés au milieu d'un mot sont étendus au mot entier, les
+    morceaux adjacents d'une même entité fusionnés, et les spans qui ne
+    peuvent pas être un nom de lieu (une lettre, un mot-outil) écartés.
+    """
+    spans = []
+    for entity in sorted(entities, key=lambda item: item["start"]):
+        start, end = entity["start"], entity["end"]
+        while start > 0 and _in_word(text, start - 1) and _in_word(text, start):
+            start -= 1
+        while end < len(text) and _in_word(text, end - 1) and _in_word(text, end):
+            end += 1
+        score = float(entity["score"])
+        if spans:
+            previous = spans[-1]
+            gap = text[previous["end"]:start]
+            if start <= previous["end"] or (len(gap) == 1 and gap in _ENTITY_JOINERS):
+                previous["end"] = max(previous["end"], end)
+                previous["score"] = max(previous["score"], score)
+                continue
+        spans.append({"start": start, "end": end, "score": score})
+
+    cleaned = []
+    for span in spans:
+        start, end = span["start"], span["end"]
+        while start < end and text[start] in _STRIPPED_PUNCTUATION:
+            start += 1
+        while end > start and text[end - 1] in _STRIPPED_PUNCTUATION:
+            end -= 1
+        # Un point final n'est gardé que dans une abréviation (« N.Y. »).
+        if end > start and text[end - 1] == "." and "." not in text[start:end - 1]:
+            end -= 1
+
+        elision = re.match(r"d['’]", text[start:end])
+        if elision:
+            start += elision.end()
+
+        first_word = re.match(r"\w+", text[start:end])
+        if (
+            first_word
+            and first_word.group(0) in _LEADING_CONNECTORS
+            and first_word.end() < end - start
+        ):
+            previous_word = re.search(r"(\w+)\s+$", text[:start])
+            if previous_word and previous_word.group(1)[:1].isupper():
+                start = previous_word.start(1)
+            else:
+                start += first_word.end()
+                while start < end and text[start].isspace():
+                    start += 1
+
+        surface = text[start:end]
+        letter_count = sum(character.isalpha() for character in surface)
+        if letter_count < 2 or _normalize_place_name(surface) in _ENTITY_STOPWORDS:
+            continue
+        cleaned.append({**span, "start": start, "end": end, "surface": surface})
+    return cleaned
+
+
 def extract_candidate_artwork(artwork, ner, threshold=DEFAULT_NER_FLOOR):
     """
     Extract detected LOC candidates, including their source field and position
@@ -186,9 +289,12 @@ def extract_candidate_artwork(artwork, ner, threshold=DEFAULT_NER_FLOOR):
     `threshold` reste volontairement bas par défaut (DEFAULT_NER_FLOOR) :
     c'est un filtre anti-bruit, pas le seuil d'acceptation final. Le score
     NER complet est conservé comme feature (score_ner_max) pour le modèle.
+    Il est appliqué après nettoyage des spans (_clean_entity_spans), sur le
+    score maximal des morceaux fusionnés.
     """
     fields = {
         "title": artwork.get("title") or "",
+        "alt_titles": " / ".join(artwork.get("alt_titles") or []),
         "description": artwork.get("description") or "",
         "short_description": artwork.get("short_description") or "",
         "themes": " ".join(artwork.get("theme_titles") or []),
@@ -200,15 +306,15 @@ def extract_candidate_artwork(artwork, ner, threshold=DEFAULT_NER_FLOOR):
     for field, text in fields.items():
         if not text.strip():
             continue
-        results = ner(text)
-        for result in results:
-            if result["entity_group"] == "LOC" and result["score"] >= threshold:
+        locations = [result for result in ner(text) if result["entity_group"] == "LOC"]
+        for span in _clean_entity_spans(text, locations):
+            if span["score"] >= threshold:
                 candidates.append({
-                    "place": result["word"],
-                    "score_ner": round(float(result["score"]), 3),
+                    "place": span["surface"],
+                    "score_ner": round(span["score"], 3),
                     "field": field,
-                    "start": result["start"],
-                    "end": result["end"],
+                    "start": span["start"],
+                    "end": span["end"],
                     "source_text": text,
                 })
     return candidates
@@ -284,6 +390,53 @@ def candidate_features(occurrences):
 
 
 
+# Types d'objets AIC (artwork_type_title) qui ne représentent pas de scène :
+# le lieu cité dans leur titre est une origine (« Kantharos, Attica »).
+# Les types figuratifs (Print, Photograph, Painting...) et les types
+# inconnus valent 0.
+NON_PICTORIAL_ARTWORK_TYPES = {
+    "vessel", "coin", "glass", "costume and accessories", "sculpture", "ceramics",
+    "decorative arts", "metalwork", "furniture", "furnishings", "religious/ritual object",
+    "arms", "armor", "architectural fragment", "textile", "coverings and hangings",
+    "mask", "funerary object", "basketry", "design",
+}
+
+
+def _mentions(text, place_name):
+    place = _normalize_place_name(place_name)
+    return bool(place) and f" {place} " in f" {_normalize_place_name(text)} "
+
+
+def artwork_context_features(artwork, place_name):
+    """
+    Indices de contexte AIC pour un candidat (voir aic.CONTEXT_FIELDS).
+
+    Ces champs ne produisent jamais de candidat : ils indiquent seulement
+    si le lieu détecté dans le titre/la description est aussi le lieu
+    d'origine de l'œuvre, apparaît dans la biographie de l'artiste
+    (« born Leiden ») ou dans la provenance / l'historique d'expositions.
+    Le modèle apprend le poids de chaque indice. Pas d'indicateur « champs
+    présents » : il ne marquerait que les œuvres AIC, et le modèle l'utilisait
+    comme raccourci de source (21 % de lieux représentés dans les œuvres AIC
+    du gold contre 70 % ailleurs). Il reste calculé, hors
+    GEOGRAPHIC_FEATURE_COLUMNS, pour les modèles entraînés avant ce retrait.
+    """
+    history = " ".join(
+        str(artwork.get(field) or "")
+        for field in ("exhibition_history", "provenance_text", "credit_line")
+    )
+    origin = artwork.get("place_of_origin") or ""
+    artist = artwork.get("artist_display") or ""
+    artwork_type = str(artwork.get("artwork_type_title") or "").casefold()
+    return {
+        "has_context_metadata": int(bool(origin or artist or history.strip())),
+        "object_non_pictorial": int(artwork_type in NON_PICTORIAL_ARTWORK_TYPES),
+        "in_place_of_origin": int(_mentions(origin, place_name)),
+        "in_artist_display": int(_mentions(artist, place_name)),
+        "in_provenance_or_exhibition": int(_mentions(history, place_name)),
+    }
+
+
 def _normalize_place_name(name):
     text = unicodedata.normalize("NFKD", (name or "").lower())
     text = "".join(c for c in text if not unicodedata.combining(c))
@@ -345,36 +498,80 @@ _GEOGRAPHIC_LABEL_LEVELS = {
 }
 
 
-def _candidate_geographic_level(location):
-    if not location:
-        return None
-    feature_code = str(location.get("feature_code") or "").upper()
+_NOMINATIM_TYPE_LEVELS = {
+    "country": "country",
+    "state": "region",
+    "region": "region",
+    "province": "region",
+    "state_district": "region",
+    "county": "region",
+    "city": "city",
+    "town": "city",
+    "village": "city",
+    "municipality": "city",
+    "hamlet": "city",
+    "neighbourhood": "neighborhood",
+    "neighborhood": "neighborhood",
+    "suburb": "neighborhood",
+    "quarter": "neighborhood",
+    "borough": "neighborhood",
+    "city_district": "neighborhood",
+    "city_block": "neighborhood",
+}
+# Codes GeoNames de zones étendues (région naturelle, archipel, massif...).
+_GEONAMES_REGION_CODES = {"RGN", "RGNE", "RGNH", "AREA", "ISLS", "PEN", "MTS", "VAL"}
+
+
+def _geonames_level(feature_code):
+    if feature_code.startswith("PCL"):
+        return "country"
+    # ADM1/ADM2 (région, département, county US) sont des régions ; ADM3+
+    # correspond le plus souvent à une commune (comune, Gemeinde).
+    if feature_code.startswith(("ADM1", "ADM2", "ADMD")) or feature_code in _GEONAMES_REGION_CODES:
+        return "region"
+    if feature_code == "PPLX":
+        return "neighborhood"
+    if feature_code.startswith(("PPL", "ADM")):
+        return "city"
+    return "exact_place"
+
+
+def _nominatim_level(location):
+    for key in ("addresstype", "feature_code"):
+        level = _NOMINATIM_TYPE_LEVELS.get(str(location.get(key) or "").casefold())
+        if level:
+            return level
+    try:
+        place_rank = int(location.get("place_rank") or 0)
+    except (TypeError, ValueError):
+        place_rank = 0
     place_type = str(location.get("feature_code") or "").casefold()
     place_class = str(location.get("place_class") or "").casefold()
-
-    if feature_code.startswith("PCLI") or place_type == "country":
-        return "country"
-    if feature_code.startswith("ADM") or (
-        place_class == "boundary" and place_type in {"administrative", "region"}
-    ):
-        return "region"
-    if feature_code.startswith("PPL") or place_type in {
-        "city", "town", "village", "municipality", "hamlet",
-    }:
-        return "city"
-    if place_type in {"neighbourhood", "neighborhood", "suburb", "quarter", "borough"}:
-        return "neighborhood"
-
-    try:
-        if int(location.get("place_rank") or 0) >= 25:
-            return "exact_place"
-    except (TypeError, ValueError):
-        pass
-    if location.get("source") == "GeoNames":
+    # Les limites administratives (type "administrative") n'ont pas de type
+    # parlant : leur niveau se lit dans place_rank (4 pays, 8 état,
+    # 12 county, 16 ville, 20 quartier).
+    if place_rank and (place_type == "administrative" or place_class == "boundary"):
+        if place_rank <= 4:
+            return "country"
+        if place_rank <= 12:
+            return "region"
+        if place_rank <= 19:
+            return "city"
+        if place_rank <= 24:
+            return "neighborhood"
+    if place_rank >= 25:
         return "exact_place"
     if place_class and place_class not in {"place", "boundary"}:
         return "exact_place"
     return None
+
+
+def _candidate_geographic_level(location):
+    if not location:
+        return None
+    if location.get("source") == "GeoNames":
+        return _geonames_level(str(location.get("feature_code") or "").upper())
+    return _nominatim_level(location)
 
 
 def _add_geographic_features(features, location):
@@ -523,14 +720,35 @@ def geographic_candidate_label(
     candidate_level = _candidate_geographic_level(candidate_location)
     hierarchy = candidate_location.get("hierarchy") or {}
 
+    # Hiérarchie de la cible obtenue par géocodage inverse de ses coordonnées
+    # (voir build_geographic_label_table) : elle est dans la même langue que
+    # celle des candidats (« Sachsen ») alors que l'annotation peut être en
+    # anglais (« Saxony »).
+    target_hierarchy = actual.get("resolved_hierarchy") or {}
+
     def value_matches(field):
-        target_value = _normalize_place_name(actual.get(field))
+        target_values = {
+            value
+            for value in (
+                _normalize_place_name(actual.get(field)),
+                _normalize_place_name(target_hierarchy.get(field)),
+            )
+            if value
+        }
         resolved_value = _normalize_place_name(hierarchy.get(field))
         if not resolved_value and candidate_level == field:
             resolved_value = _normalize_place_name(candidate_location.get("name"))
-        return bool(target_value and resolved_value and target_value == resolved_value)
+        return bool(resolved_value and resolved_value in target_values)
 
-    country_matches = value_matches("country")
+    target_country_code = (
+        actual.get("country_code") or target_hierarchy.get("country_code") or ""
+    ).upper()
+    candidate_country_code = (
+        hierarchy.get("country_code") or candidate_location.get("country_code") or ""
+    ).upper()
+    country_matches = value_matches("country") or bool(
+        target_country_code and target_country_code == candidate_country_code
+    )
     region_matches = value_matches("region")
     city_matches = value_matches("city")
     neighborhood_name = _normalize_place_name(actual.get("name"))
@@ -602,6 +820,35 @@ def geographic_candidate_label(
     }
 
 
+def _with_target_hierarchies(record, nominatim_client, reverse_cache):
+    """Return a copy of `record` whose depicted places carry `resolved_hierarchy`.
+
+    The hierarchy comes from reverse-geocoding the annotated coordinates, so
+    that region/country names are compared in the geocoder's language.
+    """
+    if nominatim_client is None or not hasattr(nominatim_client, "reverse"):
+        return record
+    annotations = record.get("annotations") or {}
+
+    def resolve(place):
+        coordinates = _valid_coordinates(place or {})
+        if coordinates is None or place.get("resolved_hierarchy"):
+            return place
+        if coordinates not in reverse_cache:
+            reverse_cache[coordinates] = nominatim_client.reverse(*coordinates)
+        location = reverse_cache[coordinates]
+        if not location:
+            return place
+        return {**place, "resolved_hierarchy": location.get("hierarchy") or {}}
+
+    updated = dict(annotations)
+    if annotations.get("depicted_place"):
+        updated["depicted_place"] = resolve(annotations["depicted_place"])
+    if annotations.get("depicted_places"):
+        updated["depicted_places"] = [resolve(place) for place in annotations["depicted_places"]]
+    return {**record, "annotations": updated}
+
+
 def build_geographic_label_table(
     records,
     candidates_by_artwork,
@@ -615,8 +862,10 @@ def build_geographic_label_table(
     """Build inspectable hierarchical labels without forcing unresolved cases negative."""
     rows = []
     location_cache = {}
+    reverse_cache = {}
     cv_groups = _artwork_target_cv_groups(records)
     for record in records:
+        record = _with_target_hierarchies(record, nominatim_client, reverse_cache)
         artwork = record.get("artwork", record)
         artwork_id = artwork.get("id")
         groups = group_candidates_by_place(candidates_by_artwork.get(artwork_id, []))
@@ -643,6 +892,7 @@ def build_geographic_label_table(
                 city_tolerance_km=city_tolerance_km,
             )
             row = _add_geographic_features(candidate_features(occurrences), location)
+            row.update(artwork_context_features(artwork, place_name))
             row.update({
                 "artwork_id": artwork_id,
                 "cv_group": cv_groups.get(artwork_id, f"artwork:{artwork_id}"),
@@ -1393,6 +1643,7 @@ def predict_with_hierarchical_model(
                 candidate_features(occurrences),
                 location,
             )
+            features.update(artwork_context_features(artwork, place_name))
             feature_row = np.asarray(
                 [[features[column] for column in feature_columns]],
                 dtype=float,

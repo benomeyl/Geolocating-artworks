@@ -27,6 +27,7 @@ from pathlib import Path
 import joblib
 import pandas as pd
 
+from api.aic import enrich_records_from_dump
 from geolocation.gazetter import NominatimClient, geocode_candidates
 from data.filtering_logreg import (
     extract_all_candidates,
@@ -74,7 +75,9 @@ def load_ner_pipeline():
         "ner",
         model=model,
         tokenizer=tokenizer,
-        aggregation_strategy="simple",
+        # "first" étiquette chaque mot d'après son premier sous-token :
+        # "simple" coupait les mots en fragments ("##kirche", "sonnen").
+        aggregation_strategy="first",
     )
 
 
@@ -83,6 +86,7 @@ def cmd_train(args):
     records = payload.get("unique_artworks", []) if isinstance(payload, dict) else payload
     if not isinstance(records, list):
         raise ValueError("The input JSON must contain a list of artwork records.")
+    print(f"[info] {enrich_records_from_dump(records, args.aic_dump_dir)} œuvres enrichies depuis le dump AIC.")
 
     print(f"[info] Chargement de {args.records}...")
     print(f"[info] {len(records)} œuvres chargées.")
@@ -387,6 +391,7 @@ def cmd_audit_labels(args):
     records = payload.get("unique_artworks", []) if isinstance(payload, dict) else payload
     if not isinstance(records, list):
         raise ValueError("The input JSON must contain a list of artwork records.")
+    print(f"[info] {enrich_records_from_dump(records, args.aic_dump_dir)} œuvres enrichies depuis le dump AIC.")
 
     print(f"[info] {len(records)} œuvres chargées; extraction des candidats NER...")
     candidates_by_artwork = extract_all_candidates(records, load_ner_pipeline())
@@ -472,6 +477,7 @@ def cmd_predict(args):
     records = payload.get("unique_artworks", []) if isinstance(payload, dict) else payload
     if not isinstance(records, list):
         raise ValueError("The input JSON must contain a list of artwork records.")
+    print(f"[info] {enrich_records_from_dump(records, args.aic_dump_dir)} œuvres enrichies depuis le dump AIC.")
     print(f"[info] {len(records)} œuvres à traiter.")
 
     print("[info] Chargement du modèle NER...")
@@ -676,6 +682,11 @@ def main():
 
 
 def add_geocoder_arguments(parser):
+    parser.add_argument(
+        "--aic-dump-dir",
+        default=None,
+        help="Dump AIC local pour les champs de contexte (défaut: data/raw/artic-api-data/json/artworks).",
+    )
     parser.add_argument("--nominatim-url", default=None, help="Endpoint Nominatim configurable pour pouvoir changer de service.")
     parser.add_argument("--nominatim-reverse-url", default=None, help="Endpoint reverse Nominatim (déduit de --nominatim-url par défaut).")
     parser.add_argument("--nominatim-user-agent", default=None, help="User-Agent identifiant l'application; configurer un contact pour l'usage réel.")

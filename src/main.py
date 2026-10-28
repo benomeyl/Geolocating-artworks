@@ -1,7 +1,7 @@
 if __package__ in (None, ""):
     import api.aic as aic
     import utils
-    import data.filtering as filt
+    import data.filtering_logreg as filt
     try:
         import data.ner as ner
     except ModuleNotFoundError:
@@ -13,7 +13,7 @@ if __package__ in (None, ""):
 else:
     from src.api import aic
     from src import utils
-    from src.data import filtering as filt
+    from src.data import filtering_logreg as filt
     try:
         from src.data import ner
     except ModuleNotFoundError:

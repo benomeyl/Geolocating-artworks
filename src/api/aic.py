@@ -128,6 +128,47 @@ def _matches_query(artwork, query):
     return needle in haystack
 
 
+# Champs de contexte ajoutés aux œuvres AIC pour le modèle de lieux. Seul
+# alt_titles est une source de candidats ; les autres servent uniquement
+# d'indices sur un candidat déjà extrait (lieu d'origine, biographie de
+# l'artiste, provenance/expositions). latitude, longitude et gallery_title
+# donnent la salle du musée à Chicago : ils sont volontairement exclus.
+CONTEXT_FIELDS = (
+    "alt_titles",
+    "artwork_type_title",
+    "place_of_origin",
+    "artist_display",
+    "exhibition_history",
+    "provenance_text",
+    "credit_line",
+)
+
+
+def enrich_records_from_dump(records, dump_dir=None, fields=CONTEXT_FIELDS):
+    """Fill missing context fields of AIC records from the local dump, in place.
+
+    Records whose id is not an AIC integer id (Wikidata, CSV imports) are
+    left untouched. Returns the number of records found in the dump.
+    """
+    dump_dir = Path(dump_dir) if dump_dir is not None else DEFAULT_DUMP_DIR
+    if not dump_dir.is_dir():
+        return 0
+    enriched = 0
+    for record in records:
+        artwork = record.get("artwork", record)
+        artwork_id = str(artwork.get("id", ""))
+        file_path = dump_dir / f"{artwork_id}.json"
+        if not artwork_id.isdigit() or not file_path.is_file():
+            continue
+        with file_path.open("r", encoding="utf-8") as file:
+            payload = json.load(file)
+        for field in fields:
+            if artwork.get(field) in (None, "", []) and payload.get(field) not in (None, "", []):
+                artwork[field] = payload[field]
+        enriched += 1
+    return enriched
+
+
 def load_artworks_from_dump(dump_dir=None, limit=None, queries=None):
     """Load artwork records directly from the local AIC dump directory.
 
@@ -208,6 +249,13 @@ def search_artworks(query=None, page=1, limit=10, output_dir=None):
             "subject_titles,"
             "theme_titles,"
             "style_titles,"
+            "alt_titles,"
+            "artwork_type_title,"
+            "place_of_origin,"
+            "artist_display,"
+            "exhibition_history,"
+            "provenance_text,"
+            "credit_line,"
             "image_id,"
             "is_public_domain"
         )
@@ -324,7 +372,7 @@ def keep_useful_fields(artwork):
         "theme_titles": artwork.get("theme_titles") or [],
         "style_titles": artwork.get("style_titles") or [],
         "artist_title": artwork.get("artist_title"),
-        "place_of_origin": artwork.get("place_of_origin"),
+        **{field: artwork.get(field) for field in CONTEXT_FIELDS},
         "date_display": artwork.get("date_display"),
         "image_id": artwork.get("image_id"),
         "is_public_domain": artwork.get("is_public_domain"),
