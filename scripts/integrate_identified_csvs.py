@@ -32,6 +32,7 @@ MAX_ROWS_PER_CITY = 20
 
 
 def _find_column(row, *names):
+    """Return the key of `row` matching one of `names` (case- and space-insensitive), or None."""
     normalized_names = {name.casefold() for name in names}
     for key in row:
         if key and key.strip().casefold() in normalized_names:
@@ -40,6 +41,7 @@ def _find_column(row, *names):
 
 
 def parse_monuments(raw_value):
+    """Parse a monument cell (a name or a Python list literal) into unique names, in order."""
     if raw_value is None or not raw_value.strip():
         return []
     value = raw_value.strip()
@@ -64,6 +66,7 @@ def parse_monuments(raw_value):
 
 
 def parse_coordinates(raw_value):
+    """Parse a "(latitude, longitude)" cell; None when empty, ValueError when invalid."""
     if raw_value is None or not raw_value.strip():
         return None
     try:
@@ -84,6 +87,7 @@ def parse_coordinates(raw_value):
 
 
 def select_described_rows(rows, maximum=MAX_ROWS_PER_CITY):
+    """Pick up to `maximum` rows that have a description, one per Wikidata id first, then one per image."""
     description_column = _find_column(rows[0], "description") if rows else None
     wikidata_column = _find_column(rows[0], "wd_id") if rows else None
     image_column = _find_column(rows[0], "Image Name") if rows else None
@@ -121,6 +125,7 @@ def select_described_rows(rows, maximum=MAX_ROWS_PER_CITY):
 
 
 def record_from_csv_row(dataset_key, city, region, country, csv_name, row, row_number):
+    """Convert one CSV row into a gold record whose depicted places are its monuments (exact_place)."""
     image_column = _find_column(row, "Image Name")
     monument_column = _find_column(row, "Monument", "Monuments")
     coordinates_column = _find_column(row, "lat_lon")
@@ -194,6 +199,7 @@ def record_from_csv_row(dataset_key, city, region, country, csv_name, row, row_n
 
 
 def load_csv_records(directory=GOLD_STANDARD_DIR):
+    """Read the Dresden and Venice CSVs and return the gold records of their selected rows."""
     imported = []
     for dataset_key, (filename, city, region, country) in CSV_DATASETS.items():
         csv_path = directory / filename
@@ -220,6 +226,11 @@ def load_csv_records(directory=GOLD_STANDARD_DIR):
 
 
 def merge_records(payload, imported):
+    """Replace previous CSV imports in the gold payload by `imported`.
+
+    Returns (merged_payload, additions, already_present_count, replaced_count).
+    Raises ValueError on an image id collision with another record.
+    """
     existing_records = payload.get("unique_artworks")
     if not isinstance(existing_records, list):
         raise ValueError("gold_dataset.json must contain a 'unique_artworks' list.")
@@ -265,6 +276,7 @@ def merge_records(payload, imported):
 
 
 def main():
+    """Preview the import, and write gold_dataset.json with --write."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--gold-json", type=Path, default=GOLD_STANDARD_DIR / "gold_dataset.json")
     parser.add_argument("--csv-dir", type=Path, default=GOLD_STANDARD_DIR)

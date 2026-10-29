@@ -125,3 +125,23 @@ def test_annotation_csv_keeps_actual_columns_empty(tmp_path):
     assert len(rows) == 1
     assert rows[0]["suggested_place"] == "Navy Pier"
     assert rows[0]["actual_place_name"] == "" and rows[0]["use_suggestion"] == ""
+
+
+def test_annotation_cells_stay_on_one_line():
+    from scripts.create_annotation_csv import _one_line
+
+    assert _one_line("Claude Monet\nFrench, 1840–1926") == "Claude Monet | French, 1840–1926"
+    assert _one_line("Paris [city]; Seine [region]") == "Paris [city] | Seine [region]"
+    assert _one_line(None) is None
+
+
+def test_rows_without_artwork_id_are_skipped_with_a_warning(tmp_path):
+    csv_path, records_path = _write_review(tmp_path, [
+        {"review_id": "", "artwork_id": "", "actual_place_status": "n"},
+        {"review_id": "", "artwork_id": ""},
+    ])
+
+    imported, unannotated, warnings = load_review_records(csv_path, records_path)
+
+    assert imported == [] and unannotated == []
+    assert warnings == ["row 2: annotated but without artwork_id, skipped"]

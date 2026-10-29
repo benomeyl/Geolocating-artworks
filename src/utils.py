@@ -1,7 +1,11 @@
+"""Helpers to read AIC corpus files and combine the text fields of an artwork."""
+
 import json
 from pathlib import Path
 
+
 def combine_artwork_text_fields(artwork):
+    """Join the non-empty text fields of an artwork into one string."""
     text_fields = [
         artwork.get("title", ""),
         artwork.get("alt_text", ""),
@@ -15,6 +19,7 @@ def combine_artwork_text_fields(artwork):
 
 
 def read_artworks_from_json(json_file):
+    """Read a corpus file and return {artwork_id: artwork}."""
     with Path(json_file).open("r", encoding="utf-8") as file:
         payload = json.load(file)
 
@@ -33,6 +38,7 @@ def read_artworks_from_json(json_file):
 
 
 def combine_all_artworks_text_fields(artworks):
+    """Return {artwork_id: combined text} for a corpus payload with "unique_artworks"."""
     combined_texts = {}
     for artwork_record in artworks.get("unique_artworks", []):
         artwork = artwork_record.get("artwork", artwork_record)
@@ -42,6 +48,7 @@ def combine_all_artworks_text_fields(artworks):
 
 
 def read_all_json_files_and_combine_text_fields(raw_aic_dir):
+    """Combine the text fields of every artwork of every corpus file in a directory."""
     combined_texts = {}
     for json_file in sorted(Path(raw_aic_dir).glob("*.json")):
         with json_file.open("r", encoding="utf-8") as file:

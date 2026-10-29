@@ -22,13 +22,23 @@ ANNOTATION_FIELDS = [
 ]
 
 
+def _one_line(value):
+    """Keep every cell on one line, without ';' (it shifts columns in spreadsheets)."""
+    if not isinstance(value, str):
+        return value
+    lines = [" ".join(line.split()) for line in value.splitlines()]
+    return " | ".join(line for line in lines if line).replace(";", " |")
+
+
 def _plain_text(html, limit=600):
+    """Strip HTML tags and truncate to about `limit` characters."""
     text = re.sub(r"<[^>]+>", " ", html or "")
     text = " ".join(text.split())
     return text if len(text) <= limit else text[:limit].rsplit(" ", 1)[0] + " …"
 
 
 def _dump_artwork(dump_dir, artwork_id):
+    """Full AIC record of an artwork from the local dump ({} if absent)."""
     path = Path(dump_dir) / f"{artwork_id}.json"
     if not str(artwork_id).isdigit() or not path.is_file():
         return {}
@@ -36,13 +46,14 @@ def _dump_artwork(dump_dir, artwork_id):
 
 
 def annotation_rows(prediction_rows, dump_dir=DUMP_DIR, statuses=("uncertain",)):
+    """Build annotation rows for the predictions with the given statuses, nearest misses first."""
     selected = [row for row in prediction_rows if row["prediction_status"] in statuses]
-    # Les cas les plus proches du seuil d'abord : ce sont les plus utiles.
+    # Nearest misses first: they are the most useful to annotate.
     selected.sort(key=lambda row: -float(row["near_miss_margin"] or "-inf"))
     rows = []
     for number, row in enumerate(selected, start=1):
         artwork = _dump_artwork(dump_dir, row["artwork_id"])
-        rows.append({
+        rows.append({key: _one_line(value) for key, value in {
             "review_id": f"U{number:04d}",
             "artwork_id": row["artwork_id"],
             "aic_url": row["aic_url"],
@@ -62,11 +73,12 @@ def annotation_rows(prediction_rows, dump_dir=DUMP_DIR, statuses=("uncertain",))
             "suggested_region": row["resolved_region"],
             "suggested_country": row["resolved_country"],
             **{field: "" for field in ANNOTATION_FIELDS},
-        })
+        }.items()})
     return rows
 
 
 def main():
+    """Write the annotation CSV (refuses to overwrite an existing file)."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--predictions-csv", type=Path, default=Path("results/test_sample_500_v3.csv"))
     parser.add_argument("--output", type=Path, default=Path("results/annotation_uncertain_v3.csv"))

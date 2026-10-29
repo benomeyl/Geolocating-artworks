@@ -1,3 +1,12 @@
+"""
+Art Institute of Chicago (AIC) data access: public API, local dump and storage.
+
+Corpora are stored as {"search_queries": [...], "unique_artworks": [...]}
+where each record is {"artwork": {...}, "matched_queries": [...]}.
+`enrich_records_from_dump` adds the context fields used by the place model
+from the local dump (data/raw/artic-api-data), without network calls.
+"""
+
 import json
 import re
 from datetime import datetime, timezone
@@ -8,33 +17,53 @@ import requests
 
 BASE_URL = "https://api.artic.edu/api/v1/artworks"
 DEFAULT_DUMP_DIR = Path(__file__).resolve().parents[2] / "data" / "raw" / "artic-api-data" / "json" / "artworks"
+# Fields requested from the search API.
+SEARCH_FIELDS = (
+    "id",
+    "title",
+    "alt_text",
+    "description",
+    "short_description",
+    "subject_titles",
+    "theme_titles",
+    "style_titles",
+    "alt_titles",
+    "artwork_type_title",
+    "place_of_origin",
+    "artist_display",
+    "exhibition_history",
+    "provenance_text",
+    "credit_line",
+    "image_id",
+    "is_public_domain",
+)
 
 
 def _sanitize_query_for_filename(query):
+    """Turn a query into a safe file-name fragment ("query" if nothing is left)."""
     cleaned = re.sub(r"[^a-zA-Z0-9]+", "_", query.strip().lower())
     cleaned = cleaned.strip("_")
     return cleaned or "query"
 
 
-def _deduplicate_artworks(results_by_query, search_queries=None):
-    """Return a deduplicated list of artwork records, with a per-artwork
-    matched_queries list computed from the queries that surfaced each artwork.
+def _group_by_artwork_id(results_by_query, search_queries=None):
+    """Map artwork id to {"artwork", "matched_queries"} from per-query results.
+
+    The first payload seen for an artwork is kept; matched_queries lists the
+    queries that returned it, in query order.
     """
     artworks_by_id = {}
-
     for query in search_queries or list(results_by_query.keys()):
-        query_results = results_by_query.get(query, [])
-        for artwork in query_results:
-            artwork_id = artwork.get("id")
-            if artwork_id not in artworks_by_id:
-                artworks_by_id[artwork_id] = {
-                    "artwork": artwork,
-                    "matched_queries": [],
-                }
-            if query not in artworks_by_id[artwork_id]["matched_queries"]:
-                artworks_by_id[artwork_id]["matched_queries"].append(query)
+        for artwork in results_by_query.get(query, []):
+            record = artworks_by_id.setdefault(artwork.get("id"), {"artwork": artwork, "matched_queries": []})
+            if query not in record["matched_queries"]:
+                record["matched_queries"].append(query)
+    return artworks_by_id
 
-    return list(artworks_by_id.values())
+
+def _deduplicate_artworks(results_by_query, search_queries=None):
+    """Return a deduplicated list of artwork records with their matched_queries."""
+    return list(_group_by_artwork_id(results_by_query, search_queries).values())
 
 
 def _normalize_artwork_records(unique_artworks, search_queries=None):
@@ -128,11 +157,11 @@ def _matches_query(artwork, query):
     return needle in haystack
 
 
-# Champs de contexte ajoutés aux œuvres AIC pour le modèle de lieux. Seul
-# alt_titles est une source de candidats ; les autres servent uniquement
-# d'indices sur un candidat déjà extrait (lieu d'origine, biographie de
-# l'artiste, provenance/expositions). latitude, longitude et gallery_title
-# donnent la salle du musée à Chicago : ils sont volontairement exclus.
+# Context fields added to AIC records for the place model. Only alt_titles is
+# a source of candidates; the others are clues about a candidate found
+# elsewhere (object type, place of origin, artist biography, provenance and
+# exhibitions). latitude, longitude and gallery_title locate the museum room
+# in Chicago: they are deliberately excluded.
 CONTEXT_FIELDS = (
     "alt_titles",
     "artwork_type_title",
@@ -176,7 +205,6 @@ def load_artworks_from_dump(dump_dir=None, limit=None, queries=None):
     data/raw/artic-api-data/json/artworks. This avoids making network calls.
     """
     dump_dir = Path(dump_dir) if dump_dir is not None else DEFAULT_DUMP_DIR
-    dump_dir = Path(dump_dir)
     if not dump_dir.exists():
         raise FileNotFoundError(f"AIC dump directory not found: {dump_dir}")
 
@@ -190,9 +218,8 @@ def load_artworks_from_dump(dump_dir=None, limit=None, queries=None):
         if "id" not in payload:
             continue
 
-        if queries:
-            if not any(_matches_query(payload, query) for query in queries):
-                continue
+        if queries and not any(_matches_query(payload, query) for query in queries):
+            continue
         artworks.append(payload)
 
         if limit is not None and len(artworks) >= limit:
@@ -236,84 +263,41 @@ def get_corpus_from_dump(queries=None, output_dir=None, dump_dir=None, limit=Non
 
 
 def search_artworks(query=None, page=1, limit=10, output_dir=None):
+    """Fetch one page of artworks from the AIC API (full-text search when `query` is set).
 
-    params = {
-        "limit": limit,
-        "page": page,
-        "fields": (
-            "id,"
-            "title,"
-            "alt_text,"
-            "description,"
-            "short_description,"
-            "subject_titles,"
-            "theme_titles,"
-            "style_titles,"
-            "alt_titles,"
-            "artwork_type_title,"
-            "place_of_origin,"
-            "artist_display,"
-            "exhibition_history,"
-            "provenance_text,"
-            "credit_line,"
-            "image_id,"
-            "is_public_domain"
-        )
-    }
-
+    `output_dir` is accepted for backwards compatibility and ignored.
+    """
+    params = {"limit": limit, "page": page, "fields": ",".join(SEARCH_FIELDS)}
     url = BASE_URL
-
-    # If the query is not empty or None, add it to the parameters.
     if query is not None and query != "":
         params["q"] = query
         url = f"{BASE_URL}/search"
 
     response = requests.get(url, params=params, timeout=20)
     response.raise_for_status()
-
-    payload = response.json()
-
-    return payload
+    return response.json()
 
 
 def search_all_artworks(query=None, max_pages=5, limit=10):
+    """Fetch up to `max_pages` pages of results and return the artwork list."""
     first_page = search_artworks(query, page=1, limit=limit)
     all_data = list(first_page["data"])
-    total_pages = first_page["pagination"]["total_pages"]
-
-
-    total_pages = min(total_pages, max_pages)
-
+    total_pages = min(first_page["pagination"]["total_pages"], max_pages)
     for page in range(2, total_pages + 1):
-        page_data = search_artworks(query, page=page, limit=limit)
-        all_data.extend(page_data["data"])
-
+        all_data.extend(search_artworks(query, page=page, limit=limit)["data"])
     return all_data
 
 
-# search_multiple_queries allows searching for multiple queries and returns
-# a deduplicated mapping of artwork IDs to an artwork payload and its
-# matched_queries metadata.
 def search_multiple_queries(queries, max_pages=None, limit=10, output_dir=None):
-    all_results = {}
+    """Run several searches, save one deduplicated JSON file and return {id: record}.
 
-    for query in queries:
-        results = search_all_artworks(query, max_pages=max_pages, limit=limit)
-        all_results[query] = results
-
-    artworks_by_id = {}
-
-    for query in queries:
-        for artwork in all_results[query]:
-            artwork_id = artwork.get("id")
-            if artwork_id not in artworks_by_id:
-                artworks_by_id[artwork_id] = {
-                    "artwork": artwork,
-                    "matched_queries": [],
-                }
-            if query not in artworks_by_id[artwork_id]["matched_queries"]:
-                artworks_by_id[artwork_id]["matched_queries"].append(query)
-
+    Each record holds the artwork payload and the queries that returned it.
+    """
+    all_results = {
+        query: search_all_artworks(query, max_pages=max_pages, limit=limit)
+        for query in queries
+    }
+    artworks_by_id = _group_by_artwork_id(all_results, queries)
     save_artworks_response(
         {
             "search_queries": list(queries),
@@ -363,6 +347,7 @@ def get_corpus(queries=None, max_pages=5, limit=10, output_dir="data/raw/aic"):
     return unique_artworks
 
 def keep_useful_fields(artwork):
+    """Reduce an AIC artwork to the fields used by the project."""
     return {
         "id": artwork.get("id"),
         "title": artwork.get("title"),
@@ -380,18 +365,17 @@ def keep_useful_fields(artwork):
 
 
 def export_useful_artworks(unique_artworks, output_path):
+    """Write the records reduced by `keep_useful_fields` to a corpus JSON file."""
     payload = {
         "search_queries": [],
-        "unique_artworks": []
+        "unique_artworks": [
+            {
+                "artwork": keep_useful_fields(record.get("artwork", record)),
+                "matched_queries": record.get("matched_queries", []),
+            }
+            for record in unique_artworks
+        ],
     }
-
-    for record in unique_artworks:
-        artwork = record.get("artwork", record)
-        reduced = {
-            "artwork": keep_useful_fields(artwork),
-            "matched_queries": record.get("matched_queries", []),
-        }
-        payload["unique_artworks"].append(reduced)
 
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)

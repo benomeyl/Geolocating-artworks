@@ -52,11 +52,13 @@ REVIEW_OUTCOMES = [
 
 
 def load_json(path):
+    """Load a JSON file."""
     with Path(path).open(encoding="utf-8") as input_file:
         return json.load(input_file)
 
 
 def sha256_file(path):
+    """SHA-256 of a file, stored in the sampling manifest."""
     digest = hashlib.sha256()
     with Path(path).open("rb") as input_file:
         for chunk in iter(lambda: input_file.read(1024 * 1024), b""):
@@ -65,6 +67,10 @@ def sha256_file(path):
 
 
 def _threshold_margin(candidate, model):
+    """Best (margin, level, score) of a candidate over the deployable levels.
+
+    Returns (best_margin_info or None, all_margins or None, crossed_a_non_deployable_level).
+    """
     location_level = candidate.get("candidate_level")
     if location_level not in GEOGRAPHIC_LEVELS:
         return None, None, False
@@ -90,6 +96,10 @@ def _threshold_margin(candidate, model):
 
 
 def classify_abstention(record, model):
+    """Assign an abstained prediction to a sampling stratum.
+
+    Returns (stratum, candidate_to_review, level, score).
+    """
     candidates = record.get("all_candidates") or []
     if not candidates:
         return "no_ner_candidate", None, None, None
@@ -134,6 +144,7 @@ def classify_abstention(record, model):
 
 
 def _record_context(records_by_id, record_id):
+    """Text fields of the source record shown to the annotator."""
     record = records_by_id.get(record_id, {})
     artwork = record.get("artwork", record)
     return {
@@ -149,6 +160,7 @@ def _record_context(records_by_id, record_id):
 
 
 def _candidate_summary(candidate):
+    """Flatten a scored candidate into CSV columns."""
     if not candidate:
         return {}
     geolocation = candidate.get("geolocation") or {}
@@ -176,6 +188,7 @@ def _candidate_summary(candidate):
 
 
 def _location_group_key(candidate):
+    """Key identifying the geocoded place of a candidate (OSM id, coordinates or name)."""
     if not candidate:
         return None
     geolocation = candidate.get("geolocation") or {}
@@ -199,6 +212,11 @@ def build_review_sample(
     seed=42,
     sample_sizes=None,
 ):
+    """Select every accepted prediction plus a seeded random sample of each abstention stratum.
+
+    Returns (csv_rows, metadata); the metadata records population and sample
+    size per stratum, to weight aggregate estimates.
+    """
     sample_sizes = {**DEFAULT_SAMPLE_SIZES, **(sample_sizes or {})}
     records_by_id = {
         (record.get("artwork", record)).get("id"): record
@@ -292,6 +310,7 @@ def build_review_sample(
 
 
 def write_review_files(rows, metadata, csv_path, metadata_path):
+    """Write the review CSV and its JSON sampling manifest."""
     csv_path = Path(csv_path)
     metadata_path = Path(metadata_path)
     csv_path.parent.mkdir(parents=True, exist_ok=True)
@@ -308,6 +327,7 @@ def write_review_files(rows, metadata, csv_path, metadata_path):
 
 
 def main():
+    """Parse the command line and write the review sample."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--predictions", type=Path, default=Path("results/predictions_echantillon.json"))
     parser.add_argument("--records", type=Path, default=Path("data/raw/aic/search_multiple_queries_all_artworks_20260917T125145Z.json"))

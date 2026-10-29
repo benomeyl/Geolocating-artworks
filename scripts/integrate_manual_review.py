@@ -63,6 +63,7 @@ ARTWORK_FIELDS = [
 
 
 def normalize_place_status(raw_value):
+    """Normalize a typed place status (aliases, case, spaces); None if empty, ValueError if unknown."""
     value = " ".join((raw_value or "").casefold().split())
     value = PLACE_STATUS_ALIASES.get(value, value)
     if not value:
@@ -73,6 +74,7 @@ def normalize_place_status(raw_value):
 
 
 def normalize_precision(raw_value):
+    """Normalize a typed precision ("neighbourhood" -> "neighborhood"); None if empty or "none"."""
     value = " ".join((raw_value or "").casefold().split())
     value = PRECISION_ALIASES.get(value, value)
     if value is not None and value not in PRECISIONS:
@@ -81,6 +83,7 @@ def normalize_precision(raw_value):
 
 
 def parse_coordinate(raw_value, minimum, maximum):
+    """Parse a latitude or longitude (comma or dot decimal); None if empty, ValueError if out of range."""
     value = (raw_value or "").strip().replace(",", ".")
     if not value:
         return None
@@ -105,11 +108,13 @@ def apply_suggestion(row):
 
 
 def _artwork_id(raw_id):
+    """Return a CSV artwork id as int for AIC ids, unchanged otherwise."""
     raw_id = (raw_id or "").strip()
     return int(raw_id) if raw_id.isdigit() else raw_id
 
 
 def _clean(value):
+    """Strip a cell; None if empty."""
     value = (value or "").strip()
     return value or None
 
@@ -164,7 +169,7 @@ def record_from_review_row(row, artwork, csv_name, import_date):
             "review_notes": _clean(row.get("review_notes")),
             "used_suggestion": (row.get("use_suggestion") or "").strip().casefold() in TRUE_VALUES,
         },
-        # Le CSV ne note pas la confiance de l'annotateur : on ne l'invente pas.
+        # The CSV does not record the annotator's confidence: do not invent one.
         "confidence": None,
         "status": "verified",
         "annotator": "manual_review",
@@ -178,6 +183,11 @@ def record_from_review_row(row, artwork, csv_name, import_date):
 
 
 def load_review_records(csv_path, records_paths, import_date=None):
+    """Build gold records from the annotated rows of a review CSV.
+
+    Artwork payloads are looked up in `records_paths`. Returns
+    (records, unannotated_review_ids, warnings).
+    """
     import_date = import_date or date.today().isoformat()
     if isinstance(records_paths, (str, Path)):
         records_paths = [records_paths]
@@ -197,6 +207,11 @@ def load_review_records(csv_path, records_paths, import_date=None):
     with Path(csv_path).open(encoding="utf-8-sig", newline="") as csv_file:
         for row_number, row in enumerate(csv.DictReader(csv_file), start=2):
             artwork_id = _artwork_id(row.get("artwork_id"))
+            if artwork_id == "":
+                # A row whose identification columns were cleared cannot be linked to an artwork.
+                if any((row.get(field) or "").strip() for field in ("actual_place_status", "use_suggestion")):
+                    warnings.append(f"row {row_number}: annotated but without artwork_id, skipped")
+                continue
             artwork = artworks_by_id.get(artwork_id) or {"id": artwork_id, "title": row.get("title")}
             try:
                 result = record_from_review_row(row, artwork, Path(csv_path).name, import_date)
@@ -241,6 +256,7 @@ def merge_records(payload, imported):
 
 
 def main():
+    """Preview the import, and write gold_dataset.json with --write."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--gold-json", type=Path, default=GOLD_JSON)
     parser.add_argument("--review-csv", type=Path, default=REVIEW_CSV)

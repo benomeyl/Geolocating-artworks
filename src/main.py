@@ -1,3 +1,11 @@
+"""
+Early entry point of the project: keyword filter, NER exploration and the
+legacy name-based model.
+
+The current pipeline is driven by run_pipeline.py (hierarchical model). The
+`test_*` functions are manual exploration helpers, not pytest tests.
+"""
+
 if __package__ in (None, ""):
     import api.aic as aic
     import utils
@@ -6,10 +14,6 @@ if __package__ in (None, ""):
         import data.ner as ner
     except ModuleNotFoundError:
         ner = None
-    try:
-        import geolocation.gazetter as gaz
-    except ModuleNotFoundError:
-        gaz = None
 else:
     from src.api import aic
     from src import utils
@@ -18,24 +22,31 @@ else:
         from src.data import ner
     except ModuleNotFoundError:
         ner = None
-    try:
-        from src.geolocation import gazetter as gaz
-    except ModuleNotFoundError:
-        gaz = None
 
-import json
 import argparse
+import json
 from pathlib import Path
-import requests
-import pandas as pd
 
-try:
-    from src.api import aic as api
-except ImportError:  # pragma: no cover - fallback for script execution
-    import api.aic as api
+import pandas as pd
+import requests
+
+
+def _require_ner():
+    """Raise a clear error when the NER dependencies are not installed."""
+    if ner is None:
+        raise ModuleNotFoundError(
+            "The NER module is unavailable. Install the project dependencies to use it."
+        )
+
+
+def _load_keywords(path="config/keywords.json"):
+    """Load the keyword structure used by the keyword filter."""
+    with Path(path).open("r", encoding="utf-8") as f:
+        return json.load(f)
 
 
 def test_request():
+    """Fetch the first 10 artworks of the AIC API (connectivity check)."""
     BASE_URL = "https://api.artic.edu/api/v1"
     url = f"{BASE_URL}/artworks"
     params = {"limit": 10}
@@ -46,11 +57,8 @@ def test_request():
 
 
 def test_filtering(combined_texts):
-    keywords_path = Path("config/keywords.json")
-    with keywords_path.open("r", encoding="utf-8") as f:
-        keywords = json.load(f)
-
-    filtered_artworks = filt.filter_by_keywords(combined_texts, keywords)
+    """Run the keyword filter on {id: text} and print what it keeps."""
+    filtered_artworks = filt.filter_by_keywords(combined_texts, _load_keywords())
 
     for artwork in filtered_artworks["filtered_artworks"]:
         print(f"Filtered Artwork ID: {artwork['id']}, Matched Keywords: {artwork['matched_keywords']}")
@@ -66,11 +74,8 @@ def test_filtering(combined_texts):
     return filtered_artworks
 
 def test_ner():
-    
-    if ner is None:
-        raise ModuleNotFoundError(
-            "The NER module is unavailable. Install the project dependencies to use it."
-        )
+    """Keyword-filter the raw AIC corpus, run the NER and print LOC entities (score >= 0.85)."""
+    _require_ner()
 
     # 1) Load the corpus
     corpus = utils.read_all_json_files_and_combine_text_fields("data/raw/aic")
@@ -88,13 +93,8 @@ def test_ner():
             f"Received type: {type(corpus).__name__}"
         )
 
-    # 3) Load the keywords
-    keywords_path = Path("config/keywords.json")
-    with keywords_path.open("r", encoding="utf-8") as f:
-        keywords = json.load(f)
-
-    # 4) Filter the artworks
-    filtered_artworks = filt.filter_by_keywords(texts_by_id, keywords)
+    # 2) Filter the artworks with the keywords
+    filtered_artworks = filt.filter_by_keywords(texts_by_id, _load_keywords())
 
     filtered_ids = [artwork["id"] for artwork in filtered_artworks["filtered_artworks"]]
     filtered_texts = {
@@ -107,7 +107,7 @@ def test_ner():
         print("No artworks were selected by the keyword filters. Stopping before NER.")
         return
 
-    # 5) Apply NER to the filtered combined texts
+    # 3) Apply NER to the filtered combined texts
     ner_model = ner.load_ner_model()
     results = ner.extract_named_entities(filtered_texts, ner_model)
 
@@ -118,22 +118,21 @@ def test_ner():
             if entity["entity_group"] == "LOC" and entity["score"] >= 0.85
         ]
 
-    # 6) Display the detected entities (including locations)
+    # 4) Display the detected entities
     ner.display_named_entities(results)
 
+
 def test_heuristic():
-    if ner is None:
-            raise ModuleNotFoundError(
-                "The NER module is unavailable. Install the project dependencies to use it."
-            )
-    
+    """Train and evaluate the legacy model on the gold standard."""
+    _require_ner()
     train_heuristic()
 
 def train_heuristic(ner_model=None):
-    if ner is None:
-        raise ModuleNotFoundError(
-            "The NER module is unavailable. Install the project dependencies to use it."
-        )
+    """Train the legacy name-based model on the gold standard and print its CV metrics.
+
+    Returns (model, ner_model) so that the NER can be reused for prediction.
+    """
+    _require_ner()
 
     # 1) Load the gold-standard records once
     with Path("data/raw/gold_standard/gold_dataset.json").open(
@@ -167,6 +166,11 @@ def train_heuristic(ner_model=None):
 
 
 def predict_artworks_file(input_path, output_path, model, ner_model, review_margin=0.1):
+    """Apply the legacy model to a JSON file of artworks and write the predictions.
+
+    Places within `review_margin` below the threshold are reported as
+    `flagged_places` for manual review.
+    """
     input_path = Path(input_path)
     output_path = Path(output_path)
     with input_path.open("r", encoding="utf-8") as input_file:
@@ -223,10 +227,8 @@ def predict_artworks_file(input_path, output_path, model, ner_model, review_marg
     return predictions
 
 def main(predict_input=None, prediction_output="data/processed/heuristic_predictions.json"):
-    if ner is None:
-        raise ModuleNotFoundError(
-            "The NER module is unavailable. Install the project dependencies to use it."
-        )
+    """Train the legacy model, then optionally predict `predict_input`."""
+    _require_ner()
 
     optimization, ner_model = train_heuristic()
     if predict_input is not None:
@@ -241,41 +243,8 @@ def main(predict_input=None, prediction_output="data/processed/heuristic_predict
 
 
 def get_corpus(queries=None, max_pages=5, limit=10, output_dir="data/raw/aic"):
-    """
-    Get the corpus of artworks based on the provided queries.
-    If queries is None, it retrieves artworks in default order.
-    If queries is provided, it retrieves artworks for the specified queries.
-    """
-    if queries is None:
-        artworks = aic.search_all_artworks(max_pages=max_pages, limit=limit)
-        unique_artworks = {
-            artwork["id"]: {
-                "artwork": artwork,
-                "matched_queries": [],
-            }
-            for artwork in artworks
-        }
-        search_queries = None
-    else:
-        search_queries = list(queries)
-        unique_artworks = aic.search_multiple_queries(
-            search_queries,
-            max_pages=max_pages,
-            limit=limit,
-            output_dir=output_dir,
-        )
-
-    if queries is None:
-        aic.save_artworks_response(
-            {
-                "search_queries": None,
-                "unique_artworks": list(unique_artworks.values()),
-            },
-            search_queries=None,
-            output_dir=output_dir,
-        )
-
-    return unique_artworks
+    """Fetch and save an AIC corpus (see aic.get_corpus, which this delegates to)."""
+    return aic.get_corpus(queries=queries, max_pages=max_pages, limit=limit, output_dir=output_dir)
 
 
 if __name__ == "__main__":

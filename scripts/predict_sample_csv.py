@@ -20,11 +20,13 @@ from run_pipeline import load_ner_pipeline  # noqa: E402
 
 
 def load_records(path):
+    """Load the records of a JSON list or of a {"unique_artworks": [...]} envelope."""
     payload = json.loads(Path(path).read_text(encoding="utf-8"))
     return payload.get("unique_artworks", []) if isinstance(payload, dict) else payload
 
 
 def sample_records(records, size, seed, excluded_ids=()):
+    """Draw a reproducible random sample of `size` records, excluding `excluded_ids`."""
     excluded = {str(artwork_id) for artwork_id in excluded_ids}
     eligible = [
         record for record in records
@@ -46,6 +48,7 @@ def _best_abstention(candidates, model):
 
 
 def prediction_row(record, result, model):
+    """Flatten the prediction of one artwork into a CSV row, with links and review columns."""
     artwork = record.get("artwork", record)
     candidates = result.get("candidates", [])
     prediction = result.get("prediction")
@@ -61,7 +64,7 @@ def prediction_row(record, result, model):
         "image_url": f"https://www.artic.edu/iiif/2/{image_id}/full/843,/0/default.jpg" if image_id else "",
         "title": artwork.get("title"),
         "place_of_origin": artwork.get("place_of_origin"),
-        "artist_display": artwork.get("artist_display"),
+        "artist_display": " | ".join((artwork.get("artist_display") or "").splitlines()),
         "has_description": bool(artwork.get("description")),
         "prediction_status": "depicted" if prediction else ("uncertain" if candidates else "no_candidate"),
         "predicted_level": decision.get("level"),
@@ -79,7 +82,7 @@ def prediction_row(record, result, model):
         "near_miss_level": near_miss[2] if near_miss else None,
         "near_miss_margin": round(near_miss[0], 3) if near_miss else None,
         "candidate_count": len(candidates),
-        "candidates": "; ".join(
+        "candidates": " | ".join(
             f"{candidate['place']} [{candidate.get('candidate_level') or '?'}]"
             for candidate in candidates
         ),
@@ -90,6 +93,7 @@ def prediction_row(record, result, model):
 
 
 def main():
+    """Sample artworks, run NER, geocoding and the model, and write the CSV."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--records", type=Path, default=Path("data/raw/aic/aic_useful_fields.json"))
     parser.add_argument("--model", type=Path, default=Path("results/model_hierarchical.joblib"))

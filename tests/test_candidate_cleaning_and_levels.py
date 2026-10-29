@@ -1,7 +1,11 @@
+import pandas as pd
+
 from src.data.filtering_logreg import (
+    _SPECIFICITY,
     _candidate_geographic_level,
     _clean_entity_spans,
     build_geographic_label_table,
+    evaluate_hierarchical_work_predictions,
     extract_candidate_artwork,
     geographic_candidate_label,
 )
@@ -248,3 +252,30 @@ def test_non_pictorial_objects_are_flagged_from_artwork_type():
     assert artwork_context_features({"artwork_type_title": "Vessel"}, "Attica")["object_non_pictorial"] == 1
     assert artwork_context_features({"artwork_type_title": "Painting"}, "Paris")["object_non_pictorial"] == 0
     assert artwork_context_features({}, "Paris")["object_non_pictorial"] == 0
+
+
+def test_candidates_of_artworks_without_depicted_place_keep_their_level():
+    record = {"artwork": {"id": 1}, "annotations": {"place_status": "none"}}
+    location = {"name": "Kentucky", "source": "GeoNames", "feature_code": "ADM1"}
+
+    label = geographic_candidate_label(record, location)
+
+    assert label["status"] == "negative"
+    assert label["candidate_level"] == "region"
+
+
+def test_false_positives_on_artworks_without_place_are_counted_and_undeterminable_skipped():
+    table = pd.DataFrame([
+        {"artwork_id": 1, "candidate_level": "region", "label_status": "negative", "label_level": "none"},
+        {"artwork_id": 2, "candidate_level": "city", "label_status": "unevaluable", "label_level": "unevaluable"},
+    ])
+    levels = {level: {"status": "abstain", "threshold": None} for level in _SPECIFICITY}
+    levels["country"] = {"status": "active", "threshold": 0.5}
+    scores = {0: {"country": 0.9}, 1: {"country": 0.9}}
+
+    metrics = evaluate_hierarchical_work_predictions(
+        table, scores, levels, _SPECIFICITY, records={1: "none", 2: "undeterminable"}
+    )
+
+    assert metrics["false_positives"] == 1
+    assert metrics["artwork_count"] == 1

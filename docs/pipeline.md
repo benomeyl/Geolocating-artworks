@@ -99,15 +99,35 @@ candidat. Ses features :
   `in_artist_display`, `in_provenance_or_exhibition`.
 - **Géographiques** : niveau du lieu géocodé (`geo_level_*`), source
   (GeoNames/Nominatim), hiérarchie disponible, importance et rang
-  Nominatim.
+  Nominatim, ressemblance entre le candidat et le nom trouvé
+  (`geo_name_similarity`) et conflit avec le contexte
+  (`geo_context_conflict`).
 
-### 4.4 Géocodage (`resolve_location`)
+### 4.4 Géocodage (`gazetter.py`)
 
-1. GeoNames local, par nom exact, trié par population. Une ville (`PPL*`)
-   proche d'une unité administrative homonyme passe devant (Paris `PPLC`
-   avant Paris `ADM3`).
-2. Sinon Nominatim (une requête par seconde maximum, résultats en cache).
-3. Hiérarchie ville/région/pays : par géocodage inverse Nominatim.
+**Alternatives d'un nom** (`location_alternatives`) :
+
+1. GeoNames local, par nom exact, plus les pays par leurs noms alternatifs
+   (GeoNames nomme « Kingdom of Spain » ce que les titres appellent
+   « Spain »). Une ville (`PPL*`) proche d'une unité administrative homonyme
+   passe devant (Paris `PPLC` avant Paris `ADM3`).
+2. Seuls les pays, unités administratives et lieux habités d'au moins
+   1 000 habitants sont acceptés directement. Sinon (hôtel « Louvre » en
+   Grèce, hameau « Puerta del Sol » au Mexique), on interroge Nominatim ; ses
+   résultats confirmés par une entrée GeoNames homonyme à moins de 5 km
+   passent en tête (Point Lobos en Californie plutôt qu'une rue du Texas).
+3. Les entrées GeoNames non fiables ne servent que si Nominatim ne trouve rien.
+
+**Désambiguïsation par le contexte** (`resolve_artwork_places`) : les
+lieux d'une œuvre sont géocodés ensemble. Un lieu cité à moins de 80
+caractères d'un « point d'ancrage » du même champ (pays, région ou lieu
+habité dont le nom correspond bien) choisit l'alternative du même pays ou à
+moins de 150 km (Logan County dans l'Illinois à côté de Cornland). Sans
+alternative compatible, on cherche « lieu, contexte » dans Nominatim ; en
+cas d'échec, le premier résultat est gardé et marqué `context_conflict`. Un
+nom de pays n'est jamais remis en cause par un lieu plus petit.
+
+**Hiérarchie** ville/région/pays : par géocodage inverse Nominatim.
 
 Seuls les 3 candidats au meilleur score NER de chaque œuvre sont géocodés à
 la prédiction (`--geocode-top-k`).
@@ -224,8 +244,9 @@ Mêmes 253 œuvres annotées ; « externe » = validation externe groupée
 - **67 % des œuvres AIC tirées au hasard n'ont aucun candidat** : surtout
   des titres sans lieu (« Untitled », « Vase ») ; 7 % seulement ont une
   description.
-- **Désambiguïsation** : le premier résultat du géocodeur est pris sans
-  regarder les autres lieux de l'œuvre (Rio géocodé en Turquie).
+- **Géocodage** : un lieu cité seul reste ambigu (« Conway Castle » →
+  Floride ; aucune source ne connaît cette orthographe de Conwy) ; un lieu
+  sans ancrage fiable à côté n'est pas désambiguïsé.
 - **Descriptions longues** tronquées à 512 tokens par le NER.
 - Pistes : liaison Wikidata, désambiguïsation par le contexte, LLM local
   comme feature, second NER (GLiNER multilingue).

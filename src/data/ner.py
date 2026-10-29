@@ -1,7 +1,8 @@
 """
-Use a NER model to extract named entities from the text. This is used after
-filtering artworks by keywords. The named entities can be used to geolocate
-the artworks.
+NER helpers of the early exploration pipeline (used by src/main.py).
+
+The current pipeline loads its NER in run_pipeline.load_ner_pipeline and
+extracts candidates with filtering_logreg.extract_candidate_artwork.
 """
 from transformers import AutoTokenizer, AutoModelForTokenClassification, pipeline
 
@@ -23,14 +24,14 @@ def load_ner_model(model_name="Babelscape/wikineural-multilingual-ner"):
 
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForTokenClassification.from_pretrained(model_name)
-    ner_pipeline = pipeline("ner", 
-                            model=model, 
-                            tokenizer=tokenizer, 
-                            aggregation_strategy="first",  # avoids split sub-word fragments ("##kirche")
-                            device=0  # Use GPU if available, otherwise use CPU
+    return pipeline(
+        "ner",
+        model=model,
+        tokenizer=tokenizer,
+        aggregation_strategy="first",  # Avoids split sub-word fragments ("##kirche").
+        device=0,  # First GPU.
     )
-                            
-    return ner_pipeline
+
 
 def extract_named_entities(filtered_texts, ner_pipeline):
     """
@@ -43,35 +44,31 @@ def extract_named_entities(filtered_texts, ner_pipeline):
     Returns:
     dict: A dictionary mapping artwork IDs to their extracted named entities.
     """
-    texts = list(filtered_texts.values())
-
-    results = ner_pipeline(texts)
+    results = ner_pipeline(list(filtered_texts.values()))
     return dict(zip(filtered_texts.keys(), results))
+
 
 def extract_entities_from_artworks(artworks, ner_pipeline):
     """
     Extract named entities from the combined text of artworks.
 
     Parameters:
-    artworks (dict): A dictionary mapping artwork IDs to their combined text.
+    artworks (dict): A corpus payload with a "unique_artworks" list.
     ner_pipeline (pipeline): A Hugging Face pipeline for named entity recognition.
 
     Returns:
-    dict: A dictionary mapping artwork IDs to their extracted named entities.
+    The pipeline output for the combined texts (see utils.combine_all_artworks_text_fields).
     """
     texts = utils.combine_all_artworks_text_fields(artworks)
-    
-    results = {}
-    results = ner_pipeline(texts)
-
-    return results
+    return ner_pipeline(texts)
 
 
 def display_named_entities(entities):
     """
-    Display the named entities with id and identified entity.
+    Print the named entities of each artwork.
 
-    param entities (dict): A dictionary mapping artwork IDs to their extracted named entities.
+    Parameters:
+    entities (dict): A dictionary mapping artwork IDs to their extracted named entities.
     """
 
     for artwork_id, entity_list in entities.items():

@@ -1,38 +1,33 @@
 """
-Data filtering, candidate extraction and place-identification scoring.
+Candidate extraction, features, labels, training and prediction of depicted places.
 
-Ce module remplace le score heuristique à poids fixés à la main (ancien
-`score_candidate` + `FIELDS_WEIGHTS`/bonus/malus + recherche en grille
-`optimize_heuristic_parameters`) par une régression logistique apprise sur
-le jeu annoté. Tout reste strictement textuel (champ d'origine, marqueurs
-lexicaux, score du NER) — aucune donnée visuelle n'entre dans les features.
+Pipeline (see docs/pipeline.md for the full picture):
 
-Changement de grain important par rapport à la version précédente :
-l'ancienne évaluation (`evaluate_binary_predictions`) ne vérifiait que si
-UNE PLACE QUELCONQUE dépassait le seuil pour une œuvre annotée "depicted" —
-jamais si c'était la BONNE. Deux œuvres pouvaient donc être comptées comme
-des succès alors que le lieu retenu était en réalité le lieu de création,
-pas le sujet représenté. En passant à une supervision PAR CANDIDAT (un
-label par lieu détecté, pas par œuvre), le modèle apprend aussi à préférer
-le bon candidat face à des distracteurs de la même œuvre (ex: "Rome"
-mentionné en contexte de création à côté du vrai sujet "Paris") — chose
-que l'ancien score, qui évaluait chaque candidat indépendamment contre un
-seuil global, ne pouvait pas faire. `evaluate_place_identity` (en bas de
-ce fichier) rend cette distinction mesurable.
+1. `extract_candidate_artwork` runs the NER on the text fields of an artwork
+   and keeps cleaned LOC mentions ("candidates").
+2. Occurrences of the same name are grouped; `candidate_features`,
+   `artwork_context_features` and `_add_geographic_features` describe each
+   group with textual, contextual and geocoding features.
+3. `build_geographic_label_table` geocodes the candidates of annotated
+   artworks and labels each one at the most specific matching level
+   (`geographic_candidate_label`).
+4. `train_hierarchical_model` fits one logistic regression per geographic
+   level (exact_place ... country) and picks a threshold that reaches the
+   level's target precision; `evaluate_hierarchical_grouped_cv` re-runs the
+   whole procedure on outer folds to decide which levels can be deployed.
+5. `predict_with_hierarchical_model` returns, for each artwork, the most
+   specific deployable level whose threshold is crossed, or abstains.
 
-Usage typique :
+Everything is text-only: no visual data enters the features.
 
-    candidates_by_artwork = extract_all_candidates(records, ner)
-    table = build_training_table(records, candidates_by_artwork)
-    model = train_logistic_model(table)
-
-    results = predict_with_model(records, candidates_by_artwork, model)
-    detection_metrics = evaluate_binary_predictions(records, results, threshold=model["threshold"])
-    identity_metrics = evaluate_place_identity(records, results)
+The module also keeps the older name-based model (`build_training_table`,
+`train_logistic_model`, `predict_with_model` and the evaluation helpers that
+go with it), still used by `src/main.py` and `run_pipeline.py train-legacy`.
 """
 
 import difflib
 import re
+import unicodedata
 from collections import Counter, defaultdict
 
 import numpy as np
@@ -40,19 +35,23 @@ import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import precision_recall_curve
 from sklearn.model_selection import GroupKFold, StratifiedGroupKFold
-import unicodedata
 
 try:
-    from src.geolocation.gazetter import haversine_distance_km, resolve_location
+    from src.geolocation.gazetter import haversine_distance_km, resolve_artwork_places, resolve_location
 except ModuleNotFoundError:
-    from geolocation.gazetter import haversine_distance_km, resolve_location
+    from geolocation.gazetter import haversine_distance_km, resolve_artwork_places, resolve_location
+
+
+# ---------------------------------------------------------------------------
+# Constants
+# ---------------------------------------------------------------------------
 
 _GENERIC_WORDS = {
-    # articles / prépositions
+    # Articles and prepositions.
     "the", "of", "de", "du", "des", "la", "le", "les", "l", "d", "di", "del",
     "der", "die", "das", "van", "von", "al", "el",
-    # types de lieux courants (en, fr, de, it, es, nl)
-    "cathedral", "cathedrale", "cathedrale", "church", "eglise", "chapel",
+    # Common place types (en, fr, de, it, es, nl).
+    "cathedral", "cathedrale", "church", "eglise", "chapel",
     "chapelle", "abbey", "abbaye", "castle", "chateau", "palace", "palais",
     "bridge", "pont", "gate", "porte", "tower", "tour", "square", "place",
     "street", "rue", "avenue", "boulevard", "station", "gare", "market",
@@ -61,10 +60,13 @@ _GENERIC_WORDS = {
     "iglesia", "catedral", "kerk", "poort", "brug", "toren",
 }
 
+# Phrases near a mention that suggest it is (or is not) the depicted place.
 POSITIVES_LABELS = [
-    "view of", "depicting", "depicts", "shows", "showing", "landscape of", "painting of", "painting depicting", "painting showing", "vue sur",
-    "vue de", "vue du", "représente", "représentant", "paysage de", "scène à", "peinture de", "peinture représentant", "peinture montrant",
-    "photo de", "photographie de", "photographie représentant", "photographie montrant",
+    "view of", "depicting", "depicts", "shows", "showing", "landscape of", "painting of",
+    "painting depicting", "painting showing", "vue sur", "vue de", "vue du", "représente",
+    "représentant", "paysage de", "scène à", "peinture de", "peinture représentant",
+    "peinture montrant", "photo de", "photographie de", "photographie représentant",
+    "photographie montrant",
 ]
 NEGATIVES_LABELS = [
     "born in", "died in", "studied in", "trained in", "exhibited in", "acquired",
@@ -72,22 +74,18 @@ NEGATIVES_LABELS = [
     "moved to", "returned to", "during his stay", "painted in", "peint à",
 ]
 
-# Ordre fixe des champs texte considérés. Remplace FIELDS_WEIGHTS : au lieu
-# d'un poids choisi à la main par champ, chaque champ devient une colonne
-# binaire ("field_title", "field_themes", ...) dont le modèle apprend le
-# coefficient lui-même.
+# Text fields read by the NER, in a fixed order. Each one becomes a binary
+# feature ("field_title", ...) whose weight is learned by the model.
 FIELD_NAMES = [
     "title", "alt_titles", "themes", "subjects", "description", "short_description", "styles",
 ]
 
-# Seuil plancher appliqué à l'extraction NER (voir extract_candidate_artwork).
-# Volontairement bas : le score NER devient une FEATURE continue
-# (score_ner_max) que le modèle pondère lui-même, plutôt qu'une coupure
-# dure choisie à la main (l'ancien paramètre `ner_threshold` de la grille).
+# Minimum NER score for a candidate. Deliberately low: it only removes noise,
+# the score itself is a feature (score_ner_max) weighted by the model.
 DEFAULT_NER_FLOOR = 0.2
 
-# Colonnes de features utilisées par le modèle, dans un ordre fixe
-# (nécessaire pour que l'entraînement et la prédiction s'accordent).
+# Features of the legacy name-based model. The order is fixed so that
+# training and prediction agree.
 FEATURE_COLUMNS = [f"field_{field}" for field in FIELD_NAMES] + [
     "n_fields",
     "has_positive_marker",
@@ -95,6 +93,7 @@ FEATURE_COLUMNS = [f"field_{field}" for field in FIELD_NAMES] + [
     "score_ner_max",
 ]
 
+# Geographic levels, from the most to the least specific.
 GEOGRAPHIC_LEVELS = [
     "exact_place",
     "neighborhood",
@@ -102,6 +101,8 @@ GEOGRAPHIC_LEVELS = [
     "region",
     "country",
 ]
+_SPECIFICITY = {level: index for index, level in enumerate(GEOGRAPHIC_LEVELS)}
+_GEOGRAPHIC_LABEL_LEVELS = set(GEOGRAPHIC_LEVELS)
 GEOGRAPHIC_TARGET_PRECISION = {
     "exact_place": 0.95,
     "neighborhood": 0.93,
@@ -126,274 +127,14 @@ GEOGRAPHIC_FEATURE_COLUMNS = FEATURE_COLUMNS + [
     "in_place_of_origin",
     "in_artist_display",
     "in_provenance_or_exhibition",
+] + [
+    "geo_name_similarity",
+    "geo_context_conflict",
 ]
 
-
-def _flatten_keywords(keywords):
-    if isinstance(keywords, dict):
-        flattened = []
-        for value in keywords.values():
-            flattened.extend(_flatten_keywords(value))
-        return flattened
-    if isinstance(keywords, (list, tuple, set)):
-        return [str(keyword) for keyword in keywords]
-    return [str(keywords)]
-
-
-def _keyword_pattern(keyword):
-    escaped_keyword = re.escape(keyword.strip())
-    return re.compile(r"(?<!\w)" + escaped_keyword + r"(?!\w)", re.IGNORECASE)
-
-
-def filter_by_keywords(combined_texts, keywords):
-    """
-    Filters artworks based on the presence of keywords in the combined text of the artwork.
-
-    Parameters:
-    combined_texts (dict): A dictionary mapping artwork IDs to their combined text.
-    keywords (dict or list): The nested keyword structure from keywords.json,
-        or a flat list of keywords.
-
-    Returns:
-    dict: A dictionary containing the filtered artworks and their matching
-        keywords, for example:
-        {"filtered_artworks": [{"id": 1, "matched_keywords": ["street"]}]}
-    """
-    keyword_patterns = [
-        (keyword, _keyword_pattern(keyword))
-        for keyword in _flatten_keywords(keywords)
-        if keyword.strip()
-    ]
-    artworks_df = pd.DataFrame(
-        combined_texts.items(),
-        columns=["id", "combined_text"],
-    )
-
-    artworks_df["matched_keywords"] = artworks_df["combined_text"].fillna("").apply(
-        lambda text: [
-            keyword
-            for keyword, pattern in keyword_patterns
-            if pattern.search(text)
-        ]
-    )
-
-    filtered_artworks = artworks_df.loc[
-        artworks_df["matched_keywords"].str.len() > 0,
-        ["id", "matched_keywords"],
-    ].to_dict(orient="records")
-
-    return {"filtered_artworks": filtered_artworks}
-
-
-# Mots qui ne sont jamais un lieu à eux seuls (artefacts NER : "of", "La").
-_ENTITY_STOPWORDS = _GENERIC_WORDS | {"a", "an", "and", "with", "et", "y", "e", "und"}
-# Connecteurs qui, en tête d'entité, signalent un début tronqué
-# ("of Control" pour "Line of Control").
-_LEADING_CONNECTORS = {
-    "of", "the", "de", "du", "des", "del", "della", "di", "da", "von", "van", "der",
-}
-# Séparateurs autorisés entre deux morceaux d'une même entité ("N" "." "Y").
-# Pas d'espace : deux entités séparées par un espace ou ". " sont distinctes
-# (« Dresden. Albert Square »).
-_ENTITY_JOINERS = set(".-–'’")
-_STRIPPED_PUNCTUATION = " \t\n,;:!?()[]{}\"«»“”‘’'"
-
-
-def _is_word_char(character):
-    return character.isalnum() or unicodedata.category(character) == "Mn"
-
-
-def _in_word(text, index):
-    """True if text[index] belongs to a word; an apostrophe between letters does (« Akbar's »)."""
-    if not 0 <= index < len(text):
-        return False
-    if _is_word_char(text[index]):
-        return True
-    return (
-        text[index] in "'’"
-        and 0 < index < len(text) - 1
-        and _is_word_char(text[index - 1])
-        and _is_word_char(text[index + 1])
-    )
-
-
-def _clean_entity_spans(text, entities):
-    """
-    Corrige les spans LOC bruts du NER à partir du texte source.
-
-    Les noms sont relus dans `text` via les offsets (et non depuis le
-    `word` décodé par le tokenizer, qui insère des espaces : « Saint - Lazare »).
-    Les spans coupés au milieu d'un mot sont étendus au mot entier, les
-    morceaux adjacents d'une même entité fusionnés, et les spans qui ne
-    peuvent pas être un nom de lieu (une lettre, un mot-outil) écartés.
-    """
-    spans = []
-    for entity in sorted(entities, key=lambda item: item["start"]):
-        start, end = entity["start"], entity["end"]
-        while start > 0 and _in_word(text, start - 1) and _in_word(text, start):
-            start -= 1
-        while end < len(text) and _in_word(text, end - 1) and _in_word(text, end):
-            end += 1
-        score = float(entity["score"])
-        if spans:
-            previous = spans[-1]
-            gap = text[previous["end"]:start]
-            if start <= previous["end"] or (len(gap) == 1 and gap in _ENTITY_JOINERS):
-                previous["end"] = max(previous["end"], end)
-                previous["score"] = max(previous["score"], score)
-                continue
-        spans.append({"start": start, "end": end, "score": score})
-
-    cleaned = []
-    for span in spans:
-        start, end = span["start"], span["end"]
-        while start < end and text[start] in _STRIPPED_PUNCTUATION:
-            start += 1
-        while end > start and text[end - 1] in _STRIPPED_PUNCTUATION:
-            end -= 1
-        # Un point final n'est gardé que dans une abréviation (« N.Y. »).
-        if end > start and text[end - 1] == "." and "." not in text[start:end - 1]:
-            end -= 1
-
-        elision = re.match(r"d['’]", text[start:end])
-        if elision:
-            start += elision.end()
-
-        first_word = re.match(r"\w+", text[start:end])
-        if (
-            first_word
-            and first_word.group(0) in _LEADING_CONNECTORS
-            and first_word.end() < end - start
-        ):
-            previous_word = re.search(r"(\w+)\s+$", text[:start])
-            if previous_word and previous_word.group(1)[:1].isupper():
-                start = previous_word.start(1)
-            else:
-                start += first_word.end()
-                while start < end and text[start].isspace():
-                    start += 1
-
-        surface = text[start:end]
-        letter_count = sum(character.isalpha() for character in surface)
-        if letter_count < 2 or _normalize_place_name(surface) in _ENTITY_STOPWORDS:
-            continue
-        cleaned.append({**span, "start": start, "end": end, "surface": surface})
-    return cleaned
-
-
-def extract_candidate_artwork(artwork, ner, threshold=DEFAULT_NER_FLOOR):
-    """
-    Extract detected LOC candidates, including their source field and position
-    within that field (required for context scoring).
-
-    `threshold` reste volontairement bas par défaut (DEFAULT_NER_FLOOR) :
-    c'est un filtre anti-bruit, pas le seuil d'acceptation final. Le score
-    NER complet est conservé comme feature (score_ner_max) pour le modèle.
-    Il est appliqué après nettoyage des spans (_clean_entity_spans), sur le
-    score maximal des morceaux fusionnés.
-    """
-    fields = {
-        "title": artwork.get("title") or "",
-        "alt_titles": " / ".join(artwork.get("alt_titles") or []),
-        "description": artwork.get("description") or "",
-        "short_description": artwork.get("short_description") or "",
-        "themes": " ".join(artwork.get("theme_titles") or []),
-        "subjects": " ".join(artwork.get("subject_titles") or []),
-        "styles": " ".join(artwork.get("style_titles") or []),
-    }
-
-    candidates = []
-    for field, text in fields.items():
-        if not text.strip():
-            continue
-        locations = [result for result in ner(text) if result["entity_group"] == "LOC"]
-        for span in _clean_entity_spans(text, locations):
-            if span["score"] >= threshold:
-                candidates.append({
-                    "place": span["surface"],
-                    "score_ner": round(span["score"], 3),
-                    "field": field,
-                    "start": span["start"],
-                    "end": span["end"],
-                    "source_text": text,
-                })
-    return candidates
-
-
-def extract_all_candidates(records, ner, threshold=DEFAULT_NER_FLOOR):
-    """
-    Lance extract_candidate_artwork sur tous les enregistrements et met les
-    résultats en cache par artwork_id, pour ne lancer le NER qu'une seule
-    fois (les candidats bruts sont ensuite réutilisés par la construction
-    de la table d'entraînement ET par la prédiction).
-    """
-    candidates_by_artwork = {}
-    for record in records:
-        artwork = record.get("artwork", record)
-        artwork_id = artwork.get("id")
-        candidates_by_artwork[artwork_id] = extract_candidate_artwork(
-            artwork, ner, threshold=threshold
-        )
-    return candidates_by_artwork
-
-
-def local_context(text, start, end, window=60):
-    """
-    Get the local context around a slice of text.
-    """
-    return text[max(0, start - window):end + window].lower()
-
-
-def group_candidates_by_place(candidates):
-    """
-    Regroupe les candidats détectés par lieu (insensible à la casse).
-    Remplace la partie "groupby" de l'ancien merge_candidate_places — la
-    partie "scoring" en est désormais séparée (voir candidate_features).
-    """
-    groups = defaultdict(list)
-    for candidate in candidates:
-        place_key = candidate["place"].lower().strip()
-        groups[place_key].append(candidate)
-    return groups
-
-
-def candidate_features(occurrences):
-    """
-    Features BRUTES pour un lieu fusionné (un groupe d'occurrences du même
-    lieu dans une œuvre). Remplace l'ancien score_candidate : au lieu de
-    combiner ces signaux en un score avec des poids fixés à la main, on les
-    expose comme colonnes et c'est la régression logistique qui apprend
-    leurs poids.
-    """
-    found_fields = {c["field"] for c in occurrences}
-    has_positive = any(
-        any(
-            marker in local_context(c["source_text"], c["start"], c["end"])
-            for marker in POSITIVES_LABELS
-        )
-        for c in occurrences
-    )
-    has_negative = any(
-        any(
-            marker in local_context(c["source_text"], c["start"], c["end"])
-            for marker in NEGATIVES_LABELS
-        )
-        for c in occurrences
-    )
-
-    features = {f"field_{field}": int(field in found_fields) for field in FIELD_NAMES}
-    features["n_fields"] = len(found_fields)
-    features["has_positive_marker"] = int(has_positive)
-    features["has_negative_marker"] = int(has_negative)
-    features["score_ner_max"] = max(c["score_ner"] for c in occurrences)
-    return features
-
-
-
-# Types d'objets AIC (artwork_type_title) qui ne représentent pas de scène :
-# le lieu cité dans leur titre est une origine (« Kantharos, Attica »).
-# Les types figuratifs (Print, Photograph, Painting...) et les types
-# inconnus valent 0.
+# AIC object types (artwork_type_title) that do not depict a scene: a place
+# in their title is where they come from ("Kantharos, Attica"). Pictorial
+# types (Print, Photograph, Painting...) and unknown types are not listed.
 NON_PICTORIAL_ARTWORK_TYPES = {
     "vessel", "coin", "glass", "costume and accessories", "sculpture", "ceramics",
     "decorative arts", "metalwork", "furniture", "furnishings", "religious/ritual object",
@@ -401,103 +142,20 @@ NON_PICTORIAL_ARTWORK_TYPES = {
     "mask", "funerary object", "basketry", "design",
 }
 
-
-def _mentions(text, place_name):
-    place = _normalize_place_name(place_name)
-    return bool(place) and f" {place} " in f" {_normalize_place_name(text)} "
-
-
-def artwork_context_features(artwork, place_name):
-    """
-    Indices de contexte AIC pour un candidat (voir aic.CONTEXT_FIELDS).
-
-    Ces champs ne produisent jamais de candidat : ils indiquent seulement
-    si le lieu détecté dans le titre/la description est aussi le lieu
-    d'origine de l'œuvre, apparaît dans la biographie de l'artiste
-    (« born Leiden ») ou dans la provenance / l'historique d'expositions.
-    Le modèle apprend le poids de chaque indice. Pas d'indicateur « champs
-    présents » : il ne marquerait que les œuvres AIC, et le modèle l'utilisait
-    comme raccourci de source (21 % de lieux représentés dans les œuvres AIC
-    du gold contre 70 % ailleurs). Il reste calculé, hors
-    GEOGRAPHIC_FEATURE_COLUMNS, pour les modèles entraînés avant ce retrait.
-    """
-    history = " ".join(
-        str(artwork.get(field) or "")
-        for field in ("exhibition_history", "provenance_text", "credit_line")
-    )
-    origin = artwork.get("place_of_origin") or ""
-    artist = artwork.get("artist_display") or ""
-    artwork_type = str(artwork.get("artwork_type_title") or "").casefold()
-    return {
-        "has_context_metadata": int(bool(origin or artist or history.strip())),
-        "object_non_pictorial": int(artwork_type in NON_PICTORIAL_ARTWORK_TYPES),
-        "in_place_of_origin": int(_mentions(origin, place_name)),
-        "in_artist_display": int(_mentions(artist, place_name)),
-        "in_provenance_or_exhibition": int(_mentions(history, place_name)),
-    }
-
-
-def _normalize_place_name(name):
-    text = unicodedata.normalize("NFKD", (name or "").lower())
-    text = "".join(c for c in text if not unicodedata.combining(c))
-    text = re.sub(r"[^a-z0-9 ]+", " ", text)
-    return re.sub(r"\s+", " ", text).strip()
-
-
-def _core_tokens(name):
-    return {t for t in _normalize_place_name(name).split() if t not in _GENERIC_WORDS}
-
-
-def fuzzy_match(name_a, name_b, threshold=0.85):
-    """
-    Match tolérant : ignore accents, articles et mots génériques
-    (« cathédrale de Rouen » == « Rouen Cathedral »).
-    """
-    a, b = _normalize_place_name(name_a), _normalize_place_name(name_b)
-    if not a or not b:
-        return False
-    if a == b:
-        return True
-    ta, tb = _core_tokens(name_a), _core_tokens(name_b)
-    if ta and tb and (ta <= tb or tb <= ta):
-        return True
-    return difflib.SequenceMatcher(None, a, b).ratio() >= threshold
-
-
-
-def label_candidate(record, place_name, fuzzy_threshold=0.85):
-    """
-    Label binaire pour un candidat : 1 si place_name correspond au
-    depicted_place annoté de cette œuvre, 0 sinon.
-
-    - place_status != "depicted" (y compris "mentioned_only" et "none") :
-      TOUS les candidats de l'œuvre sont négatifs. C'est ce qui fournit les
-      négatifs "difficiles" (un lieu de création cité à côté du vrai sujet)
-      qui manquaient à l'ancienne évaluation au niveau œuvre.
-    - place_status == "undeterminable" : à exclure de l'entraînement en
-      amont (voir build_training_table), ni positif ni négatif fiable.
-    """
-    annotations = record.get("annotations", {})
-    if annotations.get("place_status") != "depicted":
-        return 0
-    depicted_places = annotations.get("depicted_places") or [
-        annotations.get("depicted_place") or {}
-    ]
-    return int(any(
-        fuzzy_match(place_name, depicted.get("name"), fuzzy_threshold)
-        for depicted in depicted_places
-    ))
-
-
-_GEOGRAPHIC_LABEL_LEVELS = {
-    "exact_place",
-    "neighborhood",
-    "city",
-    "region",
-    "country",
+# Words that are never a place on their own (NER artefacts such as "of").
+_ENTITY_STOPWORDS = _GENERIC_WORDS | {"a", "an", "and", "with", "et", "y", "e", "und"}
+# Lowercase connectors that reveal a truncated entity start
+# ("of Control" for "Line of Control").
+_LEADING_CONNECTORS = {
+    "of", "the", "de", "du", "des", "del", "della", "di", "da", "von", "van", "der",
 }
+# Single characters allowed between two pieces of one entity ("N" "." "Y").
+# No space: entities separated by a space or ". " stay distinct
+# ("Dresden. Albert Square").
+_ENTITY_JOINERS = set(".-–'’")
+_STRIPPED_PUNCTUATION = " \t\n,;:!?()[]{}\"«»“”‘’'"
 
-
+# Nominatim `addresstype` / `type` values with an unambiguous level.
 _NOMINATIM_TYPE_LEVELS = {
     "country": "country",
     "state": "region",
@@ -518,63 +176,353 @@ _NOMINATIM_TYPE_LEVELS = {
     "city_district": "neighborhood",
     "city_block": "neighborhood",
 }
-# Codes GeoNames de zones étendues (région naturelle, archipel, massif...).
+# GeoNames codes of large areas (natural region, archipelago, mountains...).
 _GEONAMES_REGION_CODES = {"RGN", "RGNE", "RGNH", "AREA", "ISLS", "PEN", "MTS", "VAL"}
 
-
-def _geonames_level(feature_code):
-    if feature_code.startswith("PCL"):
-        return "country"
-    # ADM1/ADM2 (région, département, county US) sont des régions ; ADM3+
-    # correspond le plus souvent à une commune (comune, Gemeinde).
-    if feature_code.startswith(("ADM1", "ADM2", "ADMD")) or feature_code in _GEONAMES_REGION_CODES:
-        return "region"
-    if feature_code == "PPLX":
-        return "neighborhood"
-    if feature_code.startswith(("PPL", "ADM")):
-        return "city"
-    return "exact_place"
+# Hierarchy fields a candidate must have for a non-match to count as a real
+# negative, by annotated precision (otherwise the label is unevaluable).
+_REQUIRED_HIERARCHY = {
+    "exact_place": ("city", "region", "country"),
+    "neighborhood": ("city", "region", "country"),
+    "city": ("city", "region", "country"),
+    "region": ("region", "country"),
+    "country": ("country",),
+}
 
 
-def _nominatim_level(location):
-    for key in ("addresstype", "feature_code"):
-        level = _NOMINATIM_TYPE_LEVELS.get(str(location.get(key) or "").casefold())
-        if level:
-            return level
-    try:
-        place_rank = int(location.get("place_rank") or 0)
-    except (TypeError, ValueError):
-        place_rank = 0
-    place_type = str(location.get("feature_code") or "").casefold()
-    place_class = str(location.get("place_class") or "").casefold()
-    # Les limites administratives (type "administrative") n'ont pas de type
-    # parlant : leur niveau se lit dans place_rank (4 pays, 8 état,
-    # 12 county, 16 ville, 20 quartier).
-    if place_rank and (place_type == "administrative" or place_class == "boundary"):
-        if place_rank <= 4:
-            return "country"
-        if place_rank <= 12:
-            return "region"
-        if place_rank <= 19:
-            return "city"
-        if place_rank <= 24:
-            return "neighborhood"
-    if place_rank >= 25:
-        return "exact_place"
-    if place_class and place_class not in {"place", "boundary"}:
-        return "exact_place"
-    return None
+# ---------------------------------------------------------------------------
+# Small shared helpers
+# ---------------------------------------------------------------------------
+
+def _artwork(record):
+    """Return the artwork payload of a record (records may also be bare artworks)."""
+    return record.get("artwork", record)
 
 
-def _candidate_geographic_level(location):
-    if not location:
+def _place_status(record):
+    """Return the annotated place_status of a record, or None."""
+    return record.get("annotations", {}).get("place_status")
+
+
+def _artwork_statuses(records):
+    """Map artwork id to annotated place_status."""
+    return {_artwork(record).get("id"): _place_status(record) for record in records}
+
+
+def _ratio(numerator, denominator):
+    """Return numerator / denominator, or 0.0 when the denominator is zero."""
+    return numerator / denominator if denominator else 0.0
+
+
+def _f1(precision, recall):
+    """Harmonic mean of precision and recall (0.0 when both are zero)."""
+    return 2 * precision * recall / (precision + recall) if precision + recall else 0.0
+
+
+def _valid_coordinates(place):
+    """Return (latitude, longitude) when `place` holds valid coordinates, else None."""
+    if not isinstance(place, dict):
         return None
-    if location.get("source") == "GeoNames":
-        return _geonames_level(str(location.get("feature_code") or "").upper())
-    return _nominatim_level(location)
+    try:
+        latitude = float(place["latitude"])
+        longitude = float(place["longitude"])
+    except (KeyError, TypeError, ValueError):
+        return None
+    if not -90 <= latitude <= 90 or not -180 <= longitude <= 180:
+        return None
+    return latitude, longitude
+
+
+def _levels_up_to(level):
+    """Levels at least as specific as `level` (cumulative positives of its model)."""
+    return {candidate for candidate in GEOGRAPHIC_LEVELS if _SPECIFICITY[candidate] <= _SPECIFICITY[level]}
+
+
+# ---------------------------------------------------------------------------
+# Keyword pre-filter
+# ---------------------------------------------------------------------------
+
+def _flatten_keywords(keywords):
+    """Flatten the nested keyword structure of keywords.json into a list of strings."""
+    if isinstance(keywords, dict):
+        flattened = []
+        for value in keywords.values():
+            flattened.extend(_flatten_keywords(value))
+        return flattened
+    if isinstance(keywords, (list, tuple, set)):
+        return [str(keyword) for keyword in keywords]
+    return [str(keywords)]
+
+
+def _keyword_pattern(keyword):
+    """Case-insensitive regex matching `keyword` as a whole word."""
+    escaped_keyword = re.escape(keyword.strip())
+    return re.compile(r"(?<!\w)" + escaped_keyword + r"(?!\w)", re.IGNORECASE)
+
+
+def filter_by_keywords(combined_texts, keywords):
+    """
+    Keep the artworks whose combined text contains at least one keyword.
+
+    Parameters:
+    combined_texts (dict): Artwork id -> combined text of the artwork.
+    keywords (dict or list): The nested keyword structure from keywords.json,
+        or a flat list of keywords.
+
+    Returns:
+    dict: {"filtered_artworks": [{"id": 1, "matched_keywords": ["street"]}, ...]}
+    """
+    keyword_patterns = [
+        (keyword, _keyword_pattern(keyword))
+        for keyword in _flatten_keywords(keywords)
+        if keyword.strip()
+    ]
+    artworks_df = pd.DataFrame(combined_texts.items(), columns=["id", "combined_text"])
+    artworks_df["matched_keywords"] = artworks_df["combined_text"].fillna("").apply(
+        lambda text: [keyword for keyword, pattern in keyword_patterns if pattern.search(text)]
+    )
+    filtered_artworks = artworks_df.loc[
+        artworks_df["matched_keywords"].str.len() > 0,
+        ["id", "matched_keywords"],
+    ].to_dict(orient="records")
+    return {"filtered_artworks": filtered_artworks}
+
+
+# ---------------------------------------------------------------------------
+# NER candidate extraction and cleaning
+# ---------------------------------------------------------------------------
+
+def _is_word_char(character):
+    """True for letters, digits and combining accents."""
+    return character.isalnum() or unicodedata.category(character) == "Mn"
+
+
+def _in_word(text, index):
+    """True if text[index] belongs to a word; an apostrophe between letters does ("Akbar's")."""
+    if not 0 <= index < len(text):
+        return False
+    if _is_word_char(text[index]):
+        return True
+    return (
+        text[index] in "'’"
+        and 0 < index < len(text) - 1
+        and _is_word_char(text[index - 1])
+        and _is_word_char(text[index + 1])
+    )
+
+
+def _merge_entity_pieces(text, entities):
+    """Extend NER spans to whole words and merge pieces of the same entity.
+
+    Two spans are merged when they overlap or are separated by a single
+    joiner character ("N.Y", "Pirna-Posta"); the merged score is the maximum.
+    """
+    spans = []
+    for entity in sorted(entities, key=lambda item: item["start"]):
+        start, end = entity["start"], entity["end"]
+        while start > 0 and _in_word(text, start - 1) and _in_word(text, start):
+            start -= 1
+        while end < len(text) and _in_word(text, end - 1) and _in_word(text, end):
+            end += 1
+        score = float(entity["score"])
+        if spans:
+            previous = spans[-1]
+            gap = text[previous["end"]:start]
+            if start <= previous["end"] or (len(gap) == 1 and gap in _ENTITY_JOINERS):
+                previous["end"] = max(previous["end"], end)
+                previous["score"] = max(previous["score"], score)
+                continue
+        spans.append({"start": start, "end": end, "score": score})
+    return spans
+
+
+def _trim_entity_span(text, start, end):
+    """Remove punctuation, a "d'" elision and repair a leading connector.
+
+    Returns the corrected (start, end).
+    """
+    while start < end and text[start] in _STRIPPED_PUNCTUATION:
+        start += 1
+    while end > start and text[end - 1] in _STRIPPED_PUNCTUATION:
+        end -= 1
+    # A final dot is kept only in abbreviations ("N.Y.").
+    if end > start and text[end - 1] == "." and "." not in text[start:end - 1]:
+        end -= 1
+
+    elision = re.match(r"d['’]", text[start:end])
+    if elision:
+        start += elision.end()
+
+    first_word = re.match(r"\w+", text[start:end])
+    if first_word and first_word.group(0) in _LEADING_CONNECTORS and first_word.end() < end - start:
+        previous_word = re.search(r"(\w+)\s+$", text[:start])
+        if previous_word and previous_word.group(1)[:1].isupper():
+            # "of Control" -> "Line of Control".
+            start = previous_word.start(1)
+        else:
+            start += first_word.end()
+            while start < end and text[start].isspace():
+                start += 1
+    return start, end
+
+
+def _clean_entity_spans(text, entities):
+    """
+    Repair raw NER LOC spans using the source text.
+
+    Names are read back from `text` through the offsets (not from the
+    tokenizer's decoded `word`, which inserts spaces: "Saint - Lazare").
+    Spans cut inside a word are extended to the whole word, adjacent pieces
+    of one entity are merged, and spans that cannot be a place name (a single
+    letter, a function word) are dropped.
+
+    Returns a list of {"start", "end", "score", "surface"} dicts.
+    """
+    cleaned = []
+    for span in _merge_entity_pieces(text, entities):
+        start, end = _trim_entity_span(text, span["start"], span["end"])
+        surface = text[start:end]
+        letter_count = sum(character.isalpha() for character in surface)
+        if letter_count < 2 or _normalize_place_name(surface) in _ENTITY_STOPWORDS:
+            continue
+        cleaned.append({**span, "start": start, "end": end, "surface": surface})
+    return cleaned
+
+
+def _artwork_text_fields(artwork):
+    """Return the text of each field in FIELD_NAMES (lists are joined)."""
+    return {
+        "title": artwork.get("title") or "",
+        "alt_titles": " / ".join(artwork.get("alt_titles") or []),
+        "description": artwork.get("description") or "",
+        "short_description": artwork.get("short_description") or "",
+        "themes": " ".join(artwork.get("theme_titles") or []),
+        "subjects": " ".join(artwork.get("subject_titles") or []),
+        "styles": " ".join(artwork.get("style_titles") or []),
+    }
+
+
+def extract_candidate_artwork(artwork, ner, threshold=DEFAULT_NER_FLOOR):
+    """
+    Extract cleaned LOC candidates from the text fields of an artwork.
+
+    Each candidate keeps its source field and its position in that field
+    (needed for the context markers). `threshold` is a low noise floor, not
+    the acceptance threshold: it is applied after cleaning, to the best score
+    of the merged pieces, and the score itself stays a model feature.
+    """
+    candidates = []
+    for field, text in _artwork_text_fields(artwork).items():
+        if not text.strip():
+            continue
+        locations = [result for result in ner(text) if result["entity_group"] == "LOC"]
+        for span in _clean_entity_spans(text, locations):
+            if span["score"] >= threshold:
+                candidates.append({
+                    "place": span["surface"],
+                    "score_ner": round(span["score"], 3),
+                    "field": field,
+                    "start": span["start"],
+                    "end": span["end"],
+                    "source_text": text,
+                })
+    return candidates
+
+
+def extract_all_candidates(records, ner, threshold=DEFAULT_NER_FLOOR):
+    """
+    Run `extract_candidate_artwork` on every record, keyed by artwork id.
+
+    The NER runs once; the raw candidates are reused both to build the
+    training table and to predict.
+    """
+    return {
+        _artwork(record).get("id"): extract_candidate_artwork(_artwork(record), ner, threshold=threshold)
+        for record in records
+    }
+
+
+# ---------------------------------------------------------------------------
+# Candidate features
+# ---------------------------------------------------------------------------
+
+def local_context(text, start, end, window=60):
+    """Return the lowercased text around text[start:end], `window` characters each side."""
+    return text[max(0, start - window):end + window].lower()
+
+
+def group_candidates_by_place(candidates):
+    """Group candidate occurrences by place name (case-insensitive)."""
+    groups = defaultdict(list)
+    for candidate in candidates:
+        groups[candidate["place"].lower().strip()].append(candidate)
+    return groups
+
+
+def _has_marker(occurrences, markers):
+    """True if any marker appears in the local context of any occurrence."""
+    return any(
+        any(marker in local_context(c["source_text"], c["start"], c["end"]) for marker in markers)
+        for c in occurrences
+    )
+
+
+def candidate_features(occurrences):
+    """
+    Raw textual features of one grouped candidate (all its occurrences).
+
+    The logistic regression learns how to weight them: fields where the
+    place appears, number of fields, positive/negative context markers and
+    best NER score.
+    """
+    found_fields = {c["field"] for c in occurrences}
+    features = {f"field_{field}": int(field in found_fields) for field in FIELD_NAMES}
+    features["n_fields"] = len(found_fields)
+    features["has_positive_marker"] = int(_has_marker(occurrences, POSITIVES_LABELS))
+    features["has_negative_marker"] = int(_has_marker(occurrences, NEGATIVES_LABELS))
+    features["score_ner_max"] = max(c["score_ner"] for c in occurrences)
+    return features
+
+
+def _mentions(text, place_name):
+    """True if the normalized place name appears as whole words in `text`."""
+    place = _normalize_place_name(place_name)
+    return bool(place) and f" {place} " in f" {_normalize_place_name(text)} "
+
+
+def artwork_context_features(artwork, place_name):
+    """
+    AIC context clues for a candidate (see aic.CONTEXT_FIELDS).
+
+    These fields never produce candidates. They only tell whether the place
+    found in the title/description is also the artwork's place of origin,
+    appears in the artist's biography ("born Leiden") or in the provenance /
+    exhibition history, and whether the object is non-pictorial (a vessel, a
+    coin...). The model learns the weight of each clue.
+
+    `has_context_metadata` is computed for models trained before it was
+    removed from GEOGRAPHIC_FEATURE_COLUMNS: it only flagged AIC records and
+    the model used it as a source shortcut (21 % depicted places among AIC
+    gold artworks versus 70 % elsewhere).
+    """
+    history = " ".join(
+        str(artwork.get(field) or "")
+        for field in ("exhibition_history", "provenance_text", "credit_line")
+    )
+    origin = artwork.get("place_of_origin") or ""
+    artist = artwork.get("artist_display") or ""
+    artwork_type = str(artwork.get("artwork_type_title") or "").casefold()
+    return {
+        "has_context_metadata": int(bool(origin or artist or history.strip())),
+        "object_non_pictorial": int(artwork_type in NON_PICTORIAL_ARTWORK_TYPES),
+        "in_place_of_origin": int(_mentions(origin, place_name)),
+        "in_artist_display": int(_mentions(artist, place_name)),
+        "in_provenance_or_exhibition": int(_mentions(history, place_name)),
+    }
 
 
 def _add_geographic_features(features, location):
+    """Return a copy of `features` with the geocoding features of `location`."""
     location = location or {}
     candidate_level = _candidate_geographic_level(location)
     hierarchy = location.get("hierarchy") or {}
@@ -595,59 +543,281 @@ def _add_geographic_features(features, location):
     return result
 
 
-def _target_group_key(place):
-    wikidata_id = place.get("wikidata_id")
-    if wikidata_id:
-        return f"wikidata:{wikidata_id}"
-    geoname_id = place.get("geonameid")
-    if geoname_id:
-        return f"geonames:{geoname_id}"
-    coordinates = _valid_coordinates(place)
-    if coordinates is not None:
-        return (
-            f"coordinates:{coordinates[0]:.4f},{coordinates[1]:.4f}:"
-            f"{place.get('precision', 'unknown')}"
-        )
-    name = _normalize_place_name(place.get("name"))
-    return f"name:{name}:{place.get('precision', 'unknown')}" if name else None
+def _name_similarity(place_name, location):
+    """Similarity (0-1) between a candidate and the name of its geocoded location.
+
+    1.0 when the significant words of one name are contained in the other's
+    ("Rouen Cathedral" / "Cathédrale de Rouen"), otherwise the character
+    similarity. Low values flag geocodes unrelated to the mention ("Louvre"
+    -> "Γουβιά"), but also legitimate translations ("Venice" -> "Venezia").
+    """
+    resolved_name = (location or {}).get("name")
+    candidate, resolved = _normalize_place_name(place_name), _normalize_place_name(resolved_name)
+    if not candidate or not resolved:
+        return 0.0
+    candidate_tokens, resolved_tokens = _core_tokens(place_name), _core_tokens(resolved_name)
+    if candidate_tokens and resolved_tokens and (
+        candidate_tokens <= resolved_tokens or resolved_tokens <= candidate_tokens
+    ):
+        return 1.0
+    return difflib.SequenceMatcher(None, candidate, resolved).ratio()
 
 
-def _artwork_target_cv_groups(records):
-    parents = {}
+def _hierarchical_candidate_features(occurrences, location, artwork):
+    """All features of a grouped candidate used by the hierarchical model."""
+    place_name = occurrences[0]["place"]
+    features = _add_geographic_features(candidate_features(occurrences), location)
+    features.update(artwork_context_features(artwork, place_name))
+    features["geo_name_similarity"] = _name_similarity(place_name, location)
+    features["geo_context_conflict"] = int(bool((location or {}).get("context_conflict")))
+    return features
 
-    def find(item):
-        parents.setdefault(item, item)
-        if parents[item] != item:
-            parents[item] = find(parents[item])
-        return parents[item]
 
-    def union(left, right):
-        left_root = find(left)
-        right_root = find(right)
-        if left_root != right_root:
-            parents[right_root] = left_root
+# ---------------------------------------------------------------------------
+# Place-name matching
+# ---------------------------------------------------------------------------
 
-    artwork_nodes = []
-    for record in records:
-        artwork_id = (record.get("artwork", record)).get("id")
-        artwork_node = f"artwork:{artwork_id}"
-        find(artwork_node)
-        artwork_nodes.append((artwork_id, artwork_node))
-        annotations = record.get("annotations", {})
-        targets = annotations.get("depicted_places") or [
-            annotations.get("depicted_place")
-        ]
-        for target in targets:
-            if not target:
-                continue
-            target_key = _target_group_key(target)
-            if target_key:
-                union(artwork_node, f"target:{target_key}")
+def _normalize_place_name(name):
+    """Lowercase, strip accents and punctuation, collapse spaces."""
+    text = unicodedata.normalize("NFKD", (name or "").lower())
+    text = "".join(c for c in text if not unicodedata.combining(c))
+    text = re.sub(r"[^a-z0-9 ]+", " ", text)
+    return re.sub(r"\s+", " ", text).strip()
 
+
+def _core_tokens(name):
+    """Normalized tokens of a name, without articles and generic place words."""
+    return {t for t in _normalize_place_name(name).split() if t not in _GENERIC_WORDS}
+
+
+def fuzzy_match(name_a, name_b, threshold=0.85):
+    """
+    Lenient name match ignoring accents, articles and generic words
+    ("cathédrale de Rouen" == "Rouen Cathedral").
+    """
+    a, b = _normalize_place_name(name_a), _normalize_place_name(name_b)
+    if not a or not b:
+        return False
+    if a == b:
+        return True
+    ta, tb = _core_tokens(name_a), _core_tokens(name_b)
+    if ta and tb and (ta <= tb or tb <= ta):
+        return True
+    return difflib.SequenceMatcher(None, a, b).ratio() >= threshold
+
+
+# ---------------------------------------------------------------------------
+# Geographic level of a geocoded candidate
+# ---------------------------------------------------------------------------
+
+def _geonames_level(feature_code):
+    """Geographic level of a GeoNames feature code."""
+    if feature_code.startswith("PCL"):
+        return "country"
+    # ADM1/ADM2 (state, département, US county) are regions; ADM3+ is most
+    # often a municipality (comune, Gemeinde).
+    if feature_code.startswith(("ADM1", "ADM2", "ADMD")) or feature_code in _GEONAMES_REGION_CODES:
+        return "region"
+    if feature_code == "PPLX":
+        return "neighborhood"
+    if feature_code.startswith(("PPL", "ADM")):
+        return "city"
+    return "exact_place"
+
+
+def _place_rank(location):
+    """Nominatim place_rank as an int (0 when missing or invalid)."""
+    try:
+        return int(location.get("place_rank") or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _nominatim_level(location):
+    """Geographic level of a Nominatim result, or None if it cannot be told."""
+    for key in ("addresstype", "feature_code"):
+        level = _NOMINATIM_TYPE_LEVELS.get(str(location.get(key) or "").casefold())
+        if level:
+            return level
+    place_rank = _place_rank(location)
+    place_type = str(location.get("feature_code") or "").casefold()
+    place_class = str(location.get("place_class") or "").casefold()
+    # Administrative boundaries have no telling type: their level comes from
+    # place_rank (4 country, 8 state, 12 county, 16 city, 20 suburb).
+    if place_rank and (place_type == "administrative" or place_class == "boundary"):
+        if place_rank <= 4:
+            return "country"
+        if place_rank <= 12:
+            return "region"
+        if place_rank <= 19:
+            return "city"
+        if place_rank <= 24:
+            return "neighborhood"
+    if place_rank >= 25:
+        return "exact_place"
+    if place_class and place_class not in {"place", "boundary"}:
+        return "exact_place"
+    return None
+
+
+def _candidate_geographic_level(location):
+    """Geographic level of a geocoded location (GeoNames or Nominatim), or None."""
+    if not location:
+        return None
+    if location.get("source") == "GeoNames":
+        return _geonames_level(str(location.get("feature_code") or "").upper())
+    return _nominatim_level(location)
+
+
+def _geocode_artwork(grouped_candidates, alternatives_cache, gazetteer_conn, nominatim_client):
+    """Geocode the grouped candidates of one artwork together (see gazetter.resolve_artwork_places).
+
+    Returns one location (or None) per group, in order.
+    """
+    if not grouped_candidates or (gazetteer_conn is None and nominatim_client is None):
+        return [None] * len(grouped_candidates)
+    mentions = [(occurrences[0]["place"], occurrences) for occurrences in grouped_candidates]
+    resolved = resolve_artwork_places(mentions, gazetteer_conn, nominatim_client, alternatives_cache)
+    return [resolved[name] for name, _ in mentions]
+
+
+# ---------------------------------------------------------------------------
+# Hierarchical labels
+# ---------------------------------------------------------------------------
+
+def _unevaluable(distance_km=None, **details):
+    """Label for a candidate that can be neither positive nor negative."""
+    return {"level": "unevaluable", "status": "unevaluable", "distance_km": distance_km, **details}
+
+
+def _hierarchy_matches(target, candidate_location, candidate_level):
+    """Tell whether the candidate shares the target's country, region, city and neighborhood.
+
+    Names are compared both to the annotation and to the target hierarchy
+    obtained by reverse geocoding (`resolved_hierarchy`), which is in the
+    geocoder's language ("Sachsen") while the annotation may be in English
+    ("Saxony"). Countries also match by ISO code.
+    """
+    hierarchy = candidate_location.get("hierarchy") or {}
+    target_hierarchy = target.get("resolved_hierarchy") or {}
+    candidate_name = _normalize_place_name(candidate_location.get("name"))
+
+    def value_matches(field):
+        """True if the candidate's value for `field` equals the target's (annotated or reverse-geocoded)."""
+        target_values = {
+            value
+            for value in (
+                _normalize_place_name(target.get(field)),
+                _normalize_place_name(target_hierarchy.get(field)),
+            )
+            if value
+        }
+        resolved_value = _normalize_place_name(hierarchy.get(field))
+        if not resolved_value and candidate_level == field:
+            resolved_value = candidate_name
+        return bool(resolved_value and resolved_value in target_values)
+
+    target_country_code = (
+        target.get("country_code") or target_hierarchy.get("country_code") or ""
+    ).upper()
+    candidate_country_code = (
+        hierarchy.get("country_code") or candidate_location.get("country_code") or ""
+    ).upper()
+    target_name = _normalize_place_name(target.get("name"))
     return {
-        artwork_id: find(artwork_node)
-        for artwork_id, artwork_node in artwork_nodes
+        "country": value_matches("country") or bool(
+            target_country_code and target_country_code == candidate_country_code
+        ),
+        "region": value_matches("region"),
+        "city": value_matches("city"),
+        "neighborhood": bool(
+            target_name
+            and (
+                _normalize_place_name(hierarchy.get("neighborhood")) == target_name
+                or (candidate_level == "neighborhood" and candidate_name == target_name)
+            )
+        ),
     }
+
+
+def _matched_level(precision, candidate_level, distance, matches, tolerances):
+    """Most specific level at which the candidate matches a target of `precision`."""
+    exact_tolerance_km, neighborhood_tolerance_km, city_tolerance_km = tolerances
+    if precision == "exact_place":
+        if candidate_level == "exact_place" and distance <= exact_tolerance_km:
+            return "exact_place"
+        if matches["city"]:
+            return "city"
+    elif precision == "neighborhood":
+        if matches["neighborhood"] or (
+            candidate_level == "exact_place" and distance <= neighborhood_tolerance_km
+        ):
+            return "neighborhood"
+        if matches["city"]:
+            return "city"
+    elif precision == "city":
+        if matches["city"] or (
+            candidate_level in {"exact_place", "neighborhood", "city"}
+            and distance <= city_tolerance_km
+        ):
+            return "city"
+    elif precision == "region" and matches["region"]:
+        return "region"
+    elif precision == "country" and matches["country"]:
+        return "country"
+
+    # Fall back to a coarser level shared with the target.
+    if precision not in {"region", "country"} and matches["region"]:
+        return "region"
+    if matches["country"]:
+        return "country"
+    return None
+
+
+def _label_against_target(target, candidate_location, tolerances):
+    """Label a geocoded candidate against one annotated depicted place."""
+    precision = target.get("precision")
+    if precision not in _GEOGRAPHIC_LABEL_LEVELS:
+        return _unevaluable()
+    target_coordinates = _valid_coordinates(target)
+    candidate_coordinates = _valid_coordinates(candidate_location)
+    if target_coordinates is None or candidate_coordinates is None:
+        return _unevaluable()
+
+    distance = haversine_distance_km(*target_coordinates, *candidate_coordinates)
+    candidate_level = _candidate_geographic_level(candidate_location)
+    details = {"candidate_level": candidate_level, "geocoder_source": candidate_location.get("source")}
+    matches = _hierarchy_matches(target, candidate_location, candidate_level)
+    matched_level = _matched_level(precision, candidate_level, distance, matches, tolerances)
+
+    hierarchy = candidate_location.get("hierarchy") or {}
+    if matched_level is None and not any(hierarchy.get(field) for field in _REQUIRED_HIERARCHY[precision]):
+        # Without a hierarchy, a non-match proves nothing.
+        return _unevaluable(distance, **details)
+    return {
+        "level": matched_level or "no_match",
+        "status": "match" if matched_level else "negative",
+        "distance_km": distance,
+        **details,
+    }
+
+
+def _label_against_several_targets(depicted_places, candidate_location, tolerances):
+    """Label against each target and keep the most specific match."""
+    labels = [
+        _label_against_target(depicted_place, candidate_location, tolerances)
+        for depicted_place in depicted_places
+    ]
+    matching_labels = [label for label in labels if label["status"] == "match"]
+    if matching_labels:
+        return min(matching_labels, key=lambda label: _SPECIFICITY[label["level"]])
+    if any(label["status"] == "unevaluable" for label in labels):
+        return _unevaluable(
+            next((label.get("distance_km") for label in labels if label.get("distance_km") is not None), None),
+            candidate_level=labels[0].get("candidate_level"),
+            geocoder_source=labels[0].get("geocoder_source"),
+        )
+    return labels[0]
 
 
 def geographic_candidate_label(
@@ -658,166 +828,37 @@ def geographic_candidate_label(
     neighborhood_tolerance_km=2.0,
     city_tolerance_km=25.0,
 ):
-    """Label a candidate at the most specific level supported by its location."""
+    """
+    Label a candidate at the most specific level supported by its location.
+
+    Returns a dict with `level` (a geographic level, "no_match", "none" or
+    "unevaluable"), `status` ("match", "negative" or "unevaluable") and
+    `distance_km`, plus `candidate_level` and `geocoder_source` when the
+    candidate was compared. Artworks that are not "depicted" make every
+    candidate negative; unresolved cases are never forced to negative.
+    """
     if min(exact_tolerance_km, neighborhood_tolerance_km, city_tolerance_km) < 0:
         raise ValueError("Geographic label tolerances must be non-negative.")
     annotations = record.get("annotations", {})
     place_status = annotations.get("place_status")
     if place_status == "undeterminable":
-        return {"level": "unevaluable", "status": "unevaluable", "distance_km": None}
+        return _unevaluable()
     if place_status != "depicted":
-        return {"level": "none", "status": "negative", "distance_km": None}
+        # The candidate level is still needed: without it the evaluation
+        # never scores these candidates and cannot count their false positives.
+        return {
+            "level": "none",
+            "status": "negative",
+            "distance_km": None,
+            "candidate_level": _candidate_geographic_level(candidate_location),
+            "geocoder_source": (candidate_location or {}).get("source"),
+        }
 
+    tolerances = (exact_tolerance_km, neighborhood_tolerance_km, city_tolerance_km)
     depicted_places = annotations.get("depicted_places") or []
     if len(depicted_places) > 1:
-        labels = [
-            geographic_candidate_label(
-                {"annotations": {
-                    **annotations,
-                    "depicted_place": depicted_place,
-                    "depicted_places": [],
-                }},
-                candidate_location,
-                exact_tolerance_km=exact_tolerance_km,
-                neighborhood_tolerance_km=neighborhood_tolerance_km,
-                city_tolerance_km=city_tolerance_km,
-            )
-            for depicted_place in depicted_places
-        ]
-        specificity = {
-            "exact_place": 0,
-            "neighborhood": 1,
-            "city": 2,
-            "region": 3,
-            "country": 4,
-        }
-        matching_labels = [label for label in labels if label["status"] == "match"]
-        if matching_labels:
-            return min(matching_labels, key=lambda label: specificity[label["level"]])
-        if any(label["status"] == "unevaluable" for label in labels):
-            return {
-                "level": "unevaluable",
-                "status": "unevaluable",
-                "distance_km": next(
-                    (label.get("distance_km") for label in labels if label.get("distance_km") is not None),
-                    None,
-                ),
-                "candidate_level": labels[0].get("candidate_level"),
-                "geocoder_source": labels[0].get("geocoder_source"),
-            }
-        return labels[0]
-
-    actual = annotations.get("depicted_place") or {}
-    precision = actual.get("precision")
-    if precision not in _GEOGRAPHIC_LABEL_LEVELS:
-        return {"level": "unevaluable", "status": "unevaluable", "distance_km": None}
-    actual_coordinates = _valid_coordinates(actual)
-    predicted_coordinates = _valid_coordinates(candidate_location)
-    if actual_coordinates is None or predicted_coordinates is None:
-        return {"level": "unevaluable", "status": "unevaluable", "distance_km": None}
-
-    distance = haversine_distance_km(*actual_coordinates, *predicted_coordinates)
-    candidate_level = _candidate_geographic_level(candidate_location)
-    hierarchy = candidate_location.get("hierarchy") or {}
-
-    # Hiérarchie de la cible obtenue par géocodage inverse de ses coordonnées
-    # (voir build_geographic_label_table) : elle est dans la même langue que
-    # celle des candidats (« Sachsen ») alors que l'annotation peut être en
-    # anglais (« Saxony »).
-    target_hierarchy = actual.get("resolved_hierarchy") or {}
-
-    def value_matches(field):
-        target_values = {
-            value
-            for value in (
-                _normalize_place_name(actual.get(field)),
-                _normalize_place_name(target_hierarchy.get(field)),
-            )
-            if value
-        }
-        resolved_value = _normalize_place_name(hierarchy.get(field))
-        if not resolved_value and candidate_level == field:
-            resolved_value = _normalize_place_name(candidate_location.get("name"))
-        return bool(resolved_value and resolved_value in target_values)
-
-    target_country_code = (
-        actual.get("country_code") or target_hierarchy.get("country_code") or ""
-    ).upper()
-    candidate_country_code = (
-        hierarchy.get("country_code") or candidate_location.get("country_code") or ""
-    ).upper()
-    country_matches = value_matches("country") or bool(
-        target_country_code and target_country_code == candidate_country_code
-    )
-    region_matches = value_matches("region")
-    city_matches = value_matches("city")
-    neighborhood_name = _normalize_place_name(actual.get("name"))
-    resolved_neighborhood = _normalize_place_name(hierarchy.get("neighborhood"))
-    neighborhood_matches = bool(
-        neighborhood_name
-        and (
-            resolved_neighborhood == neighborhood_name
-            or (
-                candidate_level == "neighborhood"
-                and _normalize_place_name(candidate_location.get("name")) == neighborhood_name
-            )
-        )
-    )
-
-    matched_level = None
-    if precision == "exact_place":
-        if candidate_level == "exact_place" and distance <= exact_tolerance_km:
-            matched_level = "exact_place"
-        elif city_matches:
-            matched_level = "city"
-    elif precision == "neighborhood":
-        if neighborhood_matches or (
-            candidate_level == "exact_place" and distance <= neighborhood_tolerance_km
-        ):
-            matched_level = "neighborhood"
-        elif city_matches:
-            matched_level = "city"
-    elif precision == "city":
-        if city_matches or (
-            candidate_level in {"exact_place", "neighborhood", "city"}
-            and distance <= city_tolerance_km
-        ):
-            matched_level = "city"
-    elif precision == "region" and region_matches:
-        matched_level = "region"
-    elif precision == "country" and country_matches:
-        matched_level = "country"
-
-    if matched_level is None:
-        if precision not in {"region", "country"} and region_matches:
-            matched_level = "region"
-        elif country_matches:
-            matched_level = "country"
-
-    if matched_level is None:
-        required_hierarchy = {
-            "exact_place": ("city", "region", "country"),
-            "neighborhood": ("city", "region", "country"),
-            "city": ("city", "region", "country"),
-            "region": ("region", "country"),
-            "country": ("country",),
-        }[precision]
-        if not any(hierarchy.get(field) for field in required_hierarchy):
-            return {
-                "level": "unevaluable",
-                "status": "unevaluable",
-                "distance_km": distance,
-                "candidate_level": candidate_level,
-                "geocoder_source": candidate_location.get("source"),
-            }
-
-    return {
-        "level": matched_level or "no_match",
-        "status": "match" if matched_level else "negative",
-        "distance_km": distance,
-        "candidate_level": candidate_level,
-        "geocoder_source": candidate_location.get("source"),
-    }
+        return _label_against_several_targets(depicted_places, candidate_location, tolerances)
+    return _label_against_target(annotations.get("depicted_place") or {}, candidate_location, tolerances)
 
 
 def _with_target_hierarchies(record, nominatim_client, reverse_cache):
@@ -831,6 +872,7 @@ def _with_target_hierarchies(record, nominatim_client, reverse_cache):
     annotations = record.get("annotations") or {}
 
     def resolve(place):
+        """Add the reverse-geocoded hierarchy to one depicted place."""
         coordinates = _valid_coordinates(place or {})
         if coordinates is None or place.get("resolved_hierarchy"):
             return place
@@ -849,6 +891,71 @@ def _with_target_hierarchies(record, nominatim_client, reverse_cache):
     return {**record, "annotations": updated}
 
 
+# ---------------------------------------------------------------------------
+# Cross-validation groups
+# ---------------------------------------------------------------------------
+
+def _target_group_key(place):
+    """Stable key of an annotated target (Wikidata, GeoNames, coordinates or name)."""
+    wikidata_id = place.get("wikidata_id")
+    if wikidata_id:
+        return f"wikidata:{wikidata_id}"
+    geoname_id = place.get("geonameid")
+    if geoname_id:
+        return f"geonames:{geoname_id}"
+    coordinates = _valid_coordinates(place)
+    if coordinates is not None:
+        return (
+            f"coordinates:{coordinates[0]:.4f},{coordinates[1]:.4f}:"
+            f"{place.get('precision', 'unknown')}"
+        )
+    name = _normalize_place_name(place.get("name"))
+    return f"name:{name}:{place.get('precision', 'unknown')}" if name else None
+
+
+def _artwork_target_cv_groups(records):
+    """Map each artwork id to a CV group joining artworks that share a target.
+
+    Groups are the connected components of the artwork-target graph (a
+    union-find), so that several views of the same monument never end up in
+    both the training and the test fold.
+    """
+    parents = {}
+
+    def find(item):
+        """Root of `item`, with path compression."""
+        parents.setdefault(item, item)
+        if parents[item] != item:
+            parents[item] = find(parents[item])
+        return parents[item]
+
+    def union(left, right):
+        """Join the components of `left` and `right`."""
+        left_root = find(left)
+        right_root = find(right)
+        if left_root != right_root:
+            parents[right_root] = left_root
+
+    artwork_nodes = []
+    for record in records:
+        artwork_id = _artwork(record).get("id")
+        artwork_node = f"artwork:{artwork_id}"
+        find(artwork_node)
+        artwork_nodes.append((artwork_id, artwork_node))
+        annotations = record.get("annotations", {})
+        targets = annotations.get("depicted_places") or [annotations.get("depicted_place")]
+        for target in targets:
+            target_key = _target_group_key(target) if target else None
+            if target_key:
+                union(artwork_node, f"target:{target_key}")
+
+    return {artwork_id: find(artwork_node) for artwork_id, artwork_node in artwork_nodes}
+
+
+# ---------------------------------------------------------------------------
+# Training tables
+# ---------------------------------------------------------------------------
+
 def build_geographic_label_table(
     records,
     candidates_by_artwork,
@@ -859,31 +966,26 @@ def build_geographic_label_table(
     neighborhood_tolerance_km=2.0,
     city_tolerance_km=25.0,
 ):
-    """Build inspectable hierarchical labels without forcing unresolved cases negative."""
+    """
+    Build one row per (artwork, grouped candidate) with features and hierarchical label.
+
+    The candidates of an artwork are geocoded jointly (they disambiguate
+    each other); unresolved cases are labelled
+    "unevaluable" instead of negative. `table.attrs` keeps the place_status
+    and the CV group of every artwork, including artworks without candidates.
+    """
     rows = []
-    location_cache = {}
+    alternatives_cache = {}
     reverse_cache = {}
     cv_groups = _artwork_target_cv_groups(records)
     for record in records:
         record = _with_target_hierarchies(record, nominatim_client, reverse_cache)
-        artwork = record.get("artwork", record)
+        artwork = _artwork(record)
         artwork_id = artwork.get("id")
-        groups = group_candidates_by_place(candidates_by_artwork.get(artwork_id, []))
-        for occurrences in groups.values():
+        groups = list(group_candidates_by_place(candidates_by_artwork.get(artwork_id, [])).values())
+        locations = _geocode_artwork(groups, alternatives_cache, gazetteer_conn, nominatim_client)
+        for occurrences, location in zip(groups, locations):
             place_name = occurrences[0]["place"]
-            cache_key = place_name.casefold().strip()
-            if cache_key not in location_cache:
-                if gazetteer_conn is None and nominatim_client is None:
-                    location_cache[cache_key] = None
-                else:
-                    location_cache[cache_key] = resolve_location(
-                        place_name,
-                        gazetteer_conn,
-                        nominatim_client=nominatim_client,
-                        include_hierarchy=True,
-                    )
-            location = location_cache[cache_key]
-
             label = geographic_candidate_label(
                 record,
                 location,
@@ -891,12 +993,11 @@ def build_geographic_label_table(
                 neighborhood_tolerance_km=neighborhood_tolerance_km,
                 city_tolerance_km=city_tolerance_km,
             )
-            row = _add_geographic_features(candidate_features(occurrences), location)
-            row.update(artwork_context_features(artwork, place_name))
+            row = _hierarchical_candidate_features(occurrences, location, artwork)
             row.update({
                 "artwork_id": artwork_id,
                 "cv_group": cv_groups.get(artwork_id, f"artwork:{artwork_id}"),
-                "place_status": record.get("annotations", {}).get("place_status"),
+                "place_status": _place_status(record),
                 "place": place_name,
                 "label_level": label["level"],
                 "label_status": label["status"],
@@ -907,60 +1008,66 @@ def build_geographic_label_table(
             })
             rows.append(row)
     table = pd.DataFrame(rows)
-    table.attrs["artwork_statuses"] = {
-        (record.get("artwork", record)).get("id"):
-        record.get("annotations", {}).get("place_status")
-        for record in records
-    }
+    table.attrs["artwork_statuses"] = _artwork_statuses(records)
     table.attrs["artwork_cv_groups"] = cv_groups
     return table
 
 
+def label_candidate(record, place_name, fuzzy_threshold=0.85):
+    """
+    Legacy binary label: 1 if `place_name` fuzzy-matches an annotated depicted place.
+
+    Artworks that are not "depicted" (including "mentioned_only" and "none")
+    make all their candidates negative, which provides hard negatives such as
+    a creation place cited next to the real subject. "undeterminable"
+    artworks are excluded upstream by `build_training_table`.
+    """
+    annotations = record.get("annotations", {})
+    if annotations.get("place_status") != "depicted":
+        return 0
+    depicted_places = annotations.get("depicted_places") or [annotations.get("depicted_place") or {}]
+    return int(any(
+        fuzzy_match(place_name, depicted.get("name"), fuzzy_threshold)
+        for depicted in depicted_places
+    ))
+
+
 def build_training_table(records, candidates_by_artwork, fuzzy_threshold=0.85):
-    """
-    Construit une ligne par (œuvre, lieu fusionné), avec ses features
-    brutes et son label. C'est la table que train_logistic_model consomme.
-    """
+    """Legacy table: one row per (artwork, grouped candidate) with name-based label."""
     rows = []
     for record in records:
-        artwork = record.get("artwork", record)
-        artwork_id = artwork.get("id")
-        if record.get("annotations", {}).get("place_status") == "undeterminable":
+        if _place_status(record) == "undeterminable":
             continue
-
+        artwork_id = _artwork(record).get("id")
         groups = group_candidates_by_place(candidates_by_artwork.get(artwork_id, []))
         for occurrences in groups.values():
+            place_name = occurrences[0]["place"]  # Original spelling and case.
             row = candidate_features(occurrences)
             row["artwork_id"] = artwork_id
-            row["place"] = occurrences[0]["place"]  # orthographe/casse d'origine
-            row["label"] = label_candidate(record, occurrences[0]["place"], fuzzy_threshold)
+            row["place"] = place_name
+            row["label"] = label_candidate(record, place_name, fuzzy_threshold)
             rows.append(row)
-
     return pd.DataFrame(rows)
 
 
+# ---------------------------------------------------------------------------
+# Legacy name-based model
+# ---------------------------------------------------------------------------
+
 def _best_threshold(labels, probabilities, minimum_recall=0.8):
     """
-    Choisit, sur une courbe précision-rappel, le seuil le plus permissif
-    qui atteint encore minimum_recall (même logique que l'ancien paramètre
-    minimum_recall de optimize_heuristic_parameters) ; à défaut, le seuil
-    qui maximise le F1.
+    Most precise threshold reaching `minimum_recall` on the precision-recall
+    curve; if none reaches it, the threshold with the best F1.
     """
     precision, recall, thresholds = precision_recall_curve(labels, probabilities)
-    # precision_recall_curve renvoie un point de plus que thresholds
-    # (le point (precision=1, recall=0) sans seuil associé) : on aligne
-    # les tableaux en ignorant ce dernier point.
+    # The curve has one more point than thresholds (precision=1, recall=0).
     precision, recall = precision[:-1], recall[:-1]
 
     meets_target = recall >= minimum_recall
     if meets_target.any():
-        # Parmi les seuils qui respectent le rappel minimum, celui qui
-        # maximise la précision (donc minimise les faux positifs).
         candidate_idx = precision[meets_target].argmax()
         return float(thresholds[meets_target][candidate_idx])
 
-    # Personne n'atteint minimum_recall : repli sur le meilleur F1,
-    # comme l'ancien code repliait sur le meilleur rappel si besoin.
     f1_scores = 2 * precision * recall / (precision + recall + 1e-9)
     return float(thresholds[f1_scores.argmax()])
 
@@ -973,39 +1080,28 @@ def train_logistic_model(
     minimum_recall=0.8,
 ):
     """
-    Entraîne la régression logistique avec validation croisée GROUPÉE PAR
-    ŒUVRE (StratifiedGroupKFold, groupe = artwork_id) : sans ce
-    groupement, des candidats de la MÊME œuvre pourraient se retrouver à
-    la fois en train et en test, ce qui fuite de l'information d'une
-    manière que la validation croisée simple de l'ancien code
-    (_stratified_folds, qui stratifiait au niveau œuvre mais n'existait
-    que pour un seul label par œuvre) ne pouvait pas produire — ici
-    plusieurs lignes partagent le même artwork_id, donc le risque est réel
-    et StratifiedGroupKFold le prévient explicitement.
+    Train the legacy name-based logistic regression.
 
-    `regularization_values` est la SEULE dimension de recherche restante
-    (le paramètre C de la régression logistique) — une liste de quelques
-    valeurs suffit, plus besoin de grille combinatoire.
+    Cross-validation is grouped by artwork (StratifiedGroupKFold) so that
+    candidates of one artwork never sit in both train and test. C is chosen
+    by out-of-fold F1, the threshold on the out-of-fold probabilities, and
+    the final model is refitted on all rows.
 
-    Retourne un dict avec le modèle final, le seuil choisi, les
-    coefficients appris (pour comparaison avec les anciens poids à la
-    main) et les métriques de validation croisée hors-échantillon.
+    Returns the model, chosen C and threshold, coefficients and out-of-fold
+    metrics.
     """
     X = table[FEATURE_COLUMNS].values
     y = table["label"].values
     groups = table["artwork_id"].astype(str).values
 
-    n_groups = len(set(groups))
-    effective_splits = min(n_splits, n_groups)
+    effective_splits = min(n_splits, len(set(groups)))
     if effective_splits < 2:
         raise ValueError("Au moins 2 œuvres distinctes sont nécessaires pour la validation croisée.")
-
     cv = StratifiedGroupKFold(n_splits=effective_splits, shuffle=True, random_state=random_state)
 
     best_C = None
     best_f1 = -1.0
     best_oof_probabilities = None
-
     for C in regularization_values:
         oof_probabilities = pd.Series(index=table.index, dtype=float)
         for train_idx, test_idx in cv.split(X, y, groups):
@@ -1014,32 +1110,24 @@ def train_logistic_model(
             oof_probabilities.iloc[test_idx] = clf.predict_proba(X[test_idx])[:, 1]
 
         precision, recall, _ = precision_recall_curve(y, oof_probabilities.values)
-        f1_scores = 2 * precision * recall / (precision + recall + 1e-9)
-        f1 = float(f1_scores.max())
+        f1 = float((2 * precision * recall / (precision + recall + 1e-9)).max())
         if f1 > best_f1:
             best_f1, best_C = f1, C
             best_oof_probabilities = oof_probabilities.values.copy()
 
-    # Seuil choisi sur les probabilités HORS-ÉCHANTILLON du meilleur C,
-    # pas sur un ré-ajustement complet : évite d'être optimiste sur le
-    # seuil comme le serait un seuil calé sur les données d'entraînement.
+    # Threshold chosen on out-of-fold probabilities, not on a refit, to avoid
+    # an optimistic threshold.
     threshold = _best_threshold(y, best_oof_probabilities, minimum_recall=minimum_recall)
-
     oof_predictions = best_oof_probabilities >= threshold
     true_positives = int(((oof_predictions == 1) & (y == 1)).sum())
     false_positives = int(((oof_predictions == 1) & (y == 0)).sum())
     false_negatives = int(((oof_predictions == 0) & (y == 1)).sum())
     true_negatives = int(((oof_predictions == 0) & (y == 0)).sum())
-    precision = true_positives / (true_positives + false_positives) if (true_positives + false_positives) else 0.0
-    recall = true_positives / (true_positives + false_negatives) if (true_positives + false_negatives) else 0.0
-    f1 = 2 * precision * recall / (precision + recall) if (precision + recall) else 0.0
+    precision = _ratio(true_positives, true_positives + false_positives)
+    recall = _ratio(true_positives, true_positives + false_negatives)
 
-    # Modèle final : ré-entraîné sur TOUTES les données avec le C retenu,
-    # pour la production / les coefficients à rapporter. Les métriques
-    # ci-dessus restent celles, plus honnêtes, de la validation croisée.
     final_clf = LogisticRegression(C=best_C, class_weight="balanced", max_iter=1000)
     final_clf.fit(X, y)
-
     return {
         "model": final_clf,
         "feature_columns": FEATURE_COLUMNS,
@@ -1054,10 +1142,39 @@ def train_logistic_model(
             "false_negatives": false_negatives,
             "precision": precision,
             "recall": recall,
-            "f1": f1,
+            "f1": _f1(precision, recall),
         },
     }
 
+
+def predict_with_model(records, candidates_by_artwork, model):
+    """
+    Apply the legacy model: for each artwork id, candidates sorted by probability.
+
+    The output keeps the historical key "score_heuristique" so that
+    `evaluate_binary_predictions` works unchanged.
+    """
+    clf = model["model"]
+    feature_columns = model["feature_columns"]
+    results = {}
+    for record in records:
+        artwork_id = _artwork(record).get("id")
+        places = []
+        for occurrences in group_candidates_by_place(candidates_by_artwork.get(artwork_id, [])).values():
+            row = candidate_features(occurrences)
+            probability = float(clf.predict_proba([[row[col] for col in feature_columns]])[0, 1])
+            places.append({
+                "place": occurrences[0]["place"],
+                "score_heuristique": probability,
+                "champs": sorted({c["field"] for c in occurrences}),
+            })
+        results[artwork_id] = sorted(places, key=lambda p: p["score_heuristique"], reverse=True)
+    return results
+
+
+# ---------------------------------------------------------------------------
+# Hierarchical model: training
+# ---------------------------------------------------------------------------
 
 def _threshold_for_precision(
     labels,
@@ -1067,6 +1184,12 @@ def _threshold_for_precision(
     minimum_predictions,
     minimum_prediction_groups,
 ):
+    """Threshold with the best recall whose precision reaches the target.
+
+    Only thresholds accepting at least `minimum_predictions` rows from
+    `minimum_prediction_groups` CV groups are considered. Returns the
+    threshold with its statistics, or None if no threshold qualifies.
+    """
     best = None
     for threshold in sorted(set(float(value) for value in probabilities), reverse=True):
         accepted = probabilities >= threshold
@@ -1078,27 +1201,119 @@ def _threshold_for_precision(
         precision = true_positives / prediction_count
         if precision < target_precision:
             continue
-        recall = true_positives / int((labels == 1).sum())
         candidate = {
             "threshold": threshold,
             "precision": precision,
-            "recall": recall,
+            "recall": true_positives / int((labels == 1).sum()),
             "support": prediction_count,
             "prediction_groups": accepted_groups,
             "true_positives": true_positives,
             "false_positives": prediction_count - true_positives,
         }
-        if best is None or (
-            candidate["recall"],
-            candidate["precision"],
-            candidate["threshold"],
-        ) > (
-            best["recall"],
-            best["precision"],
-            best["threshold"],
-        ):
+        rank = (candidate["recall"], candidate["precision"], candidate["threshold"])
+        if best is None or rank > (best["recall"], best["precision"], best["threshold"]):
             best = candidate
     return best
+
+
+def _abstaining_level(status, target_precision, **details):
+    """Per-level entry of a level that does not predict."""
+    return {"status": status, "target_precision": target_precision, **details, "model": None, "threshold": None}
+
+
+def _best_regularization(X, labels, groups, n_splits, random_state, regularization_values, threshold_options):
+    """Try each C with grouped CV and keep the one whose precision-constrained threshold has the best recall."""
+    cv = StratifiedGroupKFold(n_splits=n_splits, shuffle=True, random_state=random_state)
+    best = None
+    for C in regularization_values:
+        oof = np.full(len(labels), np.nan)
+        try:
+            for train_idx, test_idx in cv.split(X, labels, groups):
+                classifier = LogisticRegression(C=C, class_weight="balanced", max_iter=1000)
+                classifier.fit(X[train_idx], labels[train_idx])
+                oof[test_idx] = classifier.predict_proba(X[test_idx])[:, 1]
+        except ValueError:
+            continue
+        if not np.isfinite(oof).all():
+            continue
+        selected = _threshold_for_precision(labels, oof, groups, **threshold_options)
+        if selected is None:
+            continue
+        candidate = {**selected, "C": C, "oof_probabilities": oof}
+        rank = (candidate["recall"], candidate["precision"], -candidate["false_positives"])
+        if best is None or rank > (best["recall"], best["precision"], -best["false_positives"]):
+            best = candidate
+    return best
+
+
+def _fit_level(level, matrix, statuses, label_levels, groups, target_precision, options):
+    """Train the classifier of one level, or explain why the level abstains."""
+    positive_levels = _levels_up_to(level)
+    row_indices = np.flatnonzero((statuses == "negative") | (statuses == "match"))
+    level_labels = np.asarray([
+        int(statuses[index] == "match" and label_levels[index] in positive_levels)
+        for index in row_indices
+    ])
+    level_groups = groups[row_indices]
+    positive_group_count = len(set(level_groups[level_labels == 1]))
+    negative_group_count = len(set(level_groups[level_labels == 0]))
+
+    if positive_group_count < options["minimum_positive_groups"]:
+        return _abstaining_level(
+            "insufficient_positive_groups",
+            target_precision,
+            positive_groups=positive_group_count,
+            minimum_positive_groups=options["minimum_positive_groups"],
+        )
+    if negative_group_count < 2:
+        return _abstaining_level("insufficient_negative_groups", target_precision, negative_groups=negative_group_count)
+    n_level_splits = min(options["n_splits"], positive_group_count, negative_group_count)
+    if n_level_splits < 2:
+        return _abstaining_level("insufficient_cv_groups", target_precision)
+
+    X = matrix[row_indices]
+    best = _best_regularization(
+        X,
+        level_labels,
+        level_groups,
+        n_level_splits,
+        options["random_state"],
+        options["regularization_values"],
+        {
+            "target_precision": target_precision,
+            "minimum_predictions": options["minimum_predictions"],
+            "minimum_prediction_groups": options["minimum_prediction_groups"],
+        },
+    )
+    if best is None:
+        return _abstaining_level(
+            "precision_target_unmet",
+            target_precision,
+            positive_groups=positive_group_count,
+            negative_groups=negative_group_count,
+        )
+
+    final_classifier = LogisticRegression(C=best["C"], class_weight="balanced", max_iter=1000)
+    final_classifier.fit(X, level_labels)
+    return {
+        "status": "active",
+        "model": final_classifier,
+        "C": best["C"],
+        "threshold": best["threshold"],
+        "target_precision": target_precision,
+        "oof_precision": best["precision"],
+        "oof_recall": best["recall"],
+        "oof_support": best["support"],
+        "oof_prediction_groups": best["prediction_groups"],
+        "positive_groups": positive_group_count,
+        "negative_groups": negative_group_count,
+        "cv_splits": n_level_splits,
+        "false_positives": best["false_positives"],
+        "true_positives": best["true_positives"],
+        # Used below for the work-level metrics, then removed.
+        "oof_row_indices": row_indices.tolist(),
+        "oof_probabilities": best["oof_probabilities"].tolist(),
+    }
 
 
 def train_hierarchical_model(
@@ -1115,15 +1330,15 @@ def train_hierarchical_model(
 ):
     """Fit one grouped-CV classifier per geographic precision level.
 
-    Thresholds are chosen only when out-of-fold decisions meet the requested
-    empirical precision and support floors. Under-supported levels abstain.
+    The classifier of a level treats as positive every candidate matching at
+    that level or a more specific one. Thresholds are chosen only when
+    out-of-fold decisions meet the requested empirical precision and support
+    floors. Under-supported levels abstain.
     """
     if table.empty:
         raise ValueError("Geographic label table is empty.")
     target_precisions = target_precisions or GEOGRAPHIC_TARGET_PRECISION
-    feature_columns = [
-        column for column in GEOGRAPHIC_FEATURE_COLUMNS if column in table.columns
-    ]
+    feature_columns = [column for column in GEOGRAPHIC_FEATURE_COLUMNS if column in table.columns]
     if len(feature_columns) != len(GEOGRAPHIC_FEATURE_COLUMNS):
         missing = sorted(set(GEOGRAPHIC_FEATURE_COLUMNS) - set(feature_columns))
         raise ValueError(f"Missing geographic model features: {missing}")
@@ -1132,139 +1347,20 @@ def train_hierarchical_model(
     statuses = table["label_status"].to_numpy()
     label_levels = table["label_level"].to_numpy()
     groups = table["cv_group"].astype(str).to_numpy()
-    specificity = {level: index for index, level in enumerate(GEOGRAPHIC_LEVELS)}
-    per_level = {}
-
-    for level in GEOGRAPHIC_LEVELS:
-        positive_levels = {
-            candidate_level
-            for candidate_level in GEOGRAPHIC_LEVELS
-            if specificity[candidate_level] <= specificity[level]
-        }
-        eligible = (statuses == "negative") | (statuses == "match")
-        row_indices = np.flatnonzero(eligible)
-        level_labels = np.asarray([
-            int(
-                statuses[index] == "match"
-                and label_levels[index] in positive_levels
-            )
-            for index in row_indices
-        ])
-        level_groups = groups[row_indices]
-        positive_group_count = len(set(level_groups[level_labels == 1]))
-        negative_group_count = len(set(level_groups[level_labels == 0]))
-        target_precision = float(target_precisions[level])
-
-        if positive_group_count < minimum_positive_groups:
-            per_level[level] = {
-                "status": "insufficient_positive_groups",
-                "target_precision": target_precision,
-                "positive_groups": positive_group_count,
-                "minimum_positive_groups": minimum_positive_groups,
-                "model": None,
-                "threshold": None,
-            }
-            continue
-        if negative_group_count < 2:
-            per_level[level] = {
-                "status": "insufficient_negative_groups",
-                "target_precision": target_precision,
-                "negative_groups": negative_group_count,
-                "model": None,
-                "threshold": None,
-            }
-            continue
-
-        n_level_splits = min(n_splits, positive_group_count, negative_group_count)
-        if n_level_splits < 2:
-            per_level[level] = {
-                "status": "insufficient_cv_groups",
-                "target_precision": target_precision,
-                "model": None,
-                "threshold": None,
-            }
-            continue
-
-        X = matrix[row_indices]
-        best = None
-        cv = StratifiedGroupKFold(
-            n_splits=n_level_splits,
-            shuffle=True,
-            random_state=random_state,
+    options = {
+        "n_splits": n_splits,
+        "random_state": random_state,
+        "regularization_values": regularization_values,
+        "minimum_positive_groups": minimum_positive_groups,
+        "minimum_prediction_groups": minimum_prediction_groups,
+        "minimum_predictions": minimum_predictions,
+    }
+    per_level = {
+        level: _fit_level(
+            level, matrix, statuses, label_levels, groups, float(target_precisions[level]), options
         )
-        for C in regularization_values:
-            oof = np.full(len(row_indices), np.nan)
-            try:
-                folds = cv.split(X, level_labels, level_groups)
-                for train_idx, test_idx in folds:
-                    classifier = LogisticRegression(
-                        C=C,
-                        class_weight="balanced",
-                        max_iter=1000,
-                    )
-                    classifier.fit(X[train_idx], level_labels[train_idx])
-                    oof[test_idx] = classifier.predict_proba(X[test_idx])[:, 1]
-            except ValueError:
-                continue
-            if not np.isfinite(oof).all():
-                continue
-            selected = _threshold_for_precision(
-                level_labels,
-                oof,
-                level_groups,
-                target_precision,
-                minimum_predictions,
-                minimum_prediction_groups,
-            )
-            if selected is None:
-                continue
-            candidate = {**selected, "C": C, "oof_probabilities": oof}
-            if best is None or (
-                candidate["recall"],
-                candidate["precision"],
-                -candidate["false_positives"],
-            ) > (
-                best["recall"],
-                best["precision"],
-                -best["false_positives"],
-            ):
-                best = candidate
-
-        if best is None:
-            per_level[level] = {
-                "status": "precision_target_unmet",
-                "target_precision": target_precision,
-                "positive_groups": positive_group_count,
-                "negative_groups": negative_group_count,
-                "model": None,
-                "threshold": None,
-            }
-            continue
-
-        final_classifier = LogisticRegression(
-            C=best["C"],
-            class_weight="balanced",
-            max_iter=1000,
-        )
-        final_classifier.fit(X, level_labels)
-        per_level[level] = {
-            "status": "active",
-            "model": final_classifier,
-            "C": best["C"],
-            "threshold": best["threshold"],
-            "target_precision": target_precision,
-            "oof_precision": best["precision"],
-            "oof_recall": best["recall"],
-            "oof_support": best["support"],
-            "oof_prediction_groups": best["prediction_groups"],
-            "positive_groups": positive_group_count,
-            "negative_groups": negative_group_count,
-            "cv_splits": n_level_splits,
-            "false_positives": best["false_positives"],
-            "true_positives": best["true_positives"],
-            "oof_row_indices": row_indices.tolist(),
-            "oof_probabilities": best["oof_probabilities"].tolist(),
-        }
+        for level in GEOGRAPHIC_LEVELS
+    }
 
     active_levels = [level for level in GEOGRAPHIC_LEVELS if per_level[level]["status"] == "active"]
     model_bundle = {
@@ -1284,16 +1380,13 @@ def train_hierarchical_model(
     oof_scores_by_row = defaultdict(dict)
     for level in active_levels:
         level_model = per_level[level]
-        for row_index, probability in zip(
-            level_model["oof_row_indices"],
-            level_model["oof_probabilities"],
-        ):
+        for row_index, probability in zip(level_model["oof_row_indices"], level_model["oof_probabilities"]):
             oof_scores_by_row[row_index][level] = probability
     model_bundle["threshold_tuning_work_metrics"] = evaluate_hierarchical_work_predictions(
         table,
         oof_scores_by_row,
         per_level,
-        specificity,
+        _SPECIFICITY,
         records=table.attrs.get("artwork_statuses"),
     )
     model_bundle["minimum_work_recall_met"] = (
@@ -1305,16 +1398,23 @@ def train_hierarchical_model(
     return model_bundle
 
 
+# ---------------------------------------------------------------------------
+# Hierarchical model: evaluation
+# ---------------------------------------------------------------------------
+
 def _select_hierarchical_level(candidate_level, level_scores, levels, specificity):
+    """Most specific active level whose threshold is crossed for this candidate, or None.
+
+    A level coarser than the candidate's own level can be chosen (a building
+    can be predicted at city level), never a finer one.
+    """
     candidate_level_rank = specificity.get(candidate_level)
     if candidate_level_rank is None:
         return None
     decisions = []
     for level, probability in level_scores.items():
         level_model = levels[level]
-        if level_model["status"] != "active":
-            continue
-        if candidate_level_rank > specificity[level]:
+        if level_model["status"] != "active" or candidate_level_rank > specificity[level]:
             continue
         if probability >= level_model["threshold"]:
             decisions.append((specificity[level], -probability, level))
@@ -1328,7 +1428,14 @@ def evaluate_hierarchical_work_predictions(
     specificity,
     records=None,
 ):
-    """Compute correct-location precision/recall for one hierarchical choice per artwork."""
+    """Compute correct-location precision/recall for one hierarchical choice per artwork.
+
+    `records` may be a list of records, a precomputed {artwork_id: place_status}
+    dict or None (statuses then come from the table). A depicted artwork
+    predicted at the wrong place counts as both a false positive and a false
+    negative ("mislocated"). "undeterminable" artworks are left out: no
+    decision about them can be judged right or wrong.
+    """
     rows_by_artwork = defaultdict(list)
     for row_index, row in table.iterrows():
         rows_by_artwork[row["artwork_id"]].append((row_index, row))
@@ -1336,46 +1443,35 @@ def evaluate_hierarchical_work_predictions(
     if isinstance(records, dict):
         artwork_statuses = records
     elif records is None:
-        artwork_statuses = {
-            row["artwork_id"]: row.get("place_status")
-            for _, row in table.iterrows()
-        }
+        artwork_statuses = {row["artwork_id"]: row.get("place_status") for _, row in table.iterrows()}
     else:
-        artwork_statuses = {
-            (record.get("artwork", record)).get("id"):
-            record.get("annotations", {}).get("place_status")
-            for record in records
-        }
+        artwork_statuses = _artwork_statuses(records)
 
     true_positives = false_positives = true_negatives = false_negatives = 0
     mislocated_count = 0
+    evaluated_artworks = 0
     for artwork_id, actual_status in artwork_statuses.items():
-        candidates = []
+        if actual_status == "undeterminable":
+            continue
+        evaluated_artworks += 1
+        decisions = []
         for row_index, row in rows_by_artwork.get(artwork_id, []):
             row_scores = scores_by_row.get(row_index, {})
-            selected_level = _select_hierarchical_level(
-                row.get("candidate_level"),
-                row_scores,
-                levels,
-                specificity,
+            selected_level = _select_hierarchical_level(row.get("candidate_level"), row_scores, levels, specificity)
+            if selected_level is None:
+                continue
+            actual_level = row.get("label_level")
+            correct_at_level = (
+                row.get("label_status") == "match"
+                and actual_level in specificity
+                and specificity[actual_level] <= specificity[selected_level]
             )
-            if selected_level is not None:
-                actual_level = row.get("label_level")
-                actual_is_correct_at_level = (
-                    row.get("label_status") == "match"
-                    and actual_level in specificity
-                    and specificity[actual_level] <= specificity[selected_level]
-                )
-                candidates.append((
-                    specificity[selected_level],
-                    -row_scores[selected_level],
-                    actual_is_correct_at_level,
-                ))
-        selected = min(candidates) if candidates else None
+            decisions.append((specificity[selected_level], -row_scores[selected_level], correct_at_level))
+
+        selected = min(decisions) if decisions else None
         actual_depicted = actual_status == "depicted"
         predicted = selected is not None
-        correct_location = predicted and selected[2]
-        if actual_depicted and correct_location:
+        if actual_depicted and predicted and selected[2]:
             true_positives += 1
         elif actual_depicted:
             false_negatives += 1
@@ -1387,14 +1483,8 @@ def evaluate_hierarchical_work_predictions(
         else:
             true_negatives += 1
 
-    precision = (
-        true_positives / (true_positives + false_positives)
-        if true_positives + false_positives else 0.0
-    )
-    recall = (
-        true_positives / (true_positives + false_negatives)
-        if true_positives + false_negatives else 0.0
-    )
+    precision = _ratio(true_positives, true_positives + false_positives)
+    recall = _ratio(true_positives, true_positives + false_negatives)
     return {
         "true_positives": true_positives,
         "false_positives": false_positives,
@@ -1403,15 +1493,54 @@ def evaluate_hierarchical_work_predictions(
         "mislocated_count": mislocated_count,
         "precision": precision,
         "recall": recall,
-        "f1": 2 * precision * recall / (precision + recall) if precision + recall else 0.0,
-        "accuracy": (
-            (true_positives + true_negatives) / len(artwork_statuses)
-            if artwork_statuses else 0.0
-        ),
-        "artwork_count": len(artwork_statuses),
+        "f1": _f1(precision, recall),
+        "accuracy": _ratio(true_positives + true_negatives, evaluated_artworks),
+        "artwork_count": evaluated_artworks,
         "depicted_artwork_count": true_positives + false_negatives,
         "metrics_are_threshold_tuning_estimates": True,
     }
+
+
+def _score_rows(model, table):
+    """Score every row of `table` with each active level compatible with its candidate level."""
+    scores_by_row = defaultdict(dict)
+    if table.empty:
+        return scores_by_row
+    feature_columns = model.get("feature_columns", GEOGRAPHIC_FEATURE_COLUMNS)
+    matrix = table[feature_columns].fillna(0).to_numpy(dtype=float)
+    for row_position, (_, row) in enumerate(table.iterrows()):
+        candidate_level = row.get("candidate_level")
+        if candidate_level not in _SPECIFICITY:
+            continue
+        for level, level_model in model["levels"].items():
+            if level_model["status"] != "active" or _SPECIFICITY[candidate_level] > _SPECIFICITY[level]:
+                continue
+            scores_by_row[row_position][level] = float(
+                level_model["model"].predict_proba(matrix[row_position:row_position + 1])[0][1]
+            )
+    return scores_by_row
+
+
+def _count_level_decisions(level_totals, level_prediction_groups, model, table, scores_by_row):
+    """Add the candidate-level confusion counts of one test fold, per level."""
+    for row_position, (_, row) in enumerate(table.iterrows()):
+        if row.get("label_status") == "unevaluable":
+            continue
+        for level, probability in scores_by_row.get(row_position, {}).items():
+            counts = level_totals[level]
+            actual_positive = (
+                row.get("label_status") == "match" and row.get("label_level") in _levels_up_to(level)
+            )
+            predicted_positive = probability >= model["levels"][level]["threshold"]
+            counts["evaluated"] += 1
+            if actual_positive:
+                counts["actual_positives"] += 1
+            if predicted_positive:
+                counts["predictions"] += 1
+                level_prediction_groups[level].add(str(row.get("cv_group")))
+                counts["true_positives" if actual_positive else "false_positives"] += 1
+            elif actual_positive:
+                counts["false_negatives"] += 1
 
 
 def evaluate_hierarchical_grouped_cv(
@@ -1422,17 +1551,18 @@ def evaluate_hierarchical_grouped_cv(
     random_state=42,
     training_options=None,
 ):
-    """Evaluate a full level/threshold selection process on outer grouped folds."""
-    artwork_statuses = {
-        (record.get("artwork", record)).get("id"):
-        record.get("annotations", {}).get("place_status")
-        for record in records
-    }
+    """Evaluate a full level/threshold selection process on outer grouped folds.
+
+    For each outer fold, `train_hierarchical_model` (thresholds included) is
+    fitted on the training artworks only and applied to the test artworks.
+    Returns work-level metrics and, per level, the candidate-level precision
+    used to decide which levels are deployable.
+    """
+    artwork_statuses = _artwork_statuses(records)
     artwork_groups = table.attrs.get("artwork_cv_groups") or _artwork_target_cv_groups(records)
     artwork_ids = list(artwork_statuses)
     group_values = [str(artwork_groups.get(artwork_id, f"artwork:{artwork_id}")) for artwork_id in artwork_ids]
-    unique_groups = len(set(group_values))
-    effective_splits = min(n_splits, unique_groups)
+    effective_splits = min(n_splits, len(set(group_values)))
     if effective_splits < 2:
         raise ValueError("At least two geographic CV groups are required.")
 
@@ -1471,59 +1601,15 @@ def evaluate_hierarchical_grouped_cv(
         else:
             model = train_hierarchical_model(train_table, **training_options)
 
-        scores_by_row = defaultdict(dict)
-        if not test_table.empty:
-            feature_columns = model.get("feature_columns", GEOGRAPHIC_FEATURE_COLUMNS)
-            matrix = test_table[feature_columns].fillna(0).to_numpy(dtype=float)
-            for row_position, (_, row) in enumerate(test_table.iterrows()):
-                candidate_level = row.get("candidate_level")
-                candidate_level_rank = GEOGRAPHIC_LEVELS.index(candidate_level) if candidate_level in GEOGRAPHIC_LEVELS else None
-                if candidate_level_rank is None:
-                    continue
-                for level, level_model in model["levels"].items():
-                    if level_model["status"] != "active":
-                        continue
-                    if candidate_level_rank > GEOGRAPHIC_LEVELS.index(level):
-                        continue
-                    scores_by_row[row_position][level] = float(
-                        level_model["model"].predict_proba(matrix[row_position:row_position + 1])[0][1]
-                    )
-
+        scores_by_row = _score_rows(model, test_table)
         metrics = evaluate_hierarchical_work_predictions(
             test_table,
             scores_by_row,
             model["levels"],
-            {level: index for index, level in enumerate(GEOGRAPHIC_LEVELS)},
+            _SPECIFICITY,
             records={artwork_id: artwork_statuses[artwork_id] for artwork_id in test_ids},
         )
-        for row_position, (_, row) in enumerate(test_table.iterrows()):
-            if row.get("label_status") == "unevaluable":
-                continue
-            row_scores = scores_by_row.get(row_position, {})
-            for level, probability in row_scores.items():
-                level_model = model["levels"][level]
-                cumulative_positive_levels = {
-                    candidate_level
-                    for candidate_level in GEOGRAPHIC_LEVELS
-                    if GEOGRAPHIC_LEVELS.index(candidate_level) <= GEOGRAPHIC_LEVELS.index(level)
-                }
-                actual_positive = (
-                    row.get("label_status") == "match"
-                    and row.get("label_level") in cumulative_positive_levels
-                )
-                predicted_positive = probability >= level_model["threshold"]
-                level_totals[level]["evaluated"] += 1
-                if actual_positive:
-                    level_totals[level]["actual_positives"] += 1
-                if predicted_positive:
-                    level_totals[level]["predictions"] += 1
-                    level_prediction_groups[level].add(str(row.get("cv_group")))
-                    if actual_positive:
-                        level_totals[level]["true_positives"] += 1
-                    else:
-                        level_totals[level]["false_positives"] += 1
-                elif actual_positive:
-                    level_totals[level]["false_negatives"] += 1
+        _count_level_decisions(level_totals, level_prediction_groups, model, test_table, scores_by_row)
         for metric in (
             "true_positives",
             "false_positives",
@@ -1538,8 +1624,7 @@ def evaluate_hierarchical_grouped_cv(
             "fold": fold_number,
             "test_artworks": len(test_ids),
             "active_levels": [
-                level for level in GEOGRAPHIC_LEVELS
-                if model["levels"][level]["status"] == "active"
+                level for level in GEOGRAPHIC_LEVELS if model["levels"][level]["status"] == "active"
             ],
             "metrics": metrics,
         })
@@ -1548,8 +1633,8 @@ def evaluate_hierarchical_grouped_cv(
     fp = totals["false_positives"]
     fn = totals["false_negatives"]
     tn = totals["true_negatives"]
-    precision = tp / (tp + fp) if tp + fp else 0.0
-    recall = tp / (tp + fn) if tp + fn else 0.0
+    precision = _ratio(tp, tp + fp)
+    recall = _ratio(tp, tp + fn)
     per_level = {}
     for level, counts in level_totals.items():
         predictions = counts["predictions"]
@@ -1574,8 +1659,8 @@ def evaluate_hierarchical_grouped_cv(
         "mislocated_count": totals["mislocated_count"],
         "precision": precision,
         "recall": recall,
-        "f1": 2 * precision * recall / (precision + recall) if precision + recall else 0.0,
-        "accuracy": (tp + tn) / totals["artwork_count"] if totals["artwork_count"] else 0.0,
+        "f1": _f1(precision, recall),
+        "accuracy": _ratio(tp + tn, totals["artwork_count"]),
         "artwork_count": totals["artwork_count"],
         "depicted_artwork_count": totals["depicted_artwork_count"],
         "metrics_by_level": per_level,
@@ -1583,6 +1668,50 @@ def evaluate_hierarchical_grouped_cv(
         "thresholds_tuned_inside_outer_training_folds": True,
         "folds": folds,
     }
+
+
+# ---------------------------------------------------------------------------
+# Hierarchical model: prediction
+# ---------------------------------------------------------------------------
+
+def _level_decisions(feature_row, candidate_level, model, specificity):
+    """Score a candidate with every usable level.
+
+    Returns (level_scores, decisions): the probability of each deployable
+    level compatible with the candidate's level, and the levels whose
+    threshold is crossed, most specific first.
+    """
+    level_scores = {}
+    decisions = []
+    candidate_level_rank = specificity.get(candidate_level)
+    if candidate_level_rank is None:
+        return level_scores, decisions
+    deployable_levels = model.get("deployable_levels")
+    for level in model["specificity_order"]:
+        level_model = model["levels"][level]
+        if level_model["status"] != "active":
+            continue
+        if deployable_levels is not None and level not in deployable_levels:
+            continue
+        if candidate_level_rank > specificity[level]:
+            continue
+        probability = float(level_model["model"].predict_proba(feature_row)[0][1])
+        level_scores[level] = probability
+        if probability >= level_model["threshold"]:
+            decisions.append({
+                "level": level,
+                "model_score": probability,
+                "confidence": level_model.get("outer_cv_precision", level_model.get("oof_precision")),
+                "confidence_basis": "outer_grouped_cv_empirical_precision",
+                "confidence_support": level_model.get(
+                    "outer_cv_prediction_groups",
+                    level_model.get("oof_prediction_groups"),
+                ),
+                "target_precision": level_model["target_precision"],
+                "threshold": level_model["threshold"],
+            })
+    decisions.sort(key=lambda decision: (specificity[decision["level"]], -decision["model_score"]))
+    return level_scores, decisions
 
 
 def predict_with_hierarchical_model(
@@ -1594,107 +1723,44 @@ def predict_with_hierarchical_model(
     nominatim_client=None,
     geocode_top_k=3,
 ):
-    """Predict the most specific sufficiently precise geographic level."""
+    """Predict the most specific sufficiently precise geographic level.
+
+    Only the `geocode_top_k` candidates with the best NER score are geocoded,
+    jointly so that they disambiguate each other.
+    For each artwork, returns `place_status_predicted`, the accepted
+    `prediction` (or None) and every scored candidate.
+    """
     if geocode_top_k < 1:
         raise ValueError("geocode_top_k must be at least 1.")
 
     feature_columns = model["feature_columns"]
-    levels = model["levels"]
-    specificity = {
-        level: index for index, level in enumerate(model["specificity_order"])
-    }
-    location_cache = {}
+    specificity = {level: index for index, level in enumerate(model["specificity_order"])}
+    alternatives_cache = {}
     results = {}
 
     for record in records:
-        artwork = record.get("artwork", record)
+        artwork = _artwork(record)
         artwork_id = artwork.get("id")
-        grouped_candidates = list(
-            group_candidates_by_place(
-                candidates_by_artwork.get(artwork_id, [])
-            ).values()
-        )
-        grouped_candidates.sort(
-            key=lambda occurrences: max(
-                occurrence.get("score_ner", 0.0) for occurrence in occurrences
-            ),
+        grouped_candidates = sorted(
+            group_candidates_by_place(candidates_by_artwork.get(artwork_id, [])).values(),
+            key=lambda occurrences: max(occurrence.get("score_ner", 0.0) for occurrence in occurrences),
             reverse=True,
         )
 
+        geocoded = grouped_candidates[:geocode_top_k]
+        locations = _geocode_artwork(geocoded, alternatives_cache, gazetteer_conn, nominatim_client)
+        locations += [None] * (len(grouped_candidates) - len(geocoded))
+
         scored_candidates = []
-        for candidate_index, occurrences in enumerate(grouped_candidates):
+        for occurrences, location in zip(grouped_candidates, locations):
             place_name = occurrences[0]["place"]
-            location = None
-            if candidate_index < geocode_top_k:
-                cache_key = place_name.casefold().strip()
-                if cache_key not in location_cache:
-                    if gazetteer_conn is not None or nominatim_client is not None:
-                        location_cache[cache_key] = resolve_location(
-                            place_name,
-                            gazetteer_conn,
-                            nominatim_client=nominatim_client,
-                            include_hierarchy=True,
-                        )
-                    else:
-                        location_cache[cache_key] = None
-                location = location_cache[cache_key]
-
-            features = _add_geographic_features(
-                candidate_features(occurrences),
-                location,
-            )
-            features.update(artwork_context_features(artwork, place_name))
-            feature_row = np.asarray(
-                [[features[column] for column in feature_columns]],
-                dtype=float,
-            )
+            features = _hierarchical_candidate_features(occurrences, location, artwork)
+            feature_row = np.asarray([[features[column] for column in feature_columns]], dtype=float)
             candidate_level = _candidate_geographic_level(location)
-            candidate_level_rank = specificity.get(candidate_level)
-            level_scores = {}
-            decisions = []
-
-            if candidate_level_rank is not None:
-                for level in model["specificity_order"]:
-                    level_model = levels[level]
-                    if level_model["status"] != "active":
-                        continue
-                    deployable_levels = model.get("deployable_levels")
-                    if deployable_levels is not None and level not in deployable_levels:
-                        continue
-                    if candidate_level_rank > specificity[level]:
-                        continue
-                    probability = float(
-                        level_model["model"].predict_proba(feature_row)[0][1]
-                    )
-                    level_scores[level] = probability
-                    if probability >= level_model["threshold"]:
-                        decisions.append({
-                            "level": level,
-                            "model_score": probability,
-                            "confidence": level_model.get(
-                                "outer_cv_precision",
-                                level_model.get("oof_precision"),
-                            ),
-                            "confidence_basis": "outer_grouped_cv_empirical_precision",
-                            "confidence_support": level_model.get(
-                                "outer_cv_prediction_groups",
-                                level_model.get("oof_prediction_groups"),
-                            ),
-                            "target_precision": level_model["target_precision"],
-                            "threshold": level_model["threshold"],
-                        })
-
-            decisions.sort(
-                key=lambda decision: (
-                    specificity[decision["level"]],
-                    -decision["model_score"],
-                )
-            )
+            level_scores, decisions = _level_decisions(feature_row, candidate_level, model, specificity)
             scored_candidates.append({
                 "place": place_name,
-                "score_ner_max": max(
-                    occurrence.get("score_ner", 0.0) for occurrence in occurrences
-                ),
+                "score_ner_max": max(occurrence.get("score_ner", 0.0) for occurrence in occurrences),
                 "geolocation": location,
                 "candidate_level": candidate_level,
                 "level_scores": level_scores,
@@ -1702,64 +1768,32 @@ def predict_with_hierarchical_model(
                 "champs": sorted({occurrence["field"] for occurrence in occurrences}),
             })
 
-        accepted = [
-            candidate for candidate in scored_candidates if candidate["decision"]
-        ]
-        accepted.sort(
+        accepted = sorted(
+            (candidate for candidate in scored_candidates if candidate["decision"]),
             key=lambda candidate: (
                 specificity[candidate["decision"]["level"]],
                 -candidate["decision"]["model_score"],
                 -candidate["score_ner_max"],
-            )
+            ),
         )
         results[artwork_id] = {
             "place_status_predicted": bool(accepted),
             "prediction": accepted[0] if accepted else None,
             "candidates": scored_candidates,
         }
-
     return results
 
 
-def predict_with_model(records, candidates_by_artwork, model):
-    """
-    Applique le modèle entraîné à toutes les œuvres et renvoie, pour
-    chaque artwork_id, la liste des lieux candidats triés par probabilité
-    décroissante — même structure de sortie que l'ancien
-    merge_candidate_places (clé "score_heuristique"), pour rester
-    compatible avec evaluate_binary_predictions sans modification.
-    """
-    clf = model["model"]
-    feature_columns = model["feature_columns"]
-    results = {}
-
-    for record in records:
-        artwork = record.get("artwork", record)
-        artwork_id = artwork.get("id")
-        groups = group_candidates_by_place(candidates_by_artwork.get(artwork_id, []))
-
-        places = []
-        for occurrences in groups.values():
-            row = candidate_features(occurrences)
-            X = [[row[col] for col in feature_columns]]
-            probability = float(clf.predict_proba(X)[0, 1])
-            places.append({
-                "place": occurrences[0]["place"],
-                "score_heuristique": probability,
-                "champs": sorted({c["field"] for c in occurrences}),
-            })
-
-        results[artwork_id] = sorted(places, key=lambda p: p["score_heuristique"], reverse=True)
-
-    return results
-
+# ---------------------------------------------------------------------------
+# Legacy evaluation helpers
+# ---------------------------------------------------------------------------
 
 def evaluate_binary_predictions(records, heuristic_results, threshold=0.5, review_margin=0.1):
     """Evaluate whether an artwork depicts a place, regardless of place identity.
 
-    Inchangé par rapport à la version précédente : cette fonction ne
-    regarde que "au moins un candidat accepté", pas l'identité du lieu.
-    Voir evaluate_place_identity ci-dessous pour cette vérification.
+    An artwork is predicted "depicted" when at least one candidate reaches
+    `threshold`. Candidates within `review_margin` below the threshold are
+    flagged for review. See `evaluate_place_identity` for the identity check.
     """
     if review_margin < 0:
         raise ValueError("review_margin must be non-negative.")
@@ -1768,33 +1802,23 @@ def evaluate_binary_predictions(records, heuristic_results, threshold=0.5, revie
     false_positive_ids = []
     false_negative_ids = []
     flagged_predictions = []
-    predictions = []
+    errors = []
 
     for record in records:
-        artwork = record.get("artwork", record)
-        artwork_id = artwork.get("id")
-        actual = record.get("annotations", {}).get("place_status") == "depicted"
+        artwork_id = _artwork(record).get("id")
+        actual = _place_status(record) == "depicted"
         artwork_places = heuristic_results.get(artwork_id, [])
         accepted_places = [
-            place for place in artwork_places
-            if place.get("score_heuristique", 0) >= threshold
+            place for place in artwork_places if place.get("score_heuristique", 0) >= threshold
         ]
         predicted = bool(accepted_places)
         rejected_places = [
-            {
-                "place": place.get("place"),
-                "score_heuristique": place.get("score_heuristique", 0),
-            }
+            {"place": place.get("place"), "score_heuristique": place.get("score_heuristique", 0)}
             for place in artwork_places
-            if threshold - review_margin
-            <= place.get("score_heuristique", 0)
-            < threshold
+            if threshold - review_margin <= place.get("score_heuristique", 0) < threshold
         ]
         if not predicted and rejected_places:
-            flagged_predictions.append({
-                "id": artwork_id,
-                "rejected_places": rejected_places,
-            })
+            flagged_predictions.append({"id": artwork_id, "rejected_places": rejected_places})
 
         if actual and predicted:
             true_positives += 1
@@ -1808,31 +1832,20 @@ def evaluate_binary_predictions(records, heuristic_results, threshold=0.5, revie
             true_negatives += 1
 
         if actual != predicted:
-            predictions.append({
+            errors.append({
                 "id": artwork_id,
                 "actual": actual,
                 "predicted": predicted,
-                "place_status": record.get("annotations", {}).get("place_status"),
+                "place_status": _place_status(record),
                 "predicted_places": [
-                    {
-                        "place": place.get("place"),
-                        "score_heuristique": place.get("score_heuristique", 0),
-                    }
+                    {"place": place.get("place"), "score_heuristique": place.get("score_heuristique", 0)}
                     for place in accepted_places
                 ],
             })
 
     total = true_positives + false_positives + true_negatives + false_negatives
-    precision = (
-        true_positives / (true_positives + false_positives)
-        if true_positives + false_positives else 0.0
-    )
-    recall = (
-        true_positives / (true_positives + false_negatives)
-        if true_positives + false_negatives else 0.0
-    )
-    f1 = 2 * precision * recall / (precision + recall) if precision + recall else 0.0
-
+    precision = _ratio(true_positives, true_positives + false_positives)
+    recall = _ratio(true_positives, true_positives + false_negatives)
     return {
         "total": total,
         "positive_count": true_positives + false_negatives,
@@ -1845,25 +1858,12 @@ def evaluate_binary_predictions(records, heuristic_results, threshold=0.5, revie
         "false_negative_ids": false_negative_ids,
         "flagged_ids": [item["id"] for item in flagged_predictions],
         "flagged_predictions": flagged_predictions,
-        "accuracy": (true_positives + true_negatives) / total if total else 0.0,
+        "accuracy": _ratio(true_positives + true_negatives, total),
         "precision": precision,
         "recall": recall,
-        "f1": f1,
-        "errors": predictions,
+        "f1": _f1(precision, recall),
+        "errors": errors,
     }
-
-
-def _valid_coordinates(place):
-    if not isinstance(place, dict):
-        return None
-    try:
-        latitude = float(place["latitude"])
-        longitude = float(place["longitude"])
-    except (KeyError, TypeError, ValueError):
-        return None
-    if not -90 <= latitude <= 90 or not -180 <= longitude <= 180:
-        return None
-    return latitude, longitude
 
 
 def evaluate_place_identity(
@@ -1877,16 +1877,20 @@ def evaluate_place_identity(
     city_tolerance_km=30.0,
 ):
     """
-    Évalue le top-1 par nom et, si possible, par proximité géographique.
+    Evaluate the top-1 candidate by name and, when possible, by distance.
 
-    La proximité du point annoté utilise coordinate_tolerance_km. La
-    métrique ville compare le candidat au centre GeoNames de la ville
-    annotée dans city_tolerance_km; c'est une approximation, pas un test
-    d'appartenance à une limite administrative.
+    Distance to the annotated point uses `coordinate_tolerance_km`. The city
+    metric compares the candidate with the GeoNames centre of the annotated
+    city within `city_tolerance_km`; it approximates, rather than tests,
+    membership of an administrative boundary.
     """
+    if coordinate_tolerance_km < 0 or city_tolerance_km < 0:
+        raise ValueError("Coordinate tolerances must be non-negative.")
+    can_geocode = gazetteer_conn is not None or nominatim_client is not None
+
     total_depicted = 0
     correct_identity = 0
-    wrong_identity = []  # (artwork_id, lieu_predit, lieu_reel)
+    wrong_identity = []
     no_candidate = []
     coordinate_matches = 0
     coordinate_evaluable = 0
@@ -1897,42 +1901,30 @@ def evaluate_place_identity(
     city_resolved_candidates = 0
     city_errors = []
 
-    if coordinate_tolerance_km < 0 or city_tolerance_km < 0:
-        raise ValueError("Coordinate tolerances must be non-negative.")
-
     for record in records:
         annotations = record.get("annotations", {})
         if annotations.get("place_status") != "depicted":
             continue
-        artwork = record.get("artwork", record)
-        artwork_id = artwork.get("id")
+        artwork_id = _artwork(record).get("id")
         total_depicted += 1
 
         places = heuristic_results.get(artwork_id, [])
         if not places:
             no_candidate.append(artwork_id)
-        real_place = (annotations.get("depicted_place") or {}).get("name")
         depicted_place = annotations.get("depicted_place") or {}
+        real_place = depicted_place.get("name")
         top_candidate = places[0] if places else None
         top_place = top_candidate.get("place") if top_candidate else None
 
-        identity_matches = (
-            top_place is not None
-            and fuzzy_match(top_place, real_place, fuzzy_threshold)
-        )
+        identity_matches = top_place is not None and fuzzy_match(top_place, real_place, fuzzy_threshold)
         if identity_matches:
             correct_identity += 1
 
+        # Distance to the annotated point.
         actual_coordinates = _valid_coordinates(depicted_place)
         predicted_coordinates = _valid_coordinates(top_candidate)
-        if predicted_coordinates is None and top_place and (
-            gazetteer_conn is not None or nominatim_client is not None
-        ):
-            resolved_candidate = resolve_location(
-                top_place,
-                gazetteer_conn,
-                nominatim_client=nominatim_client,
-            )
+        if predicted_coordinates is None and top_place and can_geocode:
+            resolved_candidate = resolve_location(top_place, gazetteer_conn, nominatim_client=nominatim_client)
             if resolved_candidate:
                 predicted_coordinates = _valid_coordinates(resolved_candidate)
 
@@ -1941,10 +1933,7 @@ def evaluate_place_identity(
             coordinate_evaluable += 1
             if predicted_coordinates is not None:
                 coordinate_resolved_candidates += 1
-                distance_to_actual_km = haversine_distance_km(
-                    *actual_coordinates,
-                    *predicted_coordinates,
-                )
+                distance_to_actual_km = haversine_distance_km(*actual_coordinates, *predicted_coordinates)
                 if distance_to_actual_km <= coordinate_tolerance_km:
                     coordinate_matches += 1
             if distance_to_actual_km is None or distance_to_actual_km > coordinate_tolerance_km:
@@ -1963,12 +1952,9 @@ def evaluate_place_identity(
                 "distance_km": distance_to_actual_km,
             })
 
+        # Distance to the centre of the annotated city.
         city_name = depicted_place.get("city")
-        if (
-            city_name
-            and (gazetteer_conn is not None or nominatim_client is not None)
-            and actual_coordinates is not None
-        ):
+        if city_name and can_geocode and actual_coordinates is not None:
             city_location = resolve_location(
                 city_name,
                 gazetteer_conn,
@@ -1981,10 +1967,7 @@ def evaluate_place_identity(
                 distance = None
                 if predicted_coordinates is not None:
                     city_resolved_candidates += 1
-                    distance = haversine_distance_km(
-                        *city_coordinates,
-                        *predicted_coordinates,
-                    )
+                    distance = haversine_distance_km(*city_coordinates, *predicted_coordinates)
                     if distance <= city_tolerance_km:
                         city_matches += 1
                 if distance is None or distance > city_tolerance_km:
@@ -1995,44 +1978,33 @@ def evaluate_place_identity(
                         "distance_km": distance,
                     })
 
+    def optional_ratio(numerator, denominator):
+        """numerator / denominator, or None when nothing could be evaluated."""
+        return numerator / denominator if denominator else None
+
     return {
         "total_depicted": total_depicted,
         "correct_identity": correct_identity,
         "wrong_identity_count": len(wrong_identity),
         "no_candidate_count": len(no_candidate),
-        "identity_accuracy": correct_identity / total_depicted if total_depicted else 0.0,
+        "identity_accuracy": _ratio(correct_identity, total_depicted),
         "wrong_identity": wrong_identity,
         "no_candidate_ids": no_candidate,
         "coordinate_matches": coordinate_matches,
         "coordinate_evaluable": coordinate_evaluable,
         "coordinate_resolved_candidates": coordinate_resolved_candidates,
-        "coordinate_candidate_coverage": (
-            coordinate_resolved_candidates / coordinate_evaluable
-            if coordinate_evaluable else None
-        ),
+        "coordinate_candidate_coverage": optional_ratio(coordinate_resolved_candidates, coordinate_evaluable),
         "coordinate_tolerance_km": coordinate_tolerance_km,
-        "coordinate_accuracy": (
-            coordinate_matches / coordinate_evaluable if coordinate_evaluable else None
-        ),
-        "coordinate_accuracy_when_geocoded": (
-            coordinate_matches / coordinate_resolved_candidates
-            if coordinate_resolved_candidates else None
-        ),
+        "coordinate_accuracy": optional_ratio(coordinate_matches, coordinate_evaluable),
+        "coordinate_accuracy_when_geocoded": optional_ratio(coordinate_matches, coordinate_resolved_candidates),
         "coordinate_errors": coordinate_errors,
         "city_matches": city_matches,
         "city_evaluable": city_evaluable,
         "city_resolved_candidates": city_resolved_candidates,
-        "city_candidate_coverage": (
-            city_resolved_candidates / city_evaluable if city_evaluable else None
-        ),
+        "city_candidate_coverage": optional_ratio(city_resolved_candidates, city_evaluable),
         "city_tolerance_km": city_tolerance_km,
-        "city_proximity_accuracy": (
-            city_matches / city_evaluable if city_evaluable else None
-        ),
-        "city_proximity_accuracy_when_geocoded": (
-            city_matches / city_resolved_candidates
-            if city_resolved_candidates else None
-        ),
+        "city_proximity_accuracy": optional_ratio(city_matches, city_evaluable),
+        "city_proximity_accuracy_when_geocoded": optional_ratio(city_matches, city_resolved_candidates),
         "city_errors": city_errors,
     }
 
@@ -2046,14 +2018,12 @@ def compare_heuristic_places_with_annotations(records, heuristic_results, thresh
     heuristic_accepted_places = 0
 
     for record in records:
-        artwork = record.get("artwork", record)
-        artwork_id = artwork.get("id")
+        artwork_id = _artwork(record).get("id")
         annotations = record.get("annotations", {})
         is_real_depicted = (
             annotations.get("place_status") == "depicted"
             and annotations.get("depicted_place") is not None
         )
-
         accepted_places = [
             place for place in heuristic_results.get(artwork_id, [])
             if place.get("score_heuristique", 0) >= threshold
@@ -2065,7 +2035,6 @@ def compare_heuristic_places_with_annotations(records, heuristic_results, thresh
         if accepted_places:
             heuristic_accepted_artworks.append(artwork_id)
             heuristic_accepted_places += len(accepted_places)
-
         if is_real_depicted != bool(accepted_places):
             artworks_with_discrepancy.append({
                 "id": artwork_id,

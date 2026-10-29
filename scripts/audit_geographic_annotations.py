@@ -18,6 +18,7 @@ CANONICAL_PRECISION_LEVELS = {
 
 
 def load_records(path):
+    """Load the records of a JSON list or of a {"unique_artworks": [...]} envelope."""
     with Path(path).open(encoding="utf-8") as input_file:
         payload = json.load(input_file)
     if isinstance(payload, dict):
@@ -27,7 +28,27 @@ def load_records(path):
     raise ValueError("Expected a JSON list or an object with 'unique_artworks'.")
 
 
+def _coordinate_problem(place):
+    """Return "coordinates" if missing, "invalid_coordinates" if unusable, else None."""
+    if place.get("latitude") is None or place.get("longitude") is None:
+        return "coordinates"
+    try:
+        latitude = float(place["latitude"])
+        longitude = float(place["longitude"])
+    except (TypeError, ValueError):
+        return "invalid_coordinates"
+    if not -90 <= latitude <= 90 or not -180 <= longitude <= 180:
+        return "invalid_coordinates"
+    return None
+
+
 def audit_annotations(records):
+    """List the depicted places with missing or invalid fields, without modifying them.
+
+    City is not applicable to region/country targets, and region is not
+    applicable to country targets: those are reported separately and not
+    counted as missing.
+    """
     depicted_records = [
         record
         for record in records
@@ -64,21 +85,9 @@ def audit_annotations(records):
         if not place:
             missing["depicted_place"].append(artwork_id)
             continue
-        if place.get("latitude") is None or place.get("longitude") is None:
-            missing["coordinates"].append(artwork_id)
-        else:
-            try:
-                latitude = float(place["latitude"])
-                longitude = float(place["longitude"])
-            except (TypeError, ValueError):
-                latitude, longitude = None, None
-            if (
-                latitude is None
-                or longitude is None
-                or not -90 <= latitude <= 90
-                or not -180 <= longitude <= 180
-            ):
-                missing["invalid_coordinates"].append(artwork_id)
+        coordinate_problem = _coordinate_problem(place)
+        if coordinate_problem:
+            missing[coordinate_problem].append(artwork_id)
         if place.get("precision") in (None, "", "unknown"):
             missing["precision"].append(artwork_id)
         elif place.get("precision") not in CANONICAL_PRECISION_LEVELS:
@@ -113,6 +122,7 @@ def audit_annotations(records):
 
 
 def main():
+    """Print the audit report of a gold-standard file as JSON."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--records", type=Path, default=DEFAULT_RECORDS)
     args = parser.parse_args()
