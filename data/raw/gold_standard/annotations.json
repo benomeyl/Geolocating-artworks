@@ -1,0 +1,21 @@
+{
+    "annotation":{
+        "place_status" : ["depicted", "none", "undeterminable", "mentioned_only"],
+        "place_type": ["real", "imaginary", "composite"],
+        "depicted_place":{
+            "name":"",
+            "city":"",
+            "country":"",
+            "latitude":0.0,
+            "longitude":0.0,
+            "geonameid":0,
+            "precision":["exact_place","neighbourhood", "city", "region", "country", "none"]
+        },
+        "evidence":{"field":"", "text":""},
+        "mentioned_places":[
+            {"name":"", "role":["depicted", "artist_biography", "creation_context", "provenance", "exhibition", "other"]}
+        ],
+        "confidence":["high", "medium", "low"],
+        "status":["verified", "not verified"]
+    }
+}
