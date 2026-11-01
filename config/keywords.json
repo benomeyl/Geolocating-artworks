@@ -41,13 +41,66 @@
         ],
         "medium": [
             "church",
-            "tower"
+            "tower",
+            "castle",
+            "abbey",
+            "basilica",
+            "chapel",
+            "mosque",
+            "temple"
         ],
         "weak": [
             "building",
             "house",
             "architecture"
         ]
+    },
+
+    "view": {
+        "strong": [
+            "view of",
+            "vue de",
+            "veduta",
+            "ansicht",
+            "panorama"
+        ],
+        "medium": [
+            "view"
+        ],
+        "weak": []
+    },
+
+    "non_english": {
+        "strong": [
+            "ville",
+            "église",
+            "cathédrale",
+            "quai",
+            "piazza",
+            "plaza",
+            "calle",
+            "straße",
+            "strasse",
+            "kirche",
+            "chiesa",
+            "palazzo",
+            "château"
+        ],
+        "medium": [],
+        "weak": []
+    },
+
+    "natural_site": {
+        "strong": [],
+        "medium": [
+            "canal",
+            "harbour",
+            "lake",
+            "mount",
+            "bay",
+            "valley"
+        ],
+        "weak": []
     },
 
     "landmark": {
@@ -156,7 +209,8 @@
     },
 
     "location": {
-        "strong": ["Paris", "London", "Rome", "New York", "Berlin", "Madrid", "Moscow", "Tokyo", "Beijing", "Sydney"],
+        "strong": ["Paris", "London", "Rome", "New York", "Berlin", "Madrid", "Moscow", "Tokyo", "Beijing", "Sydney",
+                   "Chicago", "Venice", "Florence", "Amsterdam", "Kyoto", "Edo"],
         "medium": [],
         "weak": []
     }
