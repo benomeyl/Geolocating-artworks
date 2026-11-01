@@ -1,0 +1,5 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[info] 500/500 œuvres du CSV retrouvées.
+[info] 500 œuvres enrichies depuis le dump AIC.
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights:  14%|█▍        | 28/199 [00:00<00:00, 272.58it/s]Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1411.28it/s]
+[ok] 168 œuvres avec un lieu précis écrites dans results\annotation_precise_keywords_500.csv
