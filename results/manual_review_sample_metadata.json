@@ -1,0 +1,75 @@
+{
+  "seed": 42,
+  "prediction_count": 788,
+  "accepted_predictions_included": 16,
+  "sample_sizes_requested": {
+    "no_ner_candidate": 30,
+    "near_threshold": 30,
+    "mid_threshold": 20,
+    "far_threshold": 20,
+    "candidate_ungeocoded": 20,
+    "geocoded_level_unclassified": 20,
+    "threshold_met_but_not_deployable": 20
+  },
+  "population_by_stratum": {
+    "accepted_prediction": 16,
+    "candidate_ungeocoded": 24,
+    "far_threshold": 167,
+    "geocoded_level_unclassified": 2,
+    "mid_threshold": 92,
+    "near_threshold": 68,
+    "no_ner_candidate": 419,
+    "threshold_met_but_not_deployable": 0
+  },
+  "sample_by_stratum": {
+    "accepted_prediction": 16,
+    "candidate_ungeocoded": 20,
+    "far_threshold": 20,
+    "geocoded_level_unclassified": 2,
+    "mid_threshold": 20,
+    "near_threshold": 30,
+    "no_ner_candidate": 30,
+    "threshold_met_but_not_deployable": 0
+  },
+  "selected_count": 138,
+  "stratum_definitions": {
+    "accepted_prediction": "All predictions with place_status_predicted=depicted; all included.",
+    "no_ner_candidate": "No candidate extracted by NER.",
+    "candidate_ungeocoded": "Candidates exist, but none has a geolocation.",
+    "geocoded_level_unclassified": "A geolocation exists, but no candidate has a classifiable geographic level and scores.",
+    "threshold_met_but_not_deployable": "A model level threshold is crossed, but that level did not pass outer-CV deployment criteria.",
+    "near_threshold": "Best eligible deployable score is within 0.10 below its level threshold.",
+    "mid_threshold": "Best eligible deployable score is 0.10 to 0.30 below its level threshold.",
+    "far_threshold": "Best eligible deployable score is more than 0.30 below its level threshold."
+  },
+  "weighting_note": "Strata are sampled at different rates. Use population_by_stratum / sample_by_stratum as the design weight when estimating aggregate rates.",
+  "review_outcomes": [
+    "correct_at_predicted_level",
+    "correct_but_too_general",
+    "wrong_location",
+    "false_positive",
+    "missed_depicted_place",
+    "correct_abstention",
+    "not_sure"
+  ],
+  "actual_place_status_values": [
+    "depicted",
+    "none",
+    "mentioned_only",
+    "undeterminable"
+  ],
+  "actual_precision_values": [
+    "exact_place",
+    "neighborhood",
+    "city",
+    "region",
+    "country",
+    "unknown"
+  ],
+  "predictions_file": "results/predictions_echantillon.json",
+  "predictions_sha256": "d52b7df56508607e91957313d5d1022e99cccc35804661be9faa645f5cdfb1b5",
+  "model_file": "results/model_hierarchical.joblib",
+  "model_sha256": "e759a537d31ef582d3ba47a40aa3bd1a88392ab52bec72b07b2fee8c1d73bc66",
+  "source_records_file": "data/raw/aic/search_multiple_queries_all_artworks_20260917T125145Z.json",
+  "source_records_sha256": "6d5901473baeaf97fcdf1c32e54f0ef1c8fe699759afd77d8d6055fd304947f2"
+}

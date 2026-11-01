@@ -1,0 +1,36 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[info] 387 œuvres chargées depuis data/raw/gold_standard/gold_dataset.json.
+[info] 282 œuvres enrichies depuis le dump AIC.
+[info] Training hiérarchique: labels issus des coordonnées et de la hiérarchie; validation groupée par œuvre et cible géographique.
+[info] Chargement du modèle NER et extraction des candidats...
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights:  84%|████████▍ | 168/199 [00:00<00:00, 1679.77it/s]Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1698.90it/s]
+[info] 812 candidats NER bruts.
+[info] 678 candidats avec étiquettes géographiques.
+[info] Niveaux: {'none': 283, 'city': 123, 'unevaluable': 80, 'no_match': 55, 'country': 55, 'exact_place': 42, 'region': 35, 'neighborhood': 5}
+[info] Statuts: {'negative': 338, 'match': 260, 'unevaluable': 80}
+
+=== Seuils par niveau (précision empirique OOF) ===
+  exact_place      abstention: precision_target_unmet (groupes+=30)
+  neighborhood     abstention: precision_target_unmet (groupes+=35)
+  city             abstention: precision_target_unmet (groupes+=98)
+  region           abstention: precision_target_unmet (groupes+=110)
+  country          seuil=0.920 précision OOF=0.900 rappel OOF=0.104 support=30 groupes+=120
+
+=== Décision hiérarchique par œuvre (OOF de réglage, indicatif) ===
+  précision=0.900 rappel=0.171 FP=3 FN=131 lieux mal prédits=0
+  rappel minimal 0.50 atteint: False
+  Note: les seuils OOF sont réglés sur ces folds; ces métriques ne sont pas une estimation finale indépendante.
+
+=== Déployabilité par niveau (validation externe) ===
+  exact_place      précision=n/a groupes=0 déployé=False
+  neighborhood     précision=n/a groupes=0 déployé=False
+  city             précision=0.600 groupes=5 déployé=False
+  region           précision=0.667 groupes=6 déployé=False
+  country          précision=0.795 groupes=39 déployé=False
+[info] Niveaux activés: aucun (abstention)
+
+=== Validation externe groupée par cible (estimation hors-fold) ===
+  précision=0.791 rappel=0.215 FP=9 FN=124 lieux mal prédits=3 folds=5
+[avertissement] Le rappel externe est sous le minimum demandé; les cibles de précision n'ont pas été relâchées.
+
+[ok] Modèle hiérarchique sauvegardé dans results/model_hierarchical_v4.joblib

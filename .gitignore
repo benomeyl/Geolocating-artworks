@@ -6,7 +6,7 @@ __pycache__/
 data/raw/*
 !data/raw/gold_standard/
 data/processed/
-results/
+
 /data/gazetter/allCountries*
 /data/gazetter/geonames.db
 
