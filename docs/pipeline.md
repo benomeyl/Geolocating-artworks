@@ -1,4 +1,4 @@
-# Pipeline de géolocalisation des œuvres — état au 27/10/2026
+# Pipeline de géolocalisation des œuvres — état au 01/11/2026
 
 ## 1. Objectif
 
@@ -41,7 +41,7 @@ manuels) : plus aucun code ne l'importe.
 
 | Fichier | Contenu |
 |---|---|
-| `data/raw/gold_standard/gold_dataset.json` | Jeu annoté (253 œuvres) : Wikidata, CSV Dresde/Venise, revue manuelle AIC |
+| `data/raw/gold_standard/gold_dataset.json` | Jeu annoté (387 œuvres) : Wikidata, CSV Dresde/Venise, revues manuelles AIC |
 | `data/raw/aic/aic_useful_fields.json` | 19 998 œuvres AIC, champs réduits (sert au test aléatoire) |
 | `data/raw/artic-api-data/json/artworks/` | Dump AIC complet (134 078 fichiers, un par œuvre) |
 | `data/gazetter/geonames.db` | GeoNames local (SQLite) |
@@ -102,6 +102,15 @@ candidat. Ses features :
   Nominatim, ressemblance entre le candidat et le nom trouvé
   (`geo_name_similarity`) et conflit avec le contexte
   (`geo_context_conflict`).
+- **NLI** (`src/data/nli.py`, depuis la v5) : un modèle d'inférence
+  multilingue zero-shot (`mDeBERTa-v3-base-mnli-xnli`) lit le titre et le
+  passage autour de la mention, et donne la probabilité de 5 hypothèses :
+  « shows a view of the place X » (`nli_view`), « the scene … is located
+  in X » (`nli_scene`), « X is a geographic location » (`nli_is_place`),
+  « was made in X » (`nli_made_in`), « the artist was born or lived in X »
+  (`nli_artist_life`). « This artwork depicts X » est évité : c'est vrai
+  d'un vase pour « Vase ». Scores en cache dans
+  `data/processed/nli_cache.sqlite` (≈ 0,4 s par paire sur CPU).
 
 ### 4.4 Géocodage (`gazetter.py`)
 
@@ -112,11 +121,24 @@ candidat. Ses features :
    « Spain »). Une ville (`PPL*`) proche d'une unité administrative homonyme
    passe devant (Paris `PPLC` avant Paris `ADM3`).
 2. Seuls les pays, unités administratives et lieux habités d'au moins
-   1 000 habitants sont acceptés directement. Sinon (hôtel « Louvre » en
-   Grèce, hameau « Puerta del Sol » au Mexique), on interroge Nominatim ; ses
-   résultats confirmés par une entrée GeoNames homonyme à moins de 5 km
-   passent en tête (Point Lobos en Californie plutôt qu'une rue du Texas).
-3. Les entrées GeoNames non fiables ne servent que si Nominatim ne trouve rien.
+   1 000 habitants sont « fiables » (pas l'hôtel « Louvre » en Grèce ni le
+   hameau « Puerta del Sol » au Mexique).
+3. Nominatim est toujours interrogé. Ses résultats non représentables sont
+   écartés : commerces, restaurants, bouches de métro, simples bâtiments,
+   chemins, œuvres d'art de rue (« Microcosm » → une boutique de
+   photocopies en Biélorussie).
+4. Les entrées GeoNames fiables et les résultats Nominatim sont **classés
+   ensemble par importance Nominatim** (liée à Wikipédia) : une entrée
+   GeoNames prend l'importance du résultat Nominatim qui décrit le même lieu
+   (même pays, à moins de 25 km, 100 km pour une unité administrative), ou
+   0,25 si Nominatim ne la connaît pas. Ainsi le lieu célèbre l'emporte sur
+   ses homonymes : Patmos l'île grecque (0,54) et non Patmos dans l'Arkansas
+   (0,36) ; la Normandie (0,72) et non Normandy (Missouri) ; le Corcovado à
+   Rio (0,45) et non un bourg de 1 500 habitants à Porto Rico. Un résultat
+   Nominatim confirmé par une entrée GeoNames homonyme à moins de 5 km
+   reçoit un petit bonus (Point Lobos en Californie plutôt qu'une rue du
+   Texas).
+5. Les entrées GeoNames non fiables ne servent que si rien d'autre n'est trouvé.
 
 **Désambiguïsation par le contexte** (`resolve_artwork_places`) : les
 lieux d'une œuvre sont géocodés ensemble. Un lieu cité à moins de 80
@@ -125,7 +147,10 @@ habité dont le nom correspond bien) choisit l'alternative du même pays ou à
 moins de 150 km (Logan County dans l'Illinois à côté de Cornland). Sans
 alternative compatible, on cherche « lieu, contexte » dans Nominatim ; en
 cas d'échec, le premier résultat est gardé et marqué `context_conflict`. Un
-nom de pays n'est jamais remis en cause par un lieu plus petit.
+nom de pays n'est jamais remis en cause par un lieu plus petit, ni un lieu
+très connu (importance ≥ 0,6 : Rome, Paris) par la recherche « lieu,
+contexte » (« Rome, France » trouvait la station de métro Rome à Paris) :
+il est gardé et marqué `context_conflict`.
 
 **Hiérarchie** ville/région/pays : par géocodage inverse Nominatim.
 
@@ -199,7 +224,8 @@ l'œuvre est `uncertain`.
 | `python scripts/integrate_manual_review.py [--review-csv …] [--write]` | Ajoute un CSV annoté au gold |
 | `python scripts/integrate_identified_csvs.py [--write]` | Ajoute les CSV Dresde/Venise au gold |
 | `python scripts/audit_geographic_annotations.py` | Liste les champs manquants des annotations |
-| `python -m pytest -q` | Tests (58) |
+| `python scripts/compare_feature_sets.py [--reuse-table] --output results/….json` | Compare des jeux de features sur la même table (validation externe + précision moyenne hors-fold par niveau) |
+| `python -m pytest -q` | Tests (84) |
 
 ## 6. Résultats
 
@@ -225,11 +251,38 @@ Mêmes 253 œuvres annotées ; « externe » = validation externe groupée
 - Les niveaux lieu exact et quartier n'atteignent jamais la cible : 20 à
   23 groupes positifs ne suffisent pas.
 
+### Sur le gold de 387 œuvres (01/11/2026)
+
+Comparaisons faites avec `scripts/compare_feature_sets.py` (même table,
+mêmes folds). « Préc. moyenne » = précision moyenne hors-fold sans seuil
+(aire sous la courbe précision-rappel), moyenne sur 5 découpages : plus
+stable que la validation externe, qui repose sur quelques dizaines de
+prédictions.
+
+| Version | Précision / rappel ext. | Préc. moyenne ville / région / pays | Rappel pays à 90 % de précision |
+|---|---|---|---|
+| v4 (`model_hierarchical_v4.joblib`) | 0,773 / 0,215 | 0,681 / 0,711 / 0,766 | 0,09 |
+| v4 + patrons de titre | 0,600 / 0,076 | 0,667 / 0,700 / 0,767 | — (abandonné) |
+| v4 + NLI | 0,739 / 0,108 | 0,704 / 0,740 / 0,802 | 0,09 |
+| v4 + nouveau géocodage | 0,737 / 0,266 | 0,732 / 0,764 / 0,787 | 0,04 |
+| **v5** = v4 + NLI + nouveau géocodage (`model_hierarchical_v5.joblib`) | **0,816 / 0,392** | **0,768 / 0,797 / 0,834** | **0,27** |
+
+- Les patrons de titre (« View of X », « X, Y », « Vase from X »…) étaient
+  trop rares et redondants : la plupart des erreurs viennent des
+  descriptions et de noms d'objets lus comme des lieux (« Vase », « Cane »).
+- La v5 atteint 0,90 de précision OOF pour ville, région et pays, mais
+  seulement 0,82–0,83 en validation externe : aucun niveau déployé.
+- Erreurs restantes en tête de classement : rôle du lieu discutable
+  (« Perv's House, Chicago », « Jewelled Bowl in the Treasury of San Marco,
+  Venice ») et mentions mal découpées par le NER (« Paris Street » pour
+  *Paris Street; Rainy Day*, « South Gate of »).
+
 ## 7. Fichiers de code
 
 | Fichier | Rôle |
 |---|---|
 | `src/data/filtering_logreg.py` | Candidats, features, étiquettes, entraînement, prédiction, évaluation |
+| `src/data/nli.py` | Scores NLI zero-shot avec cache (features `nli_*`) |
 | `src/geolocation/gazetter.py` | GeoNames, client Nominatim avec cache, distance |
 | `src/api/aic.py` | API et dump AIC, enrichissement |
 | `src/run_pipeline.py` | Ligne de commande `train` / `audit-labels` / `predict` / `train-legacy` |

@@ -1,0 +1,32 @@
+[info] 387 œuvres chargées depuis data/raw/gold_standard/gold_dataset.json.
+[info] 287 œuvres enrichies depuis le dump AIC.
+[info] Table relue depuis results\feature_table.pkl (678 candidats).
+[info] Statuts: {'negative': 338, 'match': 260, 'unevaluable': 80}
+[info] Évaluation de « v4 » (31 features)...
+[info] Évaluation de « v4 + titre (3) » (34 features)...
+[info] Évaluation de « v4 + titre » (40 features)...
+
+=== Validation externe (mêmes folds, seuils réglés dans chaque fold) ===
+  jeu                     préc. rappel   FP   FN  ville / région / pays (préc., groupes)
+  v4                      0.773  0.215   10  124  0.600 (5) / 0.714 (7) / 0.795 (37)  déployés=aucun
+  v4 + titre (3)          0.767  0.209   10  125  0.500 (4) / 0.750 (7) / 0.780 (37)  déployés=aucun
+  v4 + titre              0.600  0.076    8  146  0.500 (14) / 0.600 (4) / 0.889 (8)  déployés=aucun
+
+=== Précision moyenne hors-fold par niveau (sans seuil, moyenne sur 5 graines) ===
+  jeu                       exact_place   neighborhood           city         region        country
+  v4                        0.531±0.024    0.645±0.025    0.681±0.011    0.711±0.006    0.766±0.012
+  v4 + titre (3)            0.503±0.026    0.612±0.040    0.680±0.009    0.712±0.005    0.775±0.011
+  v4 + titre                0.520±0.032    0.558±0.044    0.667±0.010    0.700±0.005    0.767±0.012
+
+=== Nouvelles features (taux de candidats justes global: 0.43) ===
+  title_is_place           lignes=  64 justes=  27 taux=0.422 poids ville=-0.12 poids pays=-0.30
+  title_starts_with_place  lignes=  41 justes=  25 taux=0.610 poids ville=-0.37 poids pays=+0.08
+  title_after_comma        lignes=  64 justes=  52 taux=0.812 poids ville=+0.33 poids pays=+1.05
+  title_view_of            lignes=   8 justes=   5 taux=0.625 poids ville=-0.65 poids pays=-0.10
+  title_from               lignes=   6 justes=   0 taux=0.000 poids ville=-0.50 poids pays=-0.68
+  title_in_parentheses     lignes=   8 justes=   3 taux=0.375 poids ville=+0.31 poids pays=-0.44
+  title_person_word        lignes=  12 justes=   7 taux=0.583 poids ville=-0.22 poids pays=-0.46
+  title_has_person         lignes=  18 justes=   9 taux=0.500 poids ville=-0.11 poids pays=-0.71
+  title_object_head        lignes=  14 justes=   0 taux=0.000 poids ville=-0.96 poids pays=-1.19
+
+[ok] Résultats écrits dans results\compare_title.json

@@ -185,3 +185,70 @@ def test_country_is_not_revised_by_smaller_neighbours():
 
     assert resolved["Peru"]["country_code"] == "PE"
     assert resolved["Peru"]["context_conflict"] is False
+
+
+def _important(location, importance, **extra):
+    return {**location, "importance": importance, **extra}
+
+
+def test_famous_nominatim_place_beats_obscure_homonyms_of_both_sources():
+    # Corcovado: a 1,527-inhabitant town in Puerto Rico (trusted GeoNames) and the mountain in Rio.
+    connection = _geonames([("Corcovado", "Corcovado", 18.06, -66.4, "PR", "PPL", 1527)])
+    nominatim = FakeNominatim({
+        "Corcovado": [_important(_nominatim_location("Corcovado", -22.95, -43.21, "BR"), 0.45)],
+        "Patmos": [
+            _important(_nominatim_location("Patmos", 33.3, -93.5, "US"), 0.36),
+            _important(_nominatim_location("Πάτμος", 37.32, 26.55, "GR"), 0.54),
+        ],
+    })
+
+    assert resolve_location("Corcovado", connection, nominatim_client=nominatim)["country_code"] == "BR"
+    assert resolve_location("Patmos", connection, nominatim_client=nominatim)["country_code"] == "GR"
+
+
+def test_geonames_entry_takes_the_importance_of_the_same_nominatim_place():
+    connection = _geonames([
+        ("Paris", "Paris", 48.86, 2.35, "FR", "ADM3", 4380654),
+        ("Paris", "Paris", 48.85, 2.35, "FR", "PPLC", 2138551),
+        ("Paris", "Paris", 33.66, -95.56, "US", "PPL", 24171),
+    ])
+    nominatim = FakeNominatim({"Paris": [
+        _important(_nominatim_location("Paris", 48.85, 2.34, "FR"), 0.9),
+        _important(_nominatim_location("Paris", 33.66, -95.55, "US"), 0.53),
+    ]})
+
+    alternatives = location_alternatives("Paris", connection, nominatim)
+
+    assert [(location["source"], location["feature_code"]) for location in alternatives] == [
+        ("GeoNames", "PPLC"), ("GeoNames", "ADM3"), ("GeoNames", "PPL"),
+    ]
+    assert alternatives[0]["importance"] == 0.9
+
+
+def test_shops_and_stops_are_not_places():
+    nominatim = FakeNominatim({
+        "Microcosm": [_nominatim_location("Microcosm", 53.9, 27.56, "BY") | {"place_class": "shop", "feature_code": "copyshop"}],
+        "Archives": [
+            _nominatim_location("Archives", 38.89, -77.02, "US") | {"feature_code": "subway_entrance"},
+            _important(_nominatim_location("National Archives", 38.89, -77.02, "US"), 0.72, feature_code="museum"),
+        ],
+    })
+
+    assert location_alternatives("Microcosm", None, nominatim) == []
+    assert [location["name"] for location in location_alternatives("Archives", None, nominatim)] == ["National Archives"]
+
+
+def test_prominent_place_is_kept_against_a_foreign_context():
+    text = "Rome, France"
+    france = {**_nominatim_location("France", 46.6, 1.9, "FR"), "feature_code": "PCLI"}
+    nominatim = FakeNominatim({
+        "France": [france],
+        "Rome": [_important(_nominatim_location("Roma", 41.89, 12.48, "IT"), 0.86)],
+        "Rome, France": [_nominatim_location("Rome", 48.88, 2.32, "FR") | {"feature_code": "station"}],
+    })
+
+    resolved = resolve_artwork_places([_mention(text, "Rome"), _mention(text, "France")], None, nominatim)
+
+    assert resolved["Rome"]["country_code"] == "IT"
+    assert resolved["Rome"]["context_conflict"] is True
+    assert "Rome, France" not in nominatim.queries

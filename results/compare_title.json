@@ -1,0 +1,310 @@
+{
+  "feature_sets": {
+    "v4": {
+      "feature_count": 31,
+      "outer_precision": 0.7727272727272727,
+      "outer_recall": 0.21518987341772153,
+      "outer_false_positives": 10,
+      "outer_false_negatives": 124,
+      "outer_mislocated": 4,
+      "outer_by_level": {
+        "exact_place": {
+          "precision": null,
+          "predictions": 0,
+          "prediction_groups": 0,
+          "false_positives": 0
+        },
+        "neighborhood": {
+          "precision": 0.5,
+          "predictions": 2,
+          "prediction_groups": 2,
+          "false_positives": 1
+        },
+        "city": {
+          "precision": 0.6,
+          "predictions": 5,
+          "prediction_groups": 5,
+          "false_positives": 2
+        },
+        "region": {
+          "precision": 0.7142857142857143,
+          "predictions": 7,
+          "prediction_groups": 7,
+          "false_positives": 2
+        },
+        "country": {
+          "precision": 0.7954545454545454,
+          "predictions": 44,
+          "prediction_groups": 37,
+          "false_positives": 9
+        }
+      },
+      "active_levels": [
+        "country"
+      ],
+      "deployable_levels": [],
+      "threshold_free": {
+        "exact_place": {
+          "positives": 42,
+          "rows": 598,
+          "average_precision": 0.5307336502197169,
+          "average_precision_std": 0.024429501493623138,
+          "roc_auc": 0.9378896882494004
+        },
+        "neighborhood": {
+          "positives": 47,
+          "rows": 598,
+          "average_precision": 0.6449184278791465,
+          "average_precision_std": 0.02454450307337474,
+          "roc_auc": 0.9467505888712979
+        },
+        "city": {
+          "positives": 170,
+          "rows": 598,
+          "average_precision": 0.681214945755517,
+          "average_precision_std": 0.011473628006780447,
+          "roc_auc": 0.8704604178119846
+        },
+        "region": {
+          "positives": 205,
+          "rows": 598,
+          "average_precision": 0.7107118635478697,
+          "average_precision_std": 0.006143478695852096,
+          "roc_auc": 0.8571625395643269
+        },
+        "country": {
+          "positives": 260,
+          "rows": 598,
+          "average_precision": 0.7660723309343213,
+          "average_precision_std": 0.012136599172427154,
+          "roc_auc": 0.8377833409194355
+        }
+      }
+    },
+    "v4 + titre (3)": {
+      "feature_count": 34,
+      "outer_precision": 0.7674418604651163,
+      "outer_recall": 0.2088607594936709,
+      "outer_false_positives": 10,
+      "outer_false_negatives": 125,
+      "outer_mislocated": 3,
+      "outer_by_level": {
+        "exact_place": {
+          "precision": null,
+          "predictions": 0,
+          "prediction_groups": 0,
+          "false_positives": 0
+        },
+        "neighborhood": {
+          "precision": null,
+          "predictions": 0,
+          "prediction_groups": 0,
+          "false_positives": 0
+        },
+        "city": {
+          "precision": 0.5,
+          "predictions": 4,
+          "prediction_groups": 4,
+          "false_positives": 2
+        },
+        "region": {
+          "precision": 0.75,
+          "predictions": 8,
+          "prediction_groups": 7,
+          "false_positives": 2
+        },
+        "country": {
+          "precision": 0.78,
+          "predictions": 50,
+          "prediction_groups": 37,
+          "false_positives": 11
+        }
+      },
+      "active_levels": [
+        "country"
+      ],
+      "deployable_levels": [],
+      "threshold_free": {
+        "exact_place": {
+          "positives": 42,
+          "rows": 598,
+          "average_precision": 0.5025554200693296,
+          "average_precision_std": 0.025654746525746387,
+          "roc_auc": 0.9388146625556697
+        },
+        "neighborhood": {
+          "positives": 47,
+          "rows": 598,
+          "average_precision": 0.6123378415775174,
+          "average_precision_std": 0.03972065312124279,
+          "roc_auc": 0.9456848283584971
+        },
+        "city": {
+          "positives": 170,
+          "rows": 598,
+          "average_precision": 0.6797350018518153,
+          "average_precision_std": 0.008716464998296944,
+          "roc_auc": 0.8710197910940076
+        },
+        "region": {
+          "positives": 205,
+          "rows": 598,
+          "average_precision": 0.7116578206464423,
+          "average_precision_std": 0.00489169647573992,
+          "roc_auc": 0.8607211568298888
+        },
+        "country": {
+          "positives": 260,
+          "rows": 598,
+          "average_precision": 0.7749289518593291,
+          "average_precision_std": 0.010958282514418317,
+          "roc_auc": 0.8453243058716431
+        }
+      }
+    },
+    "v4 + titre": {
+      "feature_count": 40,
+      "outer_precision": 0.6,
+      "outer_recall": 0.0759493670886076,
+      "outer_false_positives": 8,
+      "outer_false_negatives": 146,
+      "outer_mislocated": 4,
+      "outer_by_level": {
+        "exact_place": {
+          "precision": 0.5,
+          "predictions": 2,
+          "prediction_groups": 2,
+          "false_positives": 1
+        },
+        "neighborhood": {
+          "precision": null,
+          "predictions": 0,
+          "prediction_groups": 0,
+          "false_positives": 0
+        },
+        "city": {
+          "precision": 0.5,
+          "predictions": 16,
+          "prediction_groups": 14,
+          "false_positives": 8
+        },
+        "region": {
+          "precision": 0.6,
+          "predictions": 5,
+          "prediction_groups": 4,
+          "false_positives": 2
+        },
+        "country": {
+          "precision": 0.8888888888888888,
+          "predictions": 9,
+          "prediction_groups": 8,
+          "false_positives": 1
+        }
+      },
+      "active_levels": [],
+      "deployable_levels": [],
+      "threshold_free": {
+        "exact_place": {
+          "positives": 42,
+          "rows": 598,
+          "average_precision": 0.5197636668124035,
+          "average_precision_std": 0.031836709932454306,
+          "roc_auc": 0.9366392600205551
+        },
+        "neighborhood": {
+          "positives": 47,
+          "rows": 598,
+          "average_precision": 0.5582283651854503,
+          "average_precision_std": 0.04427222719072444,
+          "roc_auc": 0.9417770398115612
+        },
+        "city": {
+          "positives": 170,
+          "rows": 598,
+          "average_precision": 0.6668823227362705,
+          "average_precision_std": 0.009777816635472968,
+          "roc_auc": 0.8684909290819132
+        },
+        "region": {
+          "positives": 205,
+          "rows": 598,
+          "average_precision": 0.700282281717514,
+          "average_precision_std": 0.005466769778420598,
+          "roc_auc": 0.8583479178303234
+        },
+        "country": {
+          "positives": 260,
+          "rows": 598,
+          "average_precision": 0.7672281455319612,
+          "average_precision_std": 0.01206637152540423,
+          "roc_auc": 0.8420653163404642
+        }
+      }
+    }
+  },
+  "new_features": {
+    "title_is_place": {
+      "rows": 64,
+      "matches": 27,
+      "match_rate": 0.421875,
+      "weight_city": -0.12444744240498047,
+      "weight_country": -0.30393133331422495
+    },
+    "title_starts_with_place": {
+      "rows": 41,
+      "matches": 25,
+      "match_rate": 0.6097560975609756,
+      "weight_city": -0.36889505810110546,
+      "weight_country": 0.0827840278999232
+    },
+    "title_after_comma": {
+      "rows": 64,
+      "matches": 52,
+      "match_rate": 0.8125,
+      "weight_city": 0.3301449871236099,
+      "weight_country": 1.0520125433773522
+    },
+    "title_view_of": {
+      "rows": 8,
+      "matches": 5,
+      "match_rate": 0.625,
+      "weight_city": -0.6548561102072976,
+      "weight_country": -0.10185331227132642
+    },
+    "title_from": {
+      "rows": 6,
+      "matches": 0,
+      "match_rate": 0.0,
+      "weight_city": -0.5002120259785088,
+      "weight_country": -0.6803167310405144
+    },
+    "title_in_parentheses": {
+      "rows": 8,
+      "matches": 3,
+      "match_rate": 0.375,
+      "weight_city": 0.3054935893189473,
+      "weight_country": -0.4372962569195862
+    },
+    "title_person_word": {
+      "rows": 12,
+      "matches": 7,
+      "match_rate": 0.5833333333333334,
+      "weight_city": -0.2234144687077323,
+      "weight_country": -0.46106171653673494
+    },
+    "title_has_person": {
+      "rows": 18,
+      "matches": 9,
+      "match_rate": 0.5,
+      "weight_city": -0.11242873288450728,
+      "weight_country": -0.7082143430859318
+    },
+    "title_object_head": {
+      "rows": 14,
+      "matches": 0,
+      "match_rate": 0.0,
+      "weight_city": -0.963593564524497,
+      "weight_country": -1.186102181327489
+    }
+  }
+}

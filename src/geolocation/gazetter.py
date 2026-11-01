@@ -5,6 +5,8 @@ Geocoding of place names: local GeoNames database first, then Nominatim.
 SQLite copy (see scripts/geonames.py); Nominatim results come from the public
 OpenStreetMap API through `NominatimClient`, which throttles requests and
 caches every response in SQLite so that a name is only queried once.
+Homonyms from both sources are ranked by Nominatim importance
+(`location_alternatives`).
 """
 
 import json
@@ -309,6 +311,29 @@ _TRUSTED_MIN_POPULATION = 1000
 # A Nominatim result this close to a GeoNames entry of the same name is
 # confirmed by two independent sources.
 _CONFIRMATION_KM = 5.0
+# Importance bonus of a Nominatim result confirmed that way.
+_CONFIRMATION_BONUS = 0.05
+# A trusted GeoNames entry and a Nominatim result describe the same place
+# when they share the country and are this close (administrative units are
+# compared through their centroids, hence the larger radius).
+_SAME_PLACE_KM = 25.0
+_SAME_ADMINISTRATIVE_UNIT_KM = 100.0
+# Importance assumed for a trusted GeoNames entry absent from Nominatim's
+# 5 results: it beats obscure homonyms, not famous ones (Corcovado, the
+# mountain in Rio, 0.45, beats a 1,500-inhabitant Corcovado in Puerto Rico).
+_UNMATCHED_GEONAMES_IMPORTANCE = 0.25
+# Nominatim results that cannot be a depicted place: shops, restaurants,
+# transport stops, plain buildings, minor paths, street artworks
+# ("Microcosm" -> a copy shop in Belarus, "Sukiya Bridge" -> a fast food).
+_IRRELEVANT_CLASSES = {"shop", "craft", "office", "emergency", "healthcare"}
+_IRRELEVANT_TYPES = {
+    "fast_food", "restaurant", "cafe", "pub", "bar", "biergarten", "copyshop", "hotel", "motel",
+    "hostel", "guest_house", "apartment", "subway_entrance", "bus_stop", "platform", "tram_stop",
+    "stop_position", "post_depot", "post_office", "parking", "fuel", "bank", "atm", "pharmacy",
+    "path", "footway", "cycleway", "service", "track", "steps", "industrial", "orchard",
+    "farmland", "farmyard", "allotments", "garages", "construction", "artwork", "company",
+    "apartments", "detached", "commercial", "retail",
+}
 
 
 def _database_path(conn):
@@ -364,15 +389,72 @@ def _is_trusted_geonames(location):
     return feature_code.startswith("PPL") and (location.get("population") or 0) >= _TRUSTED_MIN_POPULATION
 
 
+def _is_relevant_result(location):
+    """False for Nominatim results that cannot be depicted (shops, stops, plain buildings...)."""
+    if location.get("source") != "Nominatim":
+        return True
+    place_class, place_type = location.get("place_class"), location.get("feature_code")
+    if place_class in _IRRELEVANT_CLASSES or (place_class == "building" and place_type == "yes"):
+        return False
+    return place_type not in _IRRELEVANT_TYPES
+
+
+def _same_place(geonames_location, nominatim_location):
+    """True if a trusted GeoNames entry and a Nominatim result describe the same place."""
+    country_code = geonames_location.get("country_code")
+    if not country_code or country_code != nominatim_location.get("country_code"):
+        return False
+    feature_code = str(geonames_location.get("feature_code") or "")
+    if feature_code.startswith("PCL") or feature_code == "TERR":
+        return _is_country(nominatim_location)
+    radius = _SAME_ADMINISTRATIVE_UNIT_KM if feature_code.startswith("ADM") else _SAME_PLACE_KM
+    return haversine_distance_km(
+        geonames_location["latitude"], geonames_location["longitude"],
+        nominatim_location["latitude"], nominatim_location["longitude"],
+    ) <= radius
+
+
+def _rank_by_importance(trusted, nominatim, geonames):
+    """Merge trusted GeoNames entries and Nominatim results, most important first.
+
+    A trusted GeoNames entry takes the importance of the Nominatim result
+    describing the same place (which is then dropped as a duplicate), or
+    `_UNMATCHED_GEONAMES_IMPORTANCE`. A Nominatim result confirmed by any
+    GeoNames entry of the same name gets `_CONFIRMATION_BONUS`. The sort is
+    stable: GeoNames' order is kept between equal importances (Paris PPLC
+    before the Paris ADM3 commune).
+    """
+    scored = []
+    for location in trusted:
+        importances = [other.get("importance") or 0.0 for other in nominatim if _same_place(location, other)]
+        if importances:
+            scored.append((max(importances), {**location, "importance": max(importances)}))
+        else:
+            scored.append((_UNMATCHED_GEONAMES_IMPORTANCE, location))
+    for location in nominatim:
+        if any(_same_place(other, location) for other in trusted):
+            continue
+        confirmed = any(
+            haversine_distance_km(
+                location["latitude"], location["longitude"], other["latitude"], other["longitude"],
+            ) <= _CONFIRMATION_KM
+            for other in geonames
+        )
+        scored.append(((location.get("importance") or 0.0) + _CONFIRMATION_BONUS * confirmed, location))
+    return [location for _, location in sorted(scored, key=lambda item: -item[0])]
+
+
 def location_alternatives(name, conn, nominatim_client=None):
     """Ranked candidate locations for a place name, without hierarchy lookup.
 
-    Trusted GeoNames matches (countries included, see `_country_index`) come
-    first, most populated first. If there is none, Nominatim's results are
-    used: those confirmed by an untrusted GeoNames entry of the same name
-    first ("Point Lobos" in California rather than a Texas street), then the
-    others. Untrusted GeoNames matches are used only when Nominatim finds
-    nothing.
+    Trusted GeoNames matches (countries included, see `_country_index`) and
+    Nominatim's results (shops, stops and other `_is_relevant_result`
+    failures removed) are ranked together by Nominatim importance
+    (`_rank_by_importance`), so that a famous place beats its homonyms
+    whatever the source: Patmos the Greek island, not Patmos (Arkansas);
+    Normandy the French region, not Normandy (Missouri). Without Nominatim,
+    trusted GeoNames matches come first, most populated first. Untrusted
+    GeoNames matches are used only when nothing else is found.
     """
     geonames = []
     if conn is not None:
@@ -388,21 +470,11 @@ def location_alternatives(name, conn, nominatim_client=None):
         geonames.sort(key=lambda location: -(location.get("population") or 0))
         geonames = _prefer_populated_place(geonames) if geonames else []
     trusted = [location for location in geonames if _is_trusted_geonames(location)]
-    if trusted:
-        return trusted
     nominatim = nominatim_client.search(name) if nominatim_client is not None else []
+    nominatim = [location for location in nominatim if _is_relevant_result(location)]
     if not nominatim:
-        return geonames
-    confirmed = [
-        location for location in nominatim
-        if any(
-            haversine_distance_km(
-                location["latitude"], location["longitude"], other["latitude"], other["longitude"],
-            ) <= _CONFIRMATION_KM
-            for other in geonames
-        )
-    ]
-    return confirmed + [location for location in nominatim if location not in confirmed]
+        return trusted or geonames
+    return _rank_by_importance(trusted, nominatim, geonames)
 
 
 def _with_hierarchy(location, nominatim_client):
@@ -456,6 +528,9 @@ CONTEXT_WINDOW_CHARS = 80
 NEARBY_KM = 150.0
 # Finest Nominatim place_rank of an anchor (16 city, 19 village, 20 hamlet).
 _ANCHOR_MAX_PLACE_RANK = 20
+# A place at least this important (Rome 0.86, Paris 0.90) is not replaced by
+# a "name, context" search: "Rome, France" finds a metro station in Paris.
+_PROMINENT_IMPORTANCE = 0.6
 
 
 def _name_tokens(name):
@@ -523,7 +598,7 @@ def _contextual_search(name, context_names, context_locations, nominatim_client)
         return None
     for context_name, context_location in zip(context_names, context_locations):
         for location in nominatim_client.search(f"{name}, {context_name}"):
-            if _agreement(location, context_location) > 0:
+            if _is_relevant_result(location) and _agreement(location, context_location) > 0:
                 return location
     return None
 
@@ -536,8 +611,9 @@ def resolve_artwork_places(mentions, conn, nominatim_client=None, alternatives_c
     places (`_is_anchor`: "Logan County" next to "Cornland", "San Salvador"
     next to "Peru") takes the alternative that best agrees with their best
     guesses: same country, nearby. If none agrees, "name, context" is
-    searched with Nominatim; if that fails too, the first alternative is kept
-    and flagged with `context_conflict`.
+    searched with Nominatim, unless the first alternative is prominent
+    (`_PROMINENT_IMPORTANCE`); if that fails too, the first alternative is
+    kept and flagged with `context_conflict`.
 
     Returns {name: location or None}; locations include `context_conflict`.
     """
@@ -571,6 +647,8 @@ def resolve_artwork_places(mentions, conn, nominatim_client=None, alternatives_c
             best_index = max(range(len(options)), key=lambda index: (scores[index], -index))
             if scores[best_index] > 0:
                 choice = options[best_index]
+            elif (options[0].get("importance") or 0.0) >= _PROMINENT_IMPORTANCE:
+                conflict = True
             else:
                 contextual = _contextual_search(
                     name, [n for n, _ in context], [loc for _, loc in context], nominatim_client

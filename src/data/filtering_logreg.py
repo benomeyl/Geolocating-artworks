@@ -110,6 +110,18 @@ GEOGRAPHIC_TARGET_PRECISION = {
     "region": 0.90,
     "country": 0.90,
 }
+# NLI features: entailment probability of each hypothesis given the title
+# and the passage around the mention (see nli_features, data/nli.py).
+# "This artwork depicts {place}" is avoided: "depicts Vase" is true of a vase.
+NLI_HYPOTHESES = {
+    "nli_view": "This artwork shows a view of the place {place}.",
+    "nli_scene": "The scene shown in this artwork is located in {place}.",
+    "nli_is_place": "{place} is a geographic location.",
+    "nli_made_in": "This artwork was made in {place}.",
+    "nli_artist_life": "The artist was born or lived in {place}.",
+}
+NLI_FEATURE_COLUMNS = list(NLI_HYPOTHESES)
+
 GEOGRAPHIC_FEATURE_COLUMNS = FEATURE_COLUMNS + [
     f"geo_level_{level}" for level in GEOGRAPHIC_LEVELS
 ] + [
@@ -130,7 +142,17 @@ GEOGRAPHIC_FEATURE_COLUMNS = FEATURE_COLUMNS + [
 ] + [
     "geo_name_similarity",
     "geo_context_conflict",
-]
+] + NLI_FEATURE_COLUMNS
+
+# Label of each text field in the NLI premise.
+_NLI_FIELD_LABELS = {
+    "alt_titles": "Other titles",
+    "description": "Description",
+    "short_description": "Description",
+    "themes": "Themes",
+    "subjects": "Subjects",
+    "styles": "Styles",
+}
 
 # AIC object types (artwork_type_title) that do not depict a scene: a place
 # in their title is where they come from ("Kantharos, Attica"). Pictorial
@@ -484,6 +506,41 @@ def candidate_features(occurrences):
     return features
 
 
+def _plain_text(text):
+    """Text without HTML tags (AIC descriptions are HTML) and with collapsed spaces."""
+    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", text or "")).strip()
+
+
+def nli_premise(occurrences, artwork, window=300):
+    """
+    Text read by the NLI model for a grouped candidate.
+
+    Always the title, then the passage (`window` characters each side) around
+    the best-scored occurrence outside the title, or, for a place found only
+    in the title, the beginning of the description, which tells what the
+    object is ("Vase" alone is ambiguous).
+    """
+    premise = f"Title: {_plain_text(artwork.get('title'))}."
+    outside_title = [occurrence for occurrence in occurrences if occurrence["field"] != "title"]
+    if outside_title:
+        best = max(outside_title, key=lambda occurrence: occurrence["score_ner"])
+        text = best["source_text"]
+        passage = _plain_text(text[max(0, best["start"] - window):best["end"] + window])
+        return f"{premise} {_NLI_FIELD_LABELS.get(best['field'], 'Text')}: {passage}"
+    description = _plain_text(artwork.get("short_description") or artwork.get("description"))
+    return f"{premise} Description: {description[:2 * window]}" if description else premise
+
+
+def nli_features(occurrences, artwork, nli_scorer):
+    """Entailment probability of each NLI_HYPOTHESES for a grouped candidate."""
+    premise = nli_premise(occurrences, artwork)
+    place = occurrences[0]["place"]
+    scores = nli_scorer.entailment([
+        (premise, hypothesis.format(place=place)) for hypothesis in NLI_HYPOTHESES.values()
+    ])
+    return dict(zip(NLI_FEATURE_COLUMNS, scores))
+
+
 def _mentions(text, place_name):
     """True if the normalized place name appears as whole words in `text`."""
     place = _normalize_place_name(place_name)
@@ -563,13 +620,15 @@ def _name_similarity(place_name, location):
     return difflib.SequenceMatcher(None, candidate, resolved).ratio()
 
 
-def _hierarchical_candidate_features(occurrences, location, artwork):
-    """All features of a grouped candidate used by the hierarchical model."""
+def _hierarchical_candidate_features(occurrences, location, artwork, nli_scorer=None):
+    """All features of a grouped candidate used by the hierarchical model (NLI ones with a scorer)."""
     place_name = occurrences[0]["place"]
     features = _add_geographic_features(candidate_features(occurrences), location)
     features.update(artwork_context_features(artwork, place_name))
     features["geo_name_similarity"] = _name_similarity(place_name, location)
     features["geo_context_conflict"] = int(bool((location or {}).get("context_conflict")))
+    if nli_scorer is not None:
+        features.update(nli_features(occurrences, artwork, nli_scorer))
     return features
 
 
@@ -965,6 +1024,7 @@ def build_geographic_label_table(
     exact_tolerance_km=0.25,
     neighborhood_tolerance_km=2.0,
     city_tolerance_km=25.0,
+    nli_scorer=None,
 ):
     """
     Build one row per (artwork, grouped candidate) with features and hierarchical label.
@@ -973,6 +1033,7 @@ def build_geographic_label_table(
     each other); unresolved cases are labelled
     "unevaluable" instead of negative. `table.attrs` keeps the place_status
     and the CV group of every artwork, including artworks without candidates.
+    With `nli_scorer` (data/nli.py), the NLI features are added.
     """
     rows = []
     alternatives_cache = {}
@@ -993,7 +1054,7 @@ def build_geographic_label_table(
                 neighborhood_tolerance_km=neighborhood_tolerance_km,
                 city_tolerance_km=city_tolerance_km,
             )
-            row = _hierarchical_candidate_features(occurrences, location, artwork)
+            row = _hierarchical_candidate_features(occurrences, location, artwork, nli_scorer)
             row.update({
                 "artwork_id": artwork_id,
                 "cv_group": cv_groups.get(artwork_id, f"artwork:{artwork_id}"),
@@ -1327,6 +1388,7 @@ def train_hierarchical_model(
     minimum_positive_groups=5,
     minimum_prediction_groups=5,
     minimum_predictions=5,
+    feature_columns=None,
 ):
     """Fit one grouped-CV classifier per geographic precision level.
 
@@ -1334,13 +1396,17 @@ def train_hierarchical_model(
     that level or a more specific one. Thresholds are chosen only when
     out-of-fold decisions meet the requested empirical precision and support
     floors. Under-supported levels abstain.
+
+    `feature_columns` defaults to GEOGRAPHIC_FEATURE_COLUMNS; other lists are
+    used to compare feature sets (scripts/compare_feature_sets.py).
     """
     if table.empty:
         raise ValueError("Geographic label table is empty.")
     target_precisions = target_precisions or GEOGRAPHIC_TARGET_PRECISION
-    feature_columns = [column for column in GEOGRAPHIC_FEATURE_COLUMNS if column in table.columns]
-    if len(feature_columns) != len(GEOGRAPHIC_FEATURE_COLUMNS):
-        missing = sorted(set(GEOGRAPHIC_FEATURE_COLUMNS) - set(feature_columns))
+    requested_columns = list(feature_columns or GEOGRAPHIC_FEATURE_COLUMNS)
+    feature_columns = [column for column in requested_columns if column in table.columns]
+    if len(feature_columns) != len(requested_columns):
+        missing = sorted(set(requested_columns) - set(feature_columns))
         raise ValueError(f"Missing geographic model features: {missing}")
 
     matrix = table[feature_columns].fillna(0).to_numpy(dtype=float)
@@ -1714,6 +1780,11 @@ def _level_decisions(feature_row, candidate_level, model, specificity):
     return level_scores, decisions
 
 
+def model_uses_nli(model):
+    """True if a saved hierarchical model needs the NLI features (models up to v4 do not)."""
+    return bool(set(model.get("feature_columns") or []) & set(NLI_FEATURE_COLUMNS))
+
+
 def predict_with_hierarchical_model(
     records,
     candidates_by_artwork,
@@ -1722,18 +1793,22 @@ def predict_with_hierarchical_model(
     gazetteer_conn=None,
     nominatim_client=None,
     geocode_top_k=3,
+    nli_scorer=None,
 ):
     """Predict the most specific sufficiently precise geographic level.
 
     Only the `geocode_top_k` candidates with the best NER score are geocoded,
     jointly so that they disambiguate each other.
     For each artwork, returns `place_status_predicted`, the accepted
-    `prediction` (or None) and every scored candidate.
+    `prediction` (or None) and every scored candidate. A model trained with
+    NLI features needs `nli_scorer`.
     """
     if geocode_top_k < 1:
         raise ValueError("geocode_top_k must be at least 1.")
 
     feature_columns = model["feature_columns"]
+    if nli_scorer is None and model_uses_nli(model):
+        raise ValueError("This model uses NLI features: pass an nli_scorer (data/nli.py).")
     specificity = {level: index for index, level in enumerate(model["specificity_order"])}
     alternatives_cache = {}
     results = {}
@@ -1754,8 +1829,8 @@ def predict_with_hierarchical_model(
         scored_candidates = []
         for occurrences, location in zip(grouped_candidates, locations):
             place_name = occurrences[0]["place"]
-            features = _hierarchical_candidate_features(occurrences, location, artwork)
-            feature_row = np.asarray([[features[column] for column in feature_columns]], dtype=float)
+            features = _hierarchical_candidate_features(occurrences, location, artwork, nli_scorer)
+            feature_row =np.asarray([[features[column] for column in feature_columns]], dtype=float)
             candidate_level = _candidate_geographic_level(location)
             level_scores, decisions = _level_decisions(feature_row, candidate_level, model, specificity)
             scored_candidates.append({

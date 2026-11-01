@@ -1,0 +1,27 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[info] 387 œuvres chargées depuis data/raw/gold_standard/gold_dataset.json.
+[info] 287 œuvres enrichies depuis le dump AIC.
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights:  24%|██▍       | 48/199 [00:00<00:00, 450.26it/s]Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1681.92it/s]
+[info] 678 candidats étiquetés, table sauvegardée dans results\feature_table.pkl.
+[info] Statuts: {'negative': 327, 'match': 260, 'unevaluable': 91}
+[info] Évaluation de « v4 » (31 features)...
+[info] Évaluation de « v4 + NLI » (36 features)...
+
+=== Validation externe (mêmes folds, seuils réglés dans chaque fold) ===
+  jeu                     préc. rappel   FP   FN  ville / région / pays (préc., groupes)
+  v4                      0.737  0.266   15  116  0.900 (9) / 0.654 (25) / 0.769 (42)  déployés=aucun
+  v4 + NLI                0.816  0.392   14   96  0.818 (21) / 0.827 (43) / 0.826 (56)  déployés=aucun
+
+=== Précision moyenne hors-fold par niveau (sans seuil, moyenne sur 5 graines) ===
+  jeu                       exact_place   neighborhood           city         region        country
+  v4                        0.598±0.034    0.649±0.028    0.732±0.005    0.764±0.006    0.787±0.004
+  v4 + NLI                  0.599±0.046    0.636±0.026    0.768±0.005    0.797±0.003    0.834±0.005
+
+=== Nouvelles features (taux de candidats justes global: 0.44) ===
+  nli_view           moyenne justes=0.27 faux=0.12 (œuvres sans lieu 0.09) AUC seule=0.701 poids ville=+0.57 pays=+1.09
+  nli_scene          moyenne justes=0.60 faux=0.44 (œuvres sans lieu 0.41) AUC seule=0.646 poids ville=+1.69 pays=+1.58
+  nli_is_place       moyenne justes=0.36 faux=0.22 (œuvres sans lieu 0.22) AUC seule=0.709 poids ville=+0.93 pays=+1.42
+  nli_made_in        moyenne justes=0.27 faux=0.32 (œuvres sans lieu 0.30) AUC seule=0.502 poids ville=-2.18 pays=-2.34
+  nli_artist_life    moyenne justes=0.03 faux=0.09 (œuvres sans lieu 0.09) AUC seule=0.340 poids ville=-0.95 pays=-1.39
+
+[ok] Résultats écrits dans results\compare_geocoding.json

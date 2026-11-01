@@ -209,11 +209,16 @@ def test_hierarchical_prediction_falls_back_to_city_when_exact_is_below_target()
         "source_text": "Schiedamse poort",
     }]}
 
+    class ConstantNli:
+        def entailment(self, pairs):
+            return [0.5] * len(pairs)
+
     predictions = predict_with_hierarchical_model(
         records,
         candidates,
         model,
         nominatim_client=ExactPlaceGeocoder(),
+        nli_scorer=ConstantNli(),
     )
 
     decision = predictions[1]["prediction"]["decision"]
@@ -439,7 +444,7 @@ def test_cv_groups_join_artworks_that_share_a_target_entity():
     assert groups["photo-a"] != groups["other-place"]
 
 
-def test_resolve_location_uses_nominatim_only_when_geonames_has_no_match():
+def test_trusted_geonames_match_beats_an_unrelated_obscure_nominatim_result():
     connection = sqlite3.connect(":memory:")
     connection.execute(
         "CREATE TABLE geonames (name TEXT, asciiname TEXT, latitude REAL, longitude REAL, "
@@ -456,7 +461,7 @@ def test_resolve_location_uses_nominatim_only_when_geonames_has_no_match():
 
     assert geonames_match["source"] == "GeoNames"
     assert fallback_match["source"] == "Nominatim"
-    assert nominatim.queries == ["Example Place"]
+    assert nominatim.queries == ["Paris", "Example Place"]
     connection.close()
 
 
@@ -595,7 +600,8 @@ def test_geonames_candidate_gets_hierarchy_from_cached_nominatim_reverse(tmp_pat
     assert first[1][0]["geolocation"]["hierarchy"]["city"] == "Paris"
     assert first[1][0]["geolocation"]["hierarchy_source"] == "Nominatim"
     assert second[2][0]["geolocation"]["hierarchy"]["region"] == "Ile-de-France"
-    assert session.calls == 1
+    # One search (to rank homonyms) and one reverse lookup, both cached for the second artwork.
+    assert session.calls == 2
     connection.close()
 
 

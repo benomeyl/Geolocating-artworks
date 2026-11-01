@@ -1,0 +1,11 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[info] 21963 œuvres contiennent au moins un mot-clé.
+[info] 500 œuvres tirées (seed=42), hors gold standard.
+[info] 500 œuvres enrichies depuis le dump AIC.
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights:  26%|██▌       | 52/199 [00:00<00:00, 504.48it/s]Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1819.39it/s]
+D:\Personnel et Travail\EPFL\Geolocating-artworks\.venv\Lib\site-packages\torch\jit\_script.py:1485: FutureWarning: `torch.jit.script` is not supported in Python 3.14+ and may break. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+Loading weights:   0%|          | 0/202 [00:00<?, ?it/s]Loading weights: 100%|██████████| 202/202 [00:00<00:00, 3022.65it/s]
+[info] Statuts: {'uncertain': 212, 'depicted': 180, 'no_candidate': 108}
+[info] Niveaux prédits: {'country': 53, 'city': 53, 'region': 74}
+[ok] Résultats écrits dans results\test_keywords_500_v5.csv

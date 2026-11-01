@@ -1,0 +1,211 @@
+{
+  "feature_sets": {
+    "v4": {
+      "feature_count": 31,
+      "outer_precision": 0.7368421052631579,
+      "outer_recall": 0.26582278481012656,
+      "outer_false_positives": 15,
+      "outer_false_negatives": 116,
+      "outer_mislocated": 6,
+      "outer_by_level": {
+        "exact_place": {
+          "precision": 0.0,
+          "predictions": 2,
+          "prediction_groups": 2,
+          "false_positives": 2
+        },
+        "neighborhood": {
+          "precision": 0.5,
+          "predictions": 2,
+          "prediction_groups": 2,
+          "false_positives": 1
+        },
+        "city": {
+          "precision": 0.9,
+          "predictions": 10,
+          "prediction_groups": 9,
+          "false_positives": 1
+        },
+        "region": {
+          "precision": 0.6538461538461539,
+          "predictions": 26,
+          "prediction_groups": 25,
+          "false_positives": 9
+        },
+        "country": {
+          "precision": 0.7692307692307693,
+          "predictions": 52,
+          "prediction_groups": 42,
+          "false_positives": 12
+        }
+      },
+      "active_levels": [
+        "region",
+        "country"
+      ],
+      "deployable_levels": [],
+      "threshold_free": {
+        "exact_place": {
+          "positives": 51,
+          "rows": 587,
+          "average_precision": 0.5981531534065414,
+          "average_precision_std": 0.03351701164372556,
+          "roc_auc": 0.9475051214515657
+        },
+        "neighborhood": {
+          "positives": 57,
+          "rows": 587,
+          "average_precision": 0.6490580859071098,
+          "average_precision_std": 0.027678899810831846,
+          "roc_auc": 0.9539721946375372
+        },
+        "city": {
+          "positives": 179,
+          "rows": 587,
+          "average_precision": 0.7319204429126485,
+          "average_precision_std": 0.004710792831245711,
+          "roc_auc": 0.8871426224120933
+        },
+        "region": {
+          "positives": 213,
+          "rows": 587,
+          "average_precision": 0.764200839629835,
+          "average_precision_std": 0.005754446522503713,
+          "roc_auc": 0.8787690492330095
+        },
+        "country": {
+          "positives": 260,
+          "rows": 587,
+          "average_precision": 0.7868463754297699,
+          "average_precision_std": 0.004452932998641444,
+          "roc_auc": 0.8597083039284874
+        }
+      }
+    },
+    "v4 + NLI": {
+      "feature_count": 36,
+      "outer_precision": 0.8157894736842105,
+      "outer_recall": 0.3924050632911392,
+      "outer_false_positives": 14,
+      "outer_false_negatives": 96,
+      "outer_mislocated": 5,
+      "outer_by_level": {
+        "exact_place": {
+          "precision": 0.3333333333333333,
+          "predictions": 3,
+          "prediction_groups": 3,
+          "false_positives": 2
+        },
+        "neighborhood": {
+          "precision": 0.6666666666666666,
+          "predictions": 3,
+          "prediction_groups": 3,
+          "false_positives": 1
+        },
+        "city": {
+          "precision": 0.8181818181818182,
+          "predictions": 22,
+          "prediction_groups": 21,
+          "false_positives": 4
+        },
+        "region": {
+          "precision": 0.8269230769230769,
+          "predictions": 52,
+          "prediction_groups": 43,
+          "false_positives": 9
+        },
+        "country": {
+          "precision": 0.8255813953488372,
+          "predictions": 86,
+          "prediction_groups": 56,
+          "false_positives": 15
+        }
+      },
+      "active_levels": [
+        "city",
+        "region",
+        "country"
+      ],
+      "deployable_levels": [],
+      "threshold_free": {
+        "exact_place": {
+          "positives": 51,
+          "rows": 587,
+          "average_precision": 0.5989824101958492,
+          "average_precision_std": 0.04649269032794964,
+          "roc_auc": 0.9491732513901082
+        },
+        "neighborhood": {
+          "positives": 57,
+          "rows": 587,
+          "average_precision": 0.6357948061727605,
+          "average_precision_std": 0.026084723269964926,
+          "roc_auc": 0.9521085733200927
+        },
+        "city": {
+          "positives": 179,
+          "rows": 587,
+          "average_precision": 0.7677067525453557,
+          "average_precision_std": 0.00456305315996018,
+          "roc_auc": 0.9047403877752218
+        },
+        "region": {
+          "positives": 213,
+          "rows": 587,
+          "average_precision": 0.7973860137342236,
+          "average_precision_std": 0.0025698097750264785,
+          "roc_auc": 0.8989957570736362
+        },
+        "country": {
+          "positives": 260,
+          "rows": 587,
+          "average_precision": 0.8338562211924799,
+          "average_precision_std": 0.004918356840067963,
+          "roc_auc": 0.886504351917196
+        }
+      }
+    }
+  },
+  "new_features": {
+    "nli_view": {
+      "mean_match": 0.266272574204665,
+      "mean_negative": 0.12385055122025516,
+      "mean_negative_not_depicted": 0.09275770018884234,
+      "auc_alone": 0.7008762644083745,
+      "weight_city": 0.5707635413754839,
+      "weight_country": 1.0940403794445142
+    },
+    "nli_scene": {
+      "mean_match": 0.5965752234825721,
+      "mean_negative": 0.43760523081554914,
+      "mean_negative_not_depicted": 0.41431367692172316,
+      "auc_alone": 0.6460479887085391,
+      "weight_city": 1.6876296556342645,
+      "weight_country": 1.5776724747992479
+    },
+    "nli_is_place": {
+      "mean_match": 0.35808712519132174,
+      "mean_negative": 0.224460566809418,
+      "mean_negative_not_depicted": 0.2187403823798621,
+      "auc_alone": 0.7093507410021171,
+      "weight_city": 0.9331948879627275,
+      "weight_country": 1.4233487554949402
+    },
+    "nli_made_in": {
+      "mean_match": 0.2746880457951472,
+      "mean_negative": 0.32050588590289475,
+      "mean_negative_not_depicted": 0.3037521274687966,
+      "auc_alone": 0.5015290519877676,
+      "weight_city": -2.177545108765249,
+      "weight_country": -2.3400731187146233
+    },
+    "nli_artist_life": {
+      "mean_match": 0.03464817267197829,
+      "mean_negative": 0.08904040625335974,
+      "mean_negative_not_depicted": 0.09242289647617946,
+      "auc_alone": 0.33987297106563163,
+      "weight_city": -0.9458291291017257,
+      "weight_country": -1.3870053630308463
+    }
+  }
+}

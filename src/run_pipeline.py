@@ -36,6 +36,7 @@ from data.filtering_logreg import (
     build_training_table,
     build_geographic_label_table,
     evaluate_hierarchical_grouped_cv,
+    model_uses_nli,
     train_hierarchical_model,
     predict_with_hierarchical_model,
     train_logistic_model,
@@ -43,6 +44,7 @@ from data.filtering_logreg import (
     evaluate_binary_predictions,
     evaluate_place_identity,
 )
+from data.nli import DEFAULT_NLI_CACHE, NliScorer
 
 
 # ---------------------------------------------------------------------------
@@ -121,7 +123,7 @@ def open_gazetteer(path, missing_message=None):
         connection.close()
 
 
-def build_label_table(args, records, candidates_by_artwork, nominatim_client):
+def build_label_table(args, records, candidates_by_artwork, nominatim_client, nli_scorer=None):
     """Geocode and label the candidates of annotated records (train and audit-labels)."""
     missing_message = f"[avertissement] Gazetteer introuvable: {args.gazetteer}." if args.no_nominatim else None
     with open_gazetteer(args.gazetteer, missing_message) as gazetteer_conn:
@@ -133,6 +135,7 @@ def build_label_table(args, records, candidates_by_artwork, nominatim_client):
             exact_tolerance_km=args.exact_tolerance_km,
             neighborhood_tolerance_km=args.neighborhood_tolerance_km,
             city_tolerance_km=args.city_tolerance_km,
+            nli_scorer=nli_scorer,
         )
 
 
@@ -243,7 +246,10 @@ def cmd_train(args):
     print(f"[info] {candidate_count} candidats NER bruts.")
 
     nominatim_client = None if args.no_nominatim else make_nominatim_client(args)
-    table = build_label_table(args, records, candidates_by_artwork, nominatim_client)
+    print("[info] Géocodage et scores NLI des candidats...")
+    table = build_label_table(
+        args, records, candidates_by_artwork, nominatim_client, NliScorer(cache_path=args.nli_cache)
+    )
     print(f"[info] {len(table)} candidats avec étiquettes géographiques.")
     if table.empty:
         raise ValueError("No candidate labels were generated.")
@@ -472,6 +478,7 @@ def predict_hierarchical(args, model, records, candidates_by_artwork):
             gazetteer_conn=gazetteer_conn,
             nominatim_client=make_nominatim_client(args),
             geocode_top_k=args.geocode_top_k,
+            nli_scorer=NliScorer(cache_path=args.nli_cache) if model_uses_nli(model) else None,
         )
 
     output = []
@@ -569,6 +576,11 @@ def add_geocoder_arguments(parser):
     parser.add_argument("--nominatim-reverse-url", default=None, help="Endpoint reverse Nominatim (déduit de --nominatim-url par défaut).")
     parser.add_argument("--nominatim-user-agent", default=None, help="User-Agent identifiant l'application; configurer un contact pour l'usage réel.")
     parser.add_argument("--nominatim-cache", default=None, help="Cache SQLite persistant (défaut: data/processed/nominatim_cache.sqlite).")
+    parser.add_argument(
+        "--nli-cache",
+        default=DEFAULT_NLI_CACHE,
+        help=f"Cache SQLite des scores NLI (défaut: {DEFAULT_NLI_CACHE}).",
+    )
 
 
 def add_label_arguments(parser):

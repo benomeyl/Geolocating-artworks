@@ -1,0 +1,10 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[info] 500 œuvres tirées (seed=42), hors gold standard.
+[info] 500 œuvres enrichies depuis le dump AIC.
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights:  72%|███████▏  | 144/199 [00:00<00:00, 1439.70it/s]Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1969.74it/s]
+D:\Personnel et Travail\EPFL\Geolocating-artworks\.venv\Lib\site-packages\torch\jit\_script.py:1485: FutureWarning: `torch.jit.script` is not supported in Python 3.14+ and may break. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+Loading weights:   0%|          | 0/202 [00:00<?, ?it/s]Loading weights: 100%|██████████| 202/202 [00:00<00:00, 3087.96it/s]
+[info] Statuts: {'no_candidate': 335, 'uncertain': 108, 'depicted': 57}
+[info] Niveaux prédits: {'country': 21, 'region': 28, 'city': 8}
+[ok] Résultats écrits dans results\test_sample_500_v5.csv

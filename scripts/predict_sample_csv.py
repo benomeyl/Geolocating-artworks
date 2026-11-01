@@ -21,8 +21,10 @@ from api.aic import enrich_records_from_dump  # noqa: E402
 from data.filtering_logreg import (  # noqa: E402
     extract_all_candidates,
     filter_by_keywords,
+    model_uses_nli,
     predict_with_hierarchical_model,
 )
+from data.nli import NliScorer  # noqa: E402
 from geolocation.gazetter import NominatimClient  # noqa: E402
 from run_pipeline import load_ner_pipeline  # noqa: E402
 
@@ -186,6 +188,7 @@ def main():
             gazetteer_conn=gazetteer_conn,
             nominatim_client=NominatimClient(user_agent=args.nominatim_user_agent),
             geocode_top_k=args.geocode_top_k,
+            nli_scorer=NliScorer() if model_uses_nli(model) else None,
         )
     finally:
         if gazetteer_conn is not None:

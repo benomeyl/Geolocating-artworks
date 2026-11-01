@@ -1,0 +1,30 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[info] 387 œuvres chargées depuis data/raw/gold_standard/gold_dataset.json.
+[info] 287 œuvres enrichies depuis le dump AIC.
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights:  26%|██▌       | 51/199 [00:00<00:00, 503.68it/s]Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1711.11it/s]
+D:\Personnel et Travail\EPFL\Geolocating-artworks\.venv\Lib\site-packages\torch\jit\_script.py:1485: FutureWarning: `torch.jit.script` is not supported in Python 3.14+ and may break. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+Loading weights:   0%|          | 0/202 [00:00<?, ?it/s]Loading weights: 100%|██████████| 202/202 [00:00<00:00, 3164.05it/s]
+[info] 678 candidats étiquetés, table sauvegardée dans results\feature_table.pkl.
+[info] Statuts: {'negative': 338, 'match': 260, 'unevaluable': 80}
+[info] Évaluation de « v4 » (31 features)...
+[info] Évaluation de « v4 + NLI » (36 features)...
+
+=== Validation externe (mêmes folds, seuils réglés dans chaque fold) ===
+  jeu                     préc. rappel   FP   FN  ville / région / pays (préc., groupes)
+  v4                      0.773  0.215   10  124  0.600 (5) / 0.714 (7) / 0.795 (37)  déployés=aucun
+  v4 + NLI                0.739  0.108    6  141  0.600 (5) / 0.000 (1) / 0.800 (19)  déployés=aucun
+
+=== Précision moyenne hors-fold par niveau (sans seuil, moyenne sur 5 graines) ===
+  jeu                       exact_place   neighborhood           city         region        country
+  v4                        0.531±0.024    0.645±0.025    0.681±0.011    0.711±0.006    0.766±0.012
+  v4 + NLI                  0.516±0.029    0.596±0.028    0.704±0.015    0.740±0.004    0.802±0.010
+
+=== Nouvelles features (taux de candidats justes global: 0.43) ===
+  nli_view           moyenne justes=0.26 faux=0.13 (œuvres sans lieu 0.09) AUC seule=0.692 poids ville=+0.15 pays=+0.80
+  nli_scene          moyenne justes=0.59 faux=0.44 (œuvres sans lieu 0.41) AUC seule=0.638 poids ville=+1.80 pays=+1.64
+  nli_is_place       moyenne justes=0.35 faux=0.23 (œuvres sans lieu 0.22) AUC seule=0.700 poids ville=+0.71 pays=+1.47
+  nli_made_in        moyenne justes=0.27 faux=0.32 (œuvres sans lieu 0.30) AUC seule=0.497 poids ville=-2.06 pays=-2.35
+  nli_artist_life    moyenne justes=0.04 faux=0.09 (œuvres sans lieu 0.09) AUC seule=0.347 poids ville=-0.86 pays=-1.28
+
+[ok] Résultats écrits dans results\compare_nli.json
