@@ -13,6 +13,7 @@ import json
 import logging
 import math
 import os
+import re
 import sqlite3
 import threading
 import time
@@ -199,6 +200,41 @@ class NominatimClient:
                 if (location := self._normalize_result(result, query)) is not None
             ]
             self._store_response(query, normalized)
+            return normalized
+
+    def search_within(self, query, country_code, viewbox=None):
+        """Return up to 5 locations named `query` inside a country, and inside `viewbox` if given.
+
+        `viewbox` is (west, south, east, north) in degrees; results outside it
+        are excluded (Nominatim `bounded=1`). Cached like `search`, under a
+        key that includes the area ([] on failure, not cached).
+        """
+        area = f"cc={country_code.lower()}"
+        if viewbox is not None:
+            area += "|vb=" + ",".join(f"{value:.2f}" for value in viewbox)
+        key = f"{query}||{area}"
+        cached = self._cached_response(key)
+        if cached is not None:
+            return cached
+
+        params = {"q": query, "limit": 5, "countrycodes": country_code.lower()}
+        if viewbox is not None:
+            params.update({"viewbox": ",".join(f"{value:.4f}" for value in viewbox), "bounded": 1})
+        with self._request_lock:
+            cached = self._cached_response(key)
+            if cached is not None:
+                return cached
+            try:
+                results = self._request_json(self.endpoint, params)
+            except (requests.RequestException, ValueError) as error:
+                _LOGGER.warning("Nominatim bounded lookup failed for %r: %s", key, error)
+                return []
+            normalized = [
+                location
+                for result in results
+                if (location := self._normalize_result(result, query)) is not None
+            ]
+            self._store_response(key, normalized)
             return normalized
 
     def reverse(self, latitude, longitude):
@@ -523,7 +559,46 @@ def resolve_location(
 # ---------------------------------------------------------------------------
 
 # Two mentions closer than this (in characters, same field) give each other context.
+# Since the top-down resolution, only used to order anchors (closest first).
 CONTEXT_WINDOW_CHARS = 80
+# A precise place "fits" a city anchor within this distance, a region anchor
+# within REGION_RADIUS_KM (and the same country).
+CITY_RADIUS_KM = 30.0
+# Large: states are long (Recife is 330 km from the centre of Pernambuco).
+REGION_RADIUS_KM = 500.0
+# Half-size in degrees of the box searched around a city (about 30 km) or a
+# region anchor; a country anchor restricts the search to the country.
+_CITY_BOX_DEGREES = 0.3
+_REGION_BOX_DEGREES = 2.0
+# Words before a mention saying it is where the artwork or its author comes
+# from ("printed in London", "born in Leiden"): such places are not anchors.
+ORIGIN_CUES = [
+    "born in", "died in", "lived in", "living in", "studied in", "worked in", "working in", "trained in",
+    "made in", "printed in", "published in", "published by", "manufactured in", "produced in",
+    "exhibited in", "exhibition in", "acquired in", "purchased in", "settled in", "moved to",
+    "returned to", "emigrated to", "né à", "née à", "mort à", "morte à", "imprimé à", "publié à",
+    "fabriqué à", "geboren in", "gestorben in", "gedruckt in",
+]
+_ORIGIN_CUE_PATTERN = re.compile(
+    r"(?:^|[^\w])(?:" + "|".join(sorted(map(re.escape, ORIGIN_CUES), key=len, reverse=True)) + r")\s*$"
+)
+# Words that do not name a place on their own: a mention made only of them
+# ("Park", "Town Hall", "Grove of Trees", "South Gate of") is searched only
+# inside the area of an anchor, never worldwide.
+GENERIC_PLACE_WORDS = {
+    "the", "of", "a", "an", "and", "de", "du", "des", "la", "le", "les", "l", "d", "di", "del", "der",
+    "die", "das", "van", "von", "el", "at", "on", "in", "by", "near",
+    "park", "forest", "wood", "woods", "garden", "gardens", "grove", "tree", "trees", "field", "fields",
+    "meadow", "river", "lake", "pond", "sea", "bay", "coast", "beach", "shore", "island", "mountain",
+    "mountains", "hill", "hills", "valley", "cliff", "cliffs", "rock", "falls", "harbor", "harbour",
+    "port", "pier", "quay", "canal", "bridge", "gate", "tower", "wall", "walls", "column", "memorial",
+    "monument", "fountain", "statue", "church", "chapel", "cathedral", "abbey", "temple", "castle",
+    "palace", "fort", "hall", "house", "home", "room", "living", "window", "street", "road", "avenue",
+    "lane", "path", "square", "place", "market", "station", "town", "city", "village", "district",
+    "quarter", "business", "center", "centre", "museum", "gallery", "school", "college", "university",
+    "royal", "old", "new", "great", "little", "small", "big", "upper", "lower", "central", "north",
+    "south", "east", "west", "wooden", "entrance", "main", "high",
+}
 # Two places closer than this are considered to belong to the same area.
 NEARBY_KM = 150.0
 # Finest Nominatim place_rank of an anchor (16 city, 19 village, 20 hamlet).
@@ -544,7 +619,8 @@ def _is_anchor(name, location):
     """True if a mention is reliable enough to give context to its neighbours.
 
     Anchors are countries, regions and inhabited places whose name matches
-    the mention ("Peru" -> "Republic of Peru", "Illinois"). Other mentions,
+    the mention ("Peru" -> "Republic of Peru", "Illinois"), or that are
+    prominent under a local name ("Florence" -> "Firenze"). Other mentions,
     often misread common words ("Surf", "Memorial Column") geocoded to a
     random homonym, would mislead the disambiguation.
     """
@@ -558,7 +634,10 @@ def _is_anchor(name, location):
         reliable_level = 0 < place_rank <= _ANCHOR_MAX_PLACE_RANK
     mention_tokens, location_tokens = _name_tokens(name), _name_tokens(location.get("name"))
     names_match = bool(mention_tokens) and (mention_tokens <= location_tokens or location_tokens <= mention_tokens)
-    return reliable_level and names_match
+    # Nominatim names places in the local language: "Florence" -> "Firenze".
+    # A prominent place is trusted under another name.
+    exonym = (location.get("importance") or 0.0) >= _PROMINENT_IMPORTANCE
+    return reliable_level and (names_match or exonym)
 
 
 def _mentioned_together(occurrences_a, occurrences_b, window=CONTEXT_WINDOW_CHARS):
@@ -592,6 +671,87 @@ def _agreement(location, context_location):
     return int(same_country) + int(nearby)
 
 
+_ARTICLES = {"the", "of", "a", "an", "de", "du", "des", "la", "le", "les", "l", "d", "di", "del", "der", "die", "das"}
+
+
+def _names_the_mention(name, location):
+    """True if every word of the mention (articles aside) is in the location's name.
+
+    Guards searches restricted to an area, which return anything found
+    there: "Cardiff Castle" must not become "Cardiff Avenue", nor "Theatre"
+    the "Nürnberger Symphoniker".
+    """
+    mention_tokens = _name_tokens(name) - _ARTICLES
+    return bool(mention_tokens) and mention_tokens <= _name_tokens(location.get("name"))
+
+
+def _is_generic_name(name):
+    """True if every word of `name` is a GENERIC_PLACE_WORDS ("Town Hall", "Grove of Trees")."""
+    tokens = _name_tokens(name)
+    return bool(tokens) and tokens <= GENERIC_PLACE_WORDS
+
+
+def _origin_mentions_only(occurrences):
+    """True if every occurrence follows an origin cue ("printed in London")."""
+    return all(
+        _ORIGIN_CUE_PATTERN.search(
+            " ".join(occurrence["source_text"][max(0, occurrence["start"] - 40):occurrence["start"]].lower().split())
+        )
+        for occurrence in occurrences
+    )
+
+
+def _anchor_scale(location):
+    """"country", "region" or "city": the area an anchor stands for."""
+    if _is_country(location):
+        return "country"
+    feature_code = str(location.get("feature_code") or "")
+    if location.get("source") == "GeoNames":
+        return "region" if feature_code.startswith("ADM") else "city"
+    try:
+        place_rank = int(location.get("place_rank") or 0)
+    except (TypeError, ValueError):
+        place_rank = 0
+    return "region" if 0 < place_rank <= 12 else "city"
+
+
+def _fits_anchor(location, anchor):
+    """True if a location lies in the area of an anchor (same country, and near a city or region anchor)."""
+    country_code = location.get("country_code")
+    if not country_code or country_code != anchor.get("country_code"):
+        return False
+    scale = _anchor_scale(anchor)
+    if scale == "country":
+        return True
+    radius = CITY_RADIUS_KM if scale == "city" else REGION_RADIUS_KM
+    return haversine_distance_km(
+        location["latitude"], location["longitude"], anchor["latitude"], anchor["longitude"],
+    ) <= radius
+
+
+def _anchor_area(anchor):
+    """(country_code, viewbox or None) searched inside an anchor."""
+    scale = _anchor_scale(anchor)
+    if scale == "country":
+        return anchor["country_code"], None
+    half_size = _CITY_BOX_DEGREES if scale == "city" else _REGION_BOX_DEGREES
+    return anchor["country_code"], (
+        anchor["longitude"] - half_size, anchor["latitude"] - half_size,
+        anchor["longitude"] + half_size, anchor["latitude"] + half_size,
+    )
+
+
+def _text_distance(occurrences_a, occurrences_b):
+    """Smallest character distance between two mentions of the same text (inf if never together)."""
+    distances = [
+        max(a["start"], b["start"]) - min(a["end"], b["end"])
+        for a in occurrences_a
+        for b in occurrences_b
+        if a["field"] == b["field"] and a.get("source_text") == b.get("source_text")
+    ]
+    return min(distances, default=math.inf)
+
+
 def _contextual_search(name, context_names, context_locations, nominatim_client):
     """Search "name, context" with Nominatim and keep a result in the context's country."""
     if nominatim_client is None:
@@ -603,19 +763,57 @@ def _contextual_search(name, context_names, context_locations, nominatim_client)
     return None
 
 
+def _resolved(choice, options, nominatim_client, conflict, resolution):
+    """Location returned by resolve_artwork_places: hierarchy, conflict flag, homonym statistics."""
+    homonyms = [
+        option for option in options
+        if haversine_distance_km(
+            choice["latitude"], choice["longitude"], option["latitude"], option["longitude"],
+        ) > NEARBY_KM
+    ]
+    return {
+        **_with_hierarchy(choice, nominatim_client),
+        "context_conflict": conflict,
+        "resolution": resolution,
+        "homonym_count": len(homonyms),
+        "importance_gap": (choice.get("importance") or 0.0) - max(
+            (homonym.get("importance") or 0.0 for homonym in homonyms), default=0.0
+        ),
+    }
+
+
 def resolve_artwork_places(mentions, conn, nominatim_client=None, alternatives_cache=None):
-    """Resolve the places of one artwork together, using each other as context.
+    """Resolve the places of one artwork from the largest to the most precise.
 
     `mentions` is a list of (name, occurrences) where occurrences carry
-    `field`, `start`, `end` and `source_text`. A place mentioned near anchor
-    places (`_is_anchor`: "Logan County" next to "Cornland", "San Salvador"
-    next to "Peru") takes the alternative that best agrees with their best
-    guesses: same country, nearby. If none agrees, "name, context" is
-    searched with Nominatim, unless the first alternative is prominent
-    (`_PROMINENT_IMPORTANCE`); if that fails too, the first alternative is
-    kept and flagged with `context_conflict`.
+    `field`, `start`, `end` and `source_text`.
 
-    Returns {name: location or None}; locations include `context_conflict`.
+    1. Anchors: countries, regions and inhabited places whose name matches
+       the mention (`_is_anchor`), anywhere in the artwork, except mentions
+       that only follow an origin cue ("printed in London"). An anchor takes
+       the alternative that best agrees with the other anchors (same
+       country, nearby); if none agrees, "name, context" is searched, unless
+       the first alternative is prominent (`_PROMINENT_IMPORTANCE`); if that
+       fails too, the first alternative is kept and flagged `context_conflict`.
+    2. Other mentions (monuments, streets, misread words): with anchors, the
+       first alternative lying in an anchor's area (`_fits_anchor`, closest
+       anchor in the text first); otherwise the name is searched inside the
+       anchors' areas (`NominatimClient.search_within`), then as "name,
+       anchor", keeping only results that carry the mention's words
+       (`_names_the_mention`). If all fail and an anchor is right next to the
+       mention ("Le Nys, Amsterdam"), the mention gets no location unless its
+       first alternative is prominent: the artwork is then placed by its
+       anchors ("Palazzo Vecchio, Florence" -> Florence) rather than by a
+       homonym elsewhere. With only distant anchors, the first alternative is
+       kept; both kept cases are flagged `context_conflict`. Without anchors,
+       the first alternative, except for generic names (`_is_generic_name`:
+       "Park", "Town Hall"), which get none. Prominent anchors are only
+       revised by country or region anchors; generic names are never anchors.
+
+    Returns {name: location or None}; locations include `context_conflict`,
+    `resolution`, `homonym_count` (alternatives farther than NEARBY_KM from
+    the choice) and `importance_gap` (importance of the choice minus that of
+    the most important of those homonyms; the choice's importance if none).
     """
     alternatives_cache = {} if alternatives_cache is None else alternatives_cache
 
@@ -626,21 +824,30 @@ def resolve_artwork_places(mentions, conn, nominatim_client=None, alternatives_c
             alternatives_cache[key] = location_alternatives(name, conn, nominatim_client)
         return alternatives_cache[key]
 
+    anchor_mentions = [
+        (name, occurrences)
+        for name, occurrences in mentions
+        if alternatives(name)
+        and _is_anchor(name, alternatives(name)[0])
+        and not _is_generic_name(name)
+        and not _origin_mentions_only(occurrences)
+    ]
+    anchor_names = {name for name, _ in anchor_mentions}
     resolved = {}
-    for name, occurrences in mentions:
+
+    for name, occurrences in anchor_mentions:
         options = alternatives(name)
-        if not options:
-            resolved[name] = None
-            continue
         context = [
             (other_name, alternatives(other_name)[0])
-            for other_name, other_occurrences in mentions
+            for other_name, _ in anchor_mentions
             if other_name != name
-            and _mentioned_together(occurrences, other_occurrences)
-            and alternatives(other_name)
-            and _is_anchor(other_name, alternatives(other_name)[0])
         ]
         choice, conflict = options[0], False
+        # A prominent place (Paris, Berlin) is only revised by a country or a
+        # region: a misread city-level anchor ("Red House" -> Red House,
+        # Virginia) would otherwise drag it to a homonym.
+        if (options[0].get("importance") or 0.0) >= _PROMINENT_IMPORTANCE:
+            context = [(n, location) for n, location in context if _anchor_scale(location) != "city"]
         # A country name is not ambiguous enough to be revised by smaller places.
         if context and not _is_country(options[0]):
             scores = [sum(_agreement(option, location) for _, location in context) for option in options]
@@ -654,7 +861,70 @@ def resolve_artwork_places(mentions, conn, nominatim_client=None, alternatives_c
                     name, [n for n, _ in context], [loc for _, loc in context], nominatim_client
                 )
                 choice, conflict = (contextual, False) if contextual else (options[0], True)
-        resolved[name] = {**_with_hierarchy(choice, nominatim_client), "context_conflict": conflict}
+        resolved[name] = _resolved(choice, options, nominatim_client, conflict, "anchor")
+
+    search_within = getattr(nominatim_client, "search_within", None)
+    for name, occurrences in mentions:
+        if name in anchor_names:
+            continue
+        options = alternatives(name)
+        anchors = sorted(
+            (
+                (other_name, other_occurrences)
+                for other_name, other_occurrences in anchor_mentions
+                if resolved.get(other_name)
+            ),
+            key=lambda item: _text_distance(occurrences, item[1]),
+        )
+        anchor_locations = [resolved[other_name] for other_name, _ in anchors]
+        if not anchor_locations:
+            resolved[name] = (
+                None if not options or _is_generic_name(name)
+                else _resolved(options[0], options, nominatim_client, False, "global")
+            )
+            continue
+
+        fitting = next(
+            (option for anchor in anchor_locations for option in options if _fits_anchor(option, anchor)),
+            None,
+        )
+        if fitting is not None:
+            resolved[name] = _resolved(fitting, options, nominatim_client, False, "in_anchor")
+            continue
+        if search_within is not None:
+            bounded = next(
+                (
+                    location
+                    for anchor in anchor_locations
+                    if anchor.get("country_code")
+                    for location in search_within(name, *_anchor_area(anchor))
+                    if _is_relevant_result(location)
+                    and _fits_anchor(location, anchor)
+                    and _names_the_mention(name, location)
+                ),
+                None,
+            )
+            if bounded is not None:
+                resolved[name] = _resolved(bounded, [bounded, *options], nominatim_client, False, "searched_in_anchor")
+                continue
+        # A free-text "Grove of Trees, Versailles" search finds unrelated
+        # memorials: generic names only use the bounded search above.
+        contextual = None if _is_generic_name(name) else _contextual_search(
+            name, [n for n, _ in anchors], anchor_locations, nominatim_client
+        )
+        if contextual is not None and _names_the_mention(name, contextual):
+            resolved[name] = _resolved(contextual, [contextual, *options], nominatim_client, False, "name_and_anchor")
+            continue
+        # Not found in the anchors' areas. An anchor right next to the mention
+        # ("Le Nys, Amsterdam") says where it is: no location rather than a
+        # homonym elsewhere. A distant anchor (another sentence) may concern
+        # something else: keep the best guess, flagged as a conflict.
+        nearby_anchor = _text_distance(occurrences, anchors[0][1]) <= CONTEXT_WINDOW_CHARS
+        prominent = (options[0].get("importance") or 0.0) >= _PROMINENT_IMPORTANCE if options else False
+        keep = options and not _is_generic_name(name) and (prominent or not nearby_anchor)
+        resolved[name] = (
+            _resolved(options[0], options, nominatim_client, True, "outside_anchors") if keep else None
+        )
     return resolved
 
 

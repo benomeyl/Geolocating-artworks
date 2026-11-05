@@ -1,8 +1,11 @@
 """Add manually reviewed artworks to gold_dataset.json.
 
-Accepts both manual_review_sample.csv and the CSV produced by
-create_annotation_csv.py. In the latter, `use_suggestion` = oui copies the
-suggested_* columns into the empty actual_* columns.
+Accepts manual_review_sample.csv, the CSV produced by
+create_annotation_csv.py and the one produced by export_precise_places.py.
+In the second, `use_suggestion` = oui copies the suggested_* columns into
+the empty actual_* columns. In the third, the review_* columns are read and
+`review_candidate_correct` = oui takes the geocoded candidate as the place.
+Artworks missing from --records are read from the AIC dump.
 """
 
 import argparse
@@ -20,6 +23,7 @@ RECORDS_JSONS = [
     Path("data/raw/aic/search_multiple_queries_all_artworks_20260917T125145Z.json"),
     Path("data/raw/aic/aic_useful_fields.json"),
 ]
+AIC_DUMP_DIR = Path("data/raw/artic-api-data/json/artworks")
 
 PLACE_STATUSES = {"depicted", "none", "mentioned_only", "undeterminable"}
 PLACE_STATUS_ALIASES = {
@@ -107,6 +111,52 @@ def apply_suggestion(row):
     return filled
 
 
+# export_precise_places.py columns giving the place when the candidate is correct.
+PRECISE_CANDIDATE_COLUMNS = {
+    "actual_place_name": "resolved_name",
+    "actual_latitude": "latitude",
+    "actual_longitude": "longitude",
+    "actual_city": "resolved_city",
+    "actual_region": "resolved_region",
+    "actual_country": "resolved_country",
+}
+PRECISE_REVIEW_COLUMNS = {
+    "actual_place_name": "review_place_name",
+    "actual_latitude": "review_latitude",
+    "actual_longitude": "review_longitude",
+}
+
+
+def precise_review_row(row):
+    """Convert a row of export_precise_places.py (review_* columns) to the actual_* format.
+
+    Rows without a sample_stratum column come from the first export, sorted
+    by p_exact and annotated from the top: they are tagged "precise_keywords"
+    so that they can be kept out of an unbiased precision estimate.
+    """
+    converted = {
+        **row,
+        "review_id": f"P{(row.get('rank') or '').strip()}",
+        "sample_stratum": (row.get("sample_stratum") or "").strip() or "precise_keywords",
+        "actual_place_status": row.get("review_place_status") or "",
+        "actual_precision": row.get("review_precision") or "",
+    }
+    candidate_correct = (row.get("review_candidate_correct") or "").strip().casefold() in TRUE_VALUES
+    source_columns = PRECISE_CANDIDATE_COLUMNS if candidate_correct else PRECISE_REVIEW_COLUMNS
+    for actual_column, source_column in source_columns.items():
+        converted[actual_column] = row.get(source_column) or ""
+    return converted
+
+
+def load_dump_artwork(artwork_id, dump_dir=AIC_DUMP_DIR):
+    """Artwork fields of an AIC dump file, or None if the artwork is not in the dump."""
+    file_path = Path(dump_dir) / f"{artwork_id}.json"
+    if not file_path.is_file():
+        return None
+    payload = json.loads(file_path.read_text(encoding="utf-8"))
+    return {field: payload.get(field) for field in ARTWORK_FIELDS if field in payload}
+
+
 def _artwork_id(raw_id):
     """Return a CSV artwork id as int for AIC ids, unchanged otherwise."""
     raw_id = (raw_id or "").strip()
@@ -182,11 +232,11 @@ def record_from_review_row(row, artwork, csv_name, import_date):
     }, warnings
 
 
-def load_review_records(csv_path, records_paths, import_date=None):
+def load_review_records(csv_path, records_paths, import_date=None, dump_dir=AIC_DUMP_DIR):
     """Build gold records from the annotated rows of a review CSV.
 
-    Artwork payloads are looked up in `records_paths`. Returns
-    (records, unannotated_review_ids, warnings).
+    Artwork payloads are looked up in `records_paths`, then in the AIC dump.
+    Returns (records, unannotated_review_ids, warnings).
     """
     import_date = import_date or date.today().isoformat()
     if isinstance(records_paths, (str, Path)):
@@ -206,13 +256,19 @@ def load_review_records(csv_path, records_paths, import_date=None):
     warnings = []
     with Path(csv_path).open(encoding="utf-8-sig", newline="") as csv_file:
         for row_number, row in enumerate(csv.DictReader(csv_file), start=2):
+            if "review_place_status" in row:
+                row = precise_review_row(row)
             artwork_id = _artwork_id(row.get("artwork_id"))
             if artwork_id == "":
                 # A row whose identification columns were cleared cannot be linked to an artwork.
                 if any((row.get(field) or "").strip() for field in ("actual_place_status", "use_suggestion")):
                     warnings.append(f"row {row_number}: annotated but without artwork_id, skipped")
                 continue
-            artwork = artworks_by_id.get(artwork_id) or {"id": artwork_id, "title": row.get("title")}
+            artwork = (
+                artworks_by_id.get(artwork_id)
+                or load_dump_artwork(artwork_id, dump_dir)
+                or {"id": artwork_id, "title": row.get("title")}
+            )
             try:
                 result = record_from_review_row(row, artwork, Path(csv_path).name, import_date)
             except ValueError as error:

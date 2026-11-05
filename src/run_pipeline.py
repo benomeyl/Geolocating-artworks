@@ -28,17 +28,21 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import joblib
+import numpy as np
 
 from api.aic import enrich_records_from_dump
 from geolocation.gazetter import NominatimClient, geocode_candidates
 from data.filtering_logreg import (
+    TRAIN_ONLY_STRATA,
     extract_all_candidates,
     build_training_table,
     build_geographic_label_table,
     evaluate_hierarchical_grouped_cv,
+    evaluate_repeated_grouped_cv,
     model_uses_nli,
     train_hierarchical_model,
     predict_with_hierarchical_model,
+    wilson_interval,
     train_logistic_model,
     predict_with_model,
     evaluate_binary_predictions,
@@ -148,11 +152,34 @@ def _format_optional(value):
 # train
 # ---------------------------------------------------------------------------
 
-def deployable_levels(model, nested_metrics, minimum_prediction_groups, minimum_predictions):
+def _repeated_level_is_deployable(level, target, repeated, minimum_predictions, worst_case_margin):
+    """Rule D: mean precision over the repeated partitions >= target, and >= target - margin on each."""
+    precisions = [run["metrics_by_level"][level]["precision"] for run in repeated["runs"]]
+    predictions = [run["metrics_by_level"][level]["predictions"] for run in repeated["runs"]]
+    return (
+        all(precision is not None for precision in precisions)
+        and float(np.mean(predictions)) >= minimum_predictions
+        and float(np.mean(precisions)) >= target
+        and min(precisions) >= target - worst_case_margin
+    )
+
+
+def deployable_levels(
+    model,
+    nested_metrics,
+    minimum_prediction_groups,
+    minimum_predictions,
+    repeated=None,
+    worst_case_margin=0.05,
+):
     """Copy outer-CV metrics into each level and return the levels that can be deployed.
 
-    A level is deployable when it is active and its outer-CV precision reaches
-    its target with enough predictions and prediction groups.
+    With `repeated` (evaluate_repeated_grouped_cv), rule D: a level is
+    deployable when it is active, its precision averaged over the shuffled
+    partitions reaches its target, it stays above target - `worst_case_margin`
+    on every partition and it predicts on every partition. Without it, the
+    precision of the single fixed partition must reach the target with enough
+    predictions and prediction groups.
     """
     levels = []
     for level, level_model in model["levels"].items():
@@ -162,6 +189,13 @@ def deployable_levels(model, nested_metrics, minimum_prediction_groups, minimum_
         level_model["outer_cv_prediction_groups"] = outer["prediction_groups"]
         level_model["outer_cv_predictions"] = outer["predictions"]
         level_model["outer_cv_false_positives"] = outer["false_positives"]
+        level_model["outer_cv_precision_interval"] = wilson_interval(outer["true_positives"], outer["predictions"])
+        if repeated is not None:
+            if level_model["status"] == "active" and _repeated_level_is_deployable(
+                level, level_model["target_precision"], repeated, minimum_predictions, worst_case_margin
+            ):
+                levels.append(level)
+            continue
         if (
             level_model["status"] == "active"
             and outer["precision"] is not None
@@ -210,8 +244,11 @@ def print_training_report(model, nested_metrics, minimum_work_recall):
     print("\n=== Déployabilité par niveau (validation externe) ===")
     for level in model["specificity_order"]:
         level_metrics = nested_metrics["metrics_by_level"][level]
+        low, high = wilson_interval(level_metrics["true_positives"], level_metrics["predictions"])
+        interval = f"[{low:.2f} – {high:.2f}]" if low is not None else ""
         print(
-            f"  {level:<16s} précision={_format_optional(level_metrics['precision'])} "
+            f"  {level:<16s} précision={_format_optional(level_metrics['precision'])} {interval} "
+            f"({level_metrics['true_positives']}/{level_metrics['predictions']}) "
             f"groupes={level_metrics['prediction_groups']} "
             f"déployé={level in model['deployable_levels']}"
         )
@@ -219,7 +256,15 @@ def print_training_report(model, nested_metrics, minimum_work_recall):
 
     print("\n=== Validation externe groupée par cible (estimation hors-fold) ===")
     print(
-        f"  précision={nested_metrics['precision']:.3f} "
+        f"  œuvres évaluées={nested_metrics['artwork_count']} "
+        f"(+{nested_metrics.get('train_only_artwork_count', 0)} utilisées seulement à l'entraînement: "
+        f"{', '.join(sorted(TRAIN_ONLY_STRATA))})"
+    )
+    true_positives, false_positives = nested_metrics["true_positives"], nested_metrics["false_positives"]
+    low, high = wilson_interval(true_positives, true_positives + false_positives)
+    interval = f" [{low:.2f} – {high:.2f}]" if low is not None else ""
+    print(
+        f"  précision={nested_metrics['precision']:.3f}{interval} "
         f"rappel={nested_metrics['recall']:.3f} "
         f"FP={nested_metrics['false_positives']} "
         f"FN={nested_metrics['false_negatives']} "
@@ -231,6 +276,35 @@ def print_training_report(model, nested_metrics, minimum_work_recall):
             "[avertissement] Le rappel externe est sous le minimum demandé; "
             "les cibles de précision n'ont pas été relâchées."
         )
+
+
+def _format_spread(mean_and_std, decimals=3):
+    """Format a (mean, std) pair as "mean ± std"."""
+    mean, std = mean_and_std
+    return "n/a" if mean is None else f"{mean:.{decimals}f} ± {std:.{decimals}f}"
+
+
+def print_repeated_cv_report(repeated):
+    """Print the spread of the outer-CV metrics over shuffled partitions."""
+    summary = repeated["summary"]
+    print(f"\n=== Validation externe répétée ({repeated['repeats']} découpages mélangés) ===")
+    print(
+        f"  précision={_format_spread(summary['precision'])} "
+        f"rappel={_format_spread(summary['recall'])} "
+        f"TP={_format_spread(summary['true_positives'], 1)} "
+        f"FP={_format_spread(summary['false_positives'], 1)}"
+    )
+    for level, level_metrics in repeated["metrics_by_level"].items():
+        print(
+            f"  {level:<16s} précision={_format_spread(level_metrics['precision'])} "
+            f"(cumulée {_format_optional(level_metrics['pooled_precision'])}) "
+            f"prédictions={_format_spread(level_metrics['predictions'], 1)} "
+            f"découpages avec prédictions={level_metrics['runs_with_predictions']}/{repeated['repeats']}"
+        )
+    print(
+        "  Note: avec plusieurs découpages, la déployabilité est décidée ici (règle D): "
+        "moyenne >= cible et chaque découpage >= cible - 0.05."
+    )
 
 
 def cmd_train(args):
@@ -263,6 +337,7 @@ def cmd_train(args):
         "minimum_positive_groups": args.minimum_positive_groups,
         "minimum_prediction_groups": args.minimum_prediction_groups,
         "minimum_predictions": args.minimum_predictions,
+        "threshold_margin": args.threshold_margin,
     }
     model = train_hierarchical_model(table, **training_options)
     nested_metrics = evaluate_hierarchical_grouped_cv(
@@ -272,8 +347,23 @@ def cmd_train(args):
         training_options=training_options,
     )
     model["nested_cv_metrics"] = nested_metrics
+    repeated = None
+    if args.outer_repeats > 1:
+        repeated = evaluate_repeated_grouped_cv(
+            records,
+            table,
+            repeats=args.outer_repeats,
+            n_jobs=args.outer_jobs,
+            n_splits=args.outer_splits,
+            training_options=training_options,
+        )
+        model["repeated_cv_metrics"] = repeated
     model["deployable_levels"] = deployable_levels(
-        model, nested_metrics, args.minimum_prediction_groups, args.minimum_predictions
+        model, nested_metrics, args.minimum_prediction_groups, args.minimum_predictions, repeated
+    )
+    model["deployment_rule"] = (
+        "mean precision over shuffled partitions >= target and >= target - 0.05 on each"
+        if repeated is not None else "fixed-partition precision >= target"
     )
     model["training_metadata"] = {
         "created_at_utc": datetime.now(timezone.utc).isoformat(),
@@ -289,6 +379,10 @@ def cmd_train(args):
     }
 
     print_training_report(model, nested_metrics, args.minimum_work_recall)
+    if repeated is not None:
+        print_repeated_cv_report(repeated)
+        print(f"[info] Règle de déploiement: {model['deployment_rule']}")
+        print(f"[info] Niveaux activés: {model['deployable_levels'] or 'aucun (abstention)'}")
     joblib.dump(model, args.model_out)
     print(f"\n[ok] Modèle hiérarchique sauvegardé dans {args.model_out}")
 
@@ -610,6 +704,19 @@ def main():
     )
     train_parser.add_argument("--n-splits", type=int, default=5, help="Nombre de folds pour la validation croisée.")
     train_parser.add_argument("--outer-splits", type=int, default=5, help="Nombre de folds externes d’évaluation.")
+    train_parser.add_argument(
+        "--outer-repeats",
+        type=int,
+        default=10,
+        help="Découpages mélangés de la validation externe (défaut: 10, règle D). 1 = ancien découpage fixe seul.",
+    )
+    train_parser.add_argument("--outer-jobs", type=int, default=4, help="Découpages évalués en parallèle.")
+    train_parser.add_argument(
+        "--threshold-margin",
+        type=float,
+        default=0.05,
+        help="Les seuils visent cible + marge sur les folds d'entraînement (défaut: 0.05, règle D).",
+    )
     train_parser.add_argument(
         "--minimum-work-recall",
         "--minimum-recall",

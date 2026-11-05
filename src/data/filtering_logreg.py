@@ -32,6 +32,7 @@ from collections import Counter, defaultdict
 
 import numpy as np
 import pandas as pd
+from joblib import Parallel, delayed
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import precision_recall_curve
 from sklearn.model_selection import GroupKFold, StratifiedGroupKFold
@@ -103,9 +104,11 @@ GEOGRAPHIC_LEVELS = [
 ]
 _SPECIFICITY = {level: index for index, level in enumerate(GEOGRAPHIC_LEVELS)}
 _GEOGRAPHIC_LABEL_LEVELS = set(GEOGRAPHIC_LEVELS)
+# 0.90 for every level (decided 2026-11-05): with rule D the thresholds aim
+# at target + 0.05 on the training folds, and 0.95 + 0.05 is out of reach.
 GEOGRAPHIC_TARGET_PRECISION = {
-    "exact_place": 0.95,
-    "neighborhood": 0.93,
+    "exact_place": 0.90,
+    "neighborhood": 0.90,
     "city": 0.90,
     "region": 0.90,
     "country": 0.90,
@@ -121,6 +124,29 @@ NLI_HYPOTHESES = {
     "nli_artist_life": "The artist was born or lived in {place}.",
 }
 NLI_FEATURE_COLUMNS = list(NLI_HYPOTHESES)
+# How much more the NLI model believes "depicted" than "made or lived there"
+# (see nli_features). Not in GEOGRAPHIC_FEATURE_COLUMNS: on 10 shuffled
+# partitions (results/compare_t13_t8.log) it changed neither precision nor
+# recall beyond the noise, the five NLI scores already carry it.
+NLI_CONTRAST_COLUMNS = ["nli_depicted_minus_origin"]
+# Role of the mention in its sentence (mention_role_features): the words
+# just before it and its position in the title. Not in
+# GEOGRAPHIC_FEATURE_COLUMNS: no gain on 10 shuffled partitions
+# (results/compare_t11_t12.log); the cues are rare in terse AIC titles and
+# the 60-character markers and NLI scores already carry most of them.
+MENTION_ROLE_COLUMNS = [
+    "role_depiction_cue",
+    "role_origin_cue",
+    "role_location_preposition",
+    "role_from",
+    "role_title_head",
+    "role_title_after_comma",
+    "role_institution_name",
+]
+# Homonyms of the chosen location (gazetter.resolve_artwork_places). Not in
+# GEOGRAPHIC_FEATURE_COLUMNS: AUC alone 0.54, recall lower on 9/10 partitions;
+# most false positives are artworks without a depicted place, not homonyms.
+HOMONYM_FEATURE_COLUMNS = ["geo_homonym_count", "geo_importance_gap"]
 
 GEOGRAPHIC_FEATURE_COLUMNS = FEATURE_COLUMNS + [
     f"geo_level_{level}" for level in GEOGRAPHIC_LEVELS
@@ -229,6 +255,37 @@ def _place_status(record):
 def _artwork_statuses(records):
     """Map artwork id to annotated place_status."""
     return {_artwork(record).get("id"): _place_status(record) for record in records}
+
+
+# Strata selected by the model (sorted by its own score): training only,
+# never scored, otherwise they inflate the outer-CV metrics.
+TRAIN_ONLY_STRATA = {"precise_keywords"}
+
+
+def _train_only_artwork_ids(records):
+    """Ids of the artworks whose annotation comes from a model-selected stratum."""
+    return {
+        _artwork(record).get("id")
+        for record in records
+        if (record.get("annotations", {}).get("ground_truth_source") or {}).get("sample_stratum")
+        in TRAIN_ONLY_STRATA
+    }
+
+
+def wilson_interval(successes, total, z=1.96):
+    """95 % Wilson score interval of a proportion successes/total, (None, None) if total is 0.
+
+    Unlike the normal approximation p ± 1.96·sqrt(p(1-p)/n), it stays within
+    [0, 1] and remains reliable for small samples and proportions near 1,
+    which is the case of the precisions measured here (e.g. 29/38).
+    """
+    if not total:
+        return None, None
+    proportion = successes / total
+    denominator = 1 + z * z / total
+    centre = (proportion + z * z / (2 * total)) / denominator
+    half_width = z * np.sqrt(proportion * (1 - proportion) / total + z * z / (4 * total * total)) / denominator
+    return float(centre - half_width), float(centre + half_width)
 
 
 def _ratio(numerator, denominator):
@@ -506,6 +563,90 @@ def candidate_features(occurrences):
     return features
 
 
+# Words just before a mention that announce what is shown ("View of Delft")
+# or where the artwork or its author comes from ("printed in London").
+_DEPICTION_CUES = [
+    "view of", "views of", "view from", "view in", "view near", "scene in", "scene at", "street in",
+    "landscape near", "landscape at", "vue de", "vue du", "vue des", "vue prise de", "veduta di",
+    "veduta del", "ansicht von", "blick auf", "vista de",
+]
+_ORIGIN_CUES = [
+    "born in", "died in", "lived in", "living in", "studied in", "worked in", "working in", "trained in",
+    "made in", "printed in", "published in", "published by", "manufactured in", "produced in",
+    "exhibited in", "exhibition in", "acquired in", "purchased in", "settled in", "moved to",
+    "returned to", "emigrated to", "né à", "née à", "mort à", "morte à", "imprimé à", "publié à",
+    "fabriqué à", "geboren in", "gestorben in", "gedruckt in",
+]
+_LOCATION_PREPOSITIONS = ["in", "at", "near", "on", "à", "au", "en", "bei", "nahe", "près de", "a", "presso"]
+# Words before ("University of Chicago") or after ("Chicago Tribune") a
+# place name that make it part of an institution's name.
+_INSTITUTION_BEFORE = [
+    "university of", "college of", "museum of", "institute of", "academy of", "school of", "bank of",
+    "society of", "art institute of", "gallery of", "library of", "université de", "musée de",
+]
+_INSTITUTION_AFTER = {
+    "university", "college", "museum", "gallery", "institute", "school", "academy", "tribune", "times",
+    "herald", "daily", "news", "press", "company", "co", "corporation", "inc", "bank", "railroad",
+    "railway", "society", "club", "league", "symphony", "orchestra", "magazine", "journal", "gazette",
+}
+_TITLE_ARTICLES = {"", "the", "a", "an", "le", "la", "les", "l'", "il", "lo", "der", "die", "das", "el"}
+
+
+def _cue_pattern(cues):
+    """Regex matching text that ends with one of `cues` (whole words), followed by optional spaces."""
+    alternatives = "|".join(sorted((re.escape(cue) for cue in cues), key=len, reverse=True))
+    return re.compile(rf"(?:^|[^\w])(?:{alternatives})\s*$")
+
+
+_DEPICTION_PATTERN = _cue_pattern(_DEPICTION_CUES)
+_ORIGIN_PATTERN = _cue_pattern(_ORIGIN_CUES)
+_PREPOSITION_PATTERN = _cue_pattern(_LOCATION_PREPOSITIONS)
+_FROM_PATTERN = _cue_pattern(["from", "depuis", "von", "da"])
+_INSTITUTION_BEFORE_PATTERN = _cue_pattern(_INSTITUTION_BEFORE)
+
+
+def _text_before(occurrence, characters=40):
+    """Lowercased plain text just before a mention, on one line."""
+    before = occurrence["source_text"][max(0, occurrence["start"] - characters):occurrence["start"]]
+    return re.sub(r"\s+", " ", re.sub(r"<[^>]*>?", " ", before)).lower()
+
+
+def _first_word_after(occurrence):
+    """Lowercased first word after a mention (punctuation stripped), or ""."""
+    after = re.sub(r"<[^>]+>", " ", occurrence["source_text"][occurrence["end"]:occurrence["end"] + 30])
+    match = re.match(r"\s*([\w'’]+)", after)
+    return match.group(1).lower() if match else ""
+
+
+def mention_role_features(occurrences):
+    """Role of a grouped candidate in its text, from the words around each occurrence (any occurrence counts).
+
+    - role_depiction_cue: "View of X", "Scene in X", "Vue de X";
+    - role_origin_cue: "printed in X", "born in X", "published by X";
+    - role_location_preposition: "in/at/near X" without an origin verb;
+    - role_from: "X from Y" (Y is often the viewpoint);
+    - role_title_head: the title starts with the mention ("Pont Neuf, Paris" for Pont Neuf);
+    - role_title_after_comma: the mention follows a comma in the title (Paris in the same title);
+    - role_institution_name: "University of X", "X Tribune".
+    """
+    features = dict.fromkeys(MENTION_ROLE_COLUMNS, 0)
+    for occurrence in occurrences:
+        before = _text_before(occurrence)
+        origin = bool(_ORIGIN_PATTERN.search(before))
+        features["role_depiction_cue"] |= int(bool(_DEPICTION_PATTERN.search(before)))
+        features["role_origin_cue"] |= int(origin)
+        features["role_location_preposition"] |= int(not origin and bool(_PREPOSITION_PATTERN.search(before)))
+        features["role_from"] |= int(bool(_FROM_PATTERN.search(before)))
+        features["role_institution_name"] |= int(
+            bool(_INSTITUTION_BEFORE_PATTERN.search(before)) or _first_word_after(occurrence) in _INSTITUTION_AFTER
+        )
+        if occurrence["field"] == "title":
+            title_before = occurrence["source_text"][:occurrence["start"]].strip().lower()
+            features["role_title_head"] |= int(title_before in _TITLE_ARTICLES)
+            features["role_title_after_comma"] |= int(title_before.endswith(","))
+    return features
+
+
 def _plain_text(text):
     """Text without HTML tags (AIC descriptions are HTML) and with collapsed spaces."""
     return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", text or "")).strip()
@@ -532,13 +673,24 @@ def nli_premise(occurrences, artwork, window=300):
 
 
 def nli_features(occurrences, artwork, nli_scorer):
-    """Entailment probability of each NLI_HYPOTHESES for a grouped candidate."""
+    """Entailment probability of each NLI_HYPOTHESES for a grouped candidate, and their contrast.
+
+    `nli_depicted_minus_origin` compares the best "depicted" hypothesis with
+    the best "made or lived there" one: both can be high for the same place
+    ("View of Delft" by a Delft painter), only their difference says which
+    reading the model prefers.
+    """
     premise = nli_premise(occurrences, artwork)
     place = occurrences[0]["place"]
     scores = nli_scorer.entailment([
         (premise, hypothesis.format(place=place)) for hypothesis in NLI_HYPOTHESES.values()
     ])
-    return dict(zip(NLI_FEATURE_COLUMNS, scores))
+    features = dict(zip(NLI_FEATURE_COLUMNS, scores))
+    features["nli_depicted_minus_origin"] = (
+        max(features["nli_view"], features["nli_scene"])
+        - max(features["nli_made_in"], features["nli_artist_life"])
+    )
+    return features
 
 
 def _mentions(text, place_name):
@@ -627,6 +779,9 @@ def _hierarchical_candidate_features(occurrences, location, artwork, nli_scorer=
     features.update(artwork_context_features(artwork, place_name))
     features["geo_name_similarity"] = _name_similarity(place_name, location)
     features["geo_context_conflict"] = int(bool((location or {}).get("context_conflict")))
+    features.update(mention_role_features(occurrences))
+    features["geo_homonym_count"] = int((location or {}).get("homonym_count") or 0)
+    features["geo_importance_gap"] = float((location or {}).get("importance_gap") or 0.0)
     if nli_scorer is not None:
         features.update(nli_features(occurrences, artwork, nli_scorer))
     return features
@@ -784,6 +939,9 @@ def _hierarchy_matches(target, candidate_location, candidate_level):
     ).upper()
     target_name = _normalize_place_name(target.get("name"))
     return {
+        # Same object by name: used for extended objects (streets, parks,
+        # squares, piers) whose geocoded point can lie far from the annotated one.
+        "exact_name": fuzzy_match(target.get("name"), candidate_location.get("name")),
         "country": value_matches("country") or bool(
             target_country_code and target_country_code == candidate_country_code
         ),
@@ -803,7 +961,13 @@ def _matched_level(precision, candidate_level, distance, matches, tolerances):
     """Most specific level at which the candidate matches a target of `precision`."""
     exact_tolerance_km, neighborhood_tolerance_km, city_tolerance_km = tolerances
     if precision == "exact_place":
-        if candidate_level == "exact_place" and distance <= exact_tolerance_km:
+        # A point within exact_tolerance_km, or the same name within
+        # neighborhood_tolerance_km: "Champ de Mars" geocoded 500 m from
+        # the annotated point is still the Champ de Mars.
+        if candidate_level == "exact_place" and (
+            distance <= exact_tolerance_km
+            or (matches["exact_name"] and distance <= neighborhood_tolerance_km)
+        ):
             return "exact_place"
         if matches["city"]:
             return "city"
@@ -1308,7 +1472,13 @@ def _best_regularization(X, labels, groups, n_splits, random_state, regularizati
 
 
 def _fit_level(level, matrix, statuses, label_levels, groups, target_precision, options):
-    """Train the classifier of one level, or explain why the level abstains."""
+    """Train the classifier of one level, or explain why the level abstains.
+
+    The threshold is chosen for `target_precision` + options["threshold_margin"]
+    (at most 0.99): thresholds tuned on the training folds lose about 0.05
+    of precision on new artworks (outer CV, 2026-11-05).
+    """
+    threshold_target = min(0.99, target_precision + options.get("threshold_margin", 0.0))
     positive_levels = _levels_up_to(level)
     row_indices = np.flatnonzero((statuses == "negative") | (statuses == "match"))
     level_labels = np.asarray([
@@ -1341,7 +1511,7 @@ def _fit_level(level, matrix, statuses, label_levels, groups, target_precision, 
         options["random_state"],
         options["regularization_values"],
         {
-            "target_precision": target_precision,
+            "target_precision": threshold_target,
             "minimum_predictions": options["minimum_predictions"],
             "minimum_prediction_groups": options["minimum_prediction_groups"],
         },
@@ -1362,6 +1532,7 @@ def _fit_level(level, matrix, statuses, label_levels, groups, target_precision, 
         "C": best["C"],
         "threshold": best["threshold"],
         "target_precision": target_precision,
+        "threshold_target": threshold_target,
         "oof_precision": best["precision"],
         "oof_recall": best["recall"],
         "oof_support": best["support"],
@@ -1389,6 +1560,7 @@ def train_hierarchical_model(
     minimum_prediction_groups=5,
     minimum_predictions=5,
     feature_columns=None,
+    threshold_margin=0.0,
 ):
     """Fit one grouped-CV classifier per geographic precision level.
 
@@ -1420,6 +1592,7 @@ def train_hierarchical_model(
         "minimum_positive_groups": minimum_positive_groups,
         "minimum_prediction_groups": minimum_prediction_groups,
         "minimum_predictions": minimum_predictions,
+        "threshold_margin": threshold_margin,
     }
     per_level = {
         level: _fit_level(
@@ -1436,6 +1609,7 @@ def train_hierarchical_model(
         "levels": per_level,
         "specificity_order": GEOGRAPHIC_LEVELS,
         "target_precisions": dict(target_precisions),
+        "threshold_margin": threshold_margin,
         "minimum_work_recall": minimum_recall,
         "minimum_positive_groups": minimum_positive_groups,
         "minimum_prediction_groups": minimum_prediction_groups,
@@ -1616,24 +1790,35 @@ def evaluate_hierarchical_grouped_cv(
     n_splits=5,
     random_state=42,
     training_options=None,
+    shuffle_seed=None,
 ):
     """Evaluate a full level/threshold selection process on outer grouped folds.
 
+    Without `shuffle_seed`, the folds come from GroupKFold, which always
+    splits the same way. With a seed, StratifiedGroupKFold shuffles the
+    groups: each seed gives another partition (see evaluate_repeated_grouped_cv).
+
     For each outer fold, `train_hierarchical_model` (thresholds included) is
     fitted on the training artworks only and applied to the test artworks.
+    Artworks of TRAIN_ONLY_STRATA are never tested: they join the training
+    artworks of every fold whose test artworks share none of their CV groups.
     Returns work-level metrics and, per level, the candidate-level precision
     used to decide which levels are deployable.
     """
     artwork_statuses = _artwork_statuses(records)
     artwork_groups = table.attrs.get("artwork_cv_groups") or _artwork_target_cv_groups(records)
-    artwork_ids = list(artwork_statuses)
+    train_only_ids = _train_only_artwork_ids(records) & set(artwork_statuses)
+    artwork_ids = [artwork_id for artwork_id in artwork_statuses if artwork_id not in train_only_ids]
     group_values = [str(artwork_groups.get(artwork_id, f"artwork:{artwork_id}")) for artwork_id in artwork_ids]
     effective_splits = min(n_splits, len(set(group_values)))
     if effective_splits < 2:
         raise ValueError("At least two geographic CV groups are required.")
 
     y = np.asarray([int(artwork_statuses[artwork_id] == "depicted") for artwork_id in artwork_ids])
-    splitter = GroupKFold(n_splits=effective_splits)
+    if shuffle_seed is None:
+        splitter = GroupKFold(n_splits=effective_splits)
+    else:
+        splitter = StratifiedGroupKFold(n_splits=effective_splits, shuffle=True, random_state=shuffle_seed)
     totals = Counter()
     level_totals = {level: Counter() for level in GEOGRAPHIC_LEVELS}
     level_prediction_groups = {level: set() for level in GEOGRAPHIC_LEVELS}
@@ -1644,8 +1829,13 @@ def evaluate_hierarchical_grouped_cv(
         splitter.split(np.zeros(len(artwork_ids)), y, group_values),
         start=1,
     ):
-        train_ids = {artwork_ids[index] for index in train_work_idx}
         test_ids = {artwork_ids[index] for index in test_work_idx}
+        test_groups = {artwork_groups.get(artwork_id, f"artwork:{artwork_id}") for artwork_id in test_ids}
+        added_train_only = {
+            artwork_id for artwork_id in train_only_ids
+            if artwork_groups.get(artwork_id, f"artwork:{artwork_id}") not in test_groups
+        }
+        train_ids = {artwork_ids[index] for index in train_work_idx} | added_train_only
         train_table = table[table["artwork_id"].isin(train_ids)].reset_index(drop=True)
         test_table = table[table["artwork_id"].isin(test_ids)].reset_index(drop=True)
         train_table.attrs["artwork_statuses"] = {
@@ -1689,6 +1879,8 @@ def evaluate_hierarchical_grouped_cv(
         folds.append({
             "fold": fold_number,
             "test_artworks": len(test_ids),
+            "test_artwork_ids": sorted(str(artwork_id) for artwork_id in test_ids),
+            "train_only_artworks": len(added_train_only),
             "active_levels": [
                 level for level in GEOGRAPHIC_LEVELS if model["levels"][level]["status"] == "active"
             ],
@@ -1729,10 +1921,57 @@ def evaluate_hierarchical_grouped_cv(
         "accuracy": _ratio(tp + tn, totals["artwork_count"]),
         "artwork_count": totals["artwork_count"],
         "depicted_artwork_count": totals["depicted_artwork_count"],
+        "train_only_artwork_count": len(train_only_ids),
         "metrics_by_level": per_level,
         "grouping": "connected_artwork_and_target_entities",
         "thresholds_tuned_inside_outer_training_folds": True,
+        "shuffle_seed": shuffle_seed,
         "folds": folds,
+    }
+
+
+def _mean_and_std(values):
+    """Mean and standard deviation of the non-missing values, (None, None) if there are none."""
+    values = [value for value in values if value is not None]
+    if not values:
+        return None, None
+    return float(np.mean(values)), float(np.std(values))
+
+
+def evaluate_repeated_grouped_cv(records, table, *, repeats=10, n_jobs=1, n_splits=5, training_options=None):
+    """Repeat the outer grouped CV on `repeats` shuffled partitions (seeds 0..repeats-1).
+
+    A single partition gives one draw of the metrics: moving a few artworks
+    from one fold to another can change a threshold and the recall by
+    several points. The spread over partitions tells which differences
+    between two models are larger than this noise. Runs are independent and
+    executed in parallel with `n_jobs`.
+    """
+    runs = Parallel(n_jobs=n_jobs)(
+        delayed(evaluate_hierarchical_grouped_cv)(
+            records, table, n_splits=n_splits, training_options=training_options, shuffle_seed=seed,
+        )
+        for seed in range(repeats)
+    )
+    summary = {}
+    for metric in ("precision", "recall", "true_positives", "false_positives"):
+        summary[metric] = _mean_and_std([run[metric] for run in runs])
+    per_level = {}
+    for level in GEOGRAPHIC_LEVELS:
+        level_runs = [run["metrics_by_level"][level] for run in runs]
+        true_positives = sum(level_run["true_positives"] for level_run in level_runs)
+        predictions = sum(level_run["predictions"] for level_run in level_runs)
+        per_level[level] = {
+            "precision": _mean_and_std([level_run["precision"] for level_run in level_runs]),
+            "predictions": _mean_and_std([level_run["predictions"] for level_run in level_runs]),
+            "pooled_precision": true_positives / predictions if predictions else None,
+            "runs_with_predictions": sum(1 for level_run in level_runs if level_run["predictions"]),
+        }
+    return {
+        "repeats": repeats,
+        "summary": summary,
+        "metrics_by_level": per_level,
+        "runs": [{key: value for key, value in run.items() if key != "folds"} for run in runs],
     }
 
 

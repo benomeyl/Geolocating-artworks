@@ -30,13 +30,26 @@ def _nominatim_location(name, latitude, longitude, country_code, region=None):
 
 
 class FakeNominatim:
-    def __init__(self, results):
+    def __init__(self, results, within=None):
         self.results = results
+        self.within = within or {}
         self.queries = []
 
     def search(self, query):
         self.queries.append(query)
         return self.results.get(query, [])
+
+    def search_within(self, query, country_code, viewbox=None):
+        self.queries.append((query, country_code, viewbox is not None))
+        return self.within.get((query, country_code), [])
+
+
+def _city(name, latitude, longitude, country_code, importance):
+    return {**_nominatim_location(name, latitude, longitude, country_code), "place_rank": 16, "importance": importance}
+
+
+def _monument(name, latitude, longitude, country_code, importance=0.3):
+    return {**_nominatim_location(name, latitude, longitude, country_code), "place_rank": 30, "importance": importance}
 
 
 def _mention(text, name, field="title"):
@@ -129,6 +142,20 @@ def test_distant_mentions_do_not_constrain_each_other():
     assert resolved["London"]["country_code"] == "GB"
     assert resolved["London"]["context_conflict"] is False
     assert "London, Spain" not in nominatim.queries
+
+
+def test_distant_homonyms_are_counted_with_their_importance_gap():
+    text = "London"
+    nominatim = FakeNominatim({"London": [
+        {**_nominatim_location("London", 51.5, -0.12, "GB"), "importance": 0.9},
+        {**_nominatim_location("London", 42.98, -81.25, "CA"), "importance": 0.6},
+        {**_nominatim_location("City of London", 51.51, -0.09, "GB"), "importance": 0.5},
+    ]})
+
+    resolved = resolve_artwork_places([_mention(text, "London")], None, nominatim)
+
+    assert resolved["London"]["homonym_count"] == 1
+    assert abs(resolved["London"]["importance_gap"] - 0.3) < 1e-9
 
 
 def test_name_similarity_flags_unrelated_geocodes():
@@ -252,3 +279,160 @@ def test_prominent_place_is_kept_against_a_foreign_context():
     assert resolved["Rome"]["country_code"] == "IT"
     assert resolved["Rome"]["context_conflict"] is True
     assert "Rome, France" not in nominatim.queries
+
+
+def test_precise_place_is_searched_inside_its_city():
+    text = "Palazzo Vecchio, Florence"
+    nominatim = FakeNominatim(
+        {
+            "Florence": [_city("Firenze", 43.77, 11.25, "IT", 0.8), _city("Florence", 34.8, -87.68, "US", 0.5)],
+            "Palazzo Vecchio": [_monument("Palazzo Vecchio", 40.0, -75.0, "US")],
+        },
+        within={("Palazzo Vecchio", "IT"): [_monument("Palazzo Vecchio", 43.769, 11.256, "IT")]},
+    )
+
+    resolved = resolve_artwork_places([_mention(text, "Palazzo Vecchio"), _mention(text, "Florence")], None, nominatim)
+
+    assert resolved["Florence"]["country_code"] == "IT"
+    assert resolved["Palazzo Vecchio"]["country_code"] == "IT"
+    assert resolved["Palazzo Vecchio"]["resolution"] == "searched_in_anchor"
+
+
+def test_a_city_named_far_away_in_the_description_still_constrains_the_title():
+    description = "x" * 200 + " photographed in Chicago"
+    title_mention = _mention("Monroe Street", "Monroe Street")
+    city_mention = _mention(description, "Chicago", "description")
+    nominatim = FakeNominatim({
+        "Chicago": [_city("Chicago", 41.88, -87.63, "US", 0.8)],
+        "Monroe Street": [
+            _monument("Monroe Street", 42.33, -83.04, "US"),
+            _monument("Monroe Street", 41.88, -87.63, "US"),
+        ],
+    })
+
+    resolved = resolve_artwork_places([title_mention, city_mention], None, nominatim)
+
+    assert resolved["Monroe Street"]["latitude"] == 41.88
+    assert resolved["Monroe Street"]["resolution"] == "in_anchor"
+
+
+def test_a_precise_place_not_found_in_its_area_gets_no_location():
+    text = "Le Nys, Amsterdam"
+    nominatim = FakeNominatim({
+        "Amsterdam": [_city("Amsterdam", 52.37, 4.9, "NL", 0.8)],
+        "Le Nys": [_monument("Carrière de Nys", 49.5, 3.6, "FR")],
+    })
+
+    resolved = resolve_artwork_places([_mention(text, "Le Nys"), _mention(text, "Amsterdam")], None, nominatim)
+
+    assert resolved["Le Nys"] is None
+    assert resolved["Amsterdam"]["country_code"] == "NL"
+    assert ("Le Nys", "NL", True) in nominatim.queries
+
+
+def test_a_famous_place_outside_the_anchors_is_kept_with_a_conflict():
+    text = "The Louvre, New York"
+    nominatim = FakeNominatim({
+        "New York": [_city("New York", 40.71, -74.0, "US", 0.9)],
+        "Louvre": [_monument("Musée du Louvre", 48.86, 2.34, "FR", importance=0.8)],
+    })
+
+    resolved = resolve_artwork_places([_mention(text, "Louvre"), _mention(text, "New York")], None, nominatim)
+
+    assert resolved["Louvre"]["country_code"] == "FR"
+    assert resolved["Louvre"]["context_conflict"] is True
+
+
+def test_generic_names_are_only_searched_inside_an_anchor():
+    nominatim = FakeNominatim(
+        {"Park": [_monument("Park", 10.0, 10.0, "NG")], "Versailles": [_city("Versailles", 48.8, 2.13, "FR", 0.7)]},
+        within={("Park", "FR"): [_monument("Park of Versailles", 48.81, 2.11, "FR")]},
+    )
+
+    alone = resolve_artwork_places([_mention("Park", "Park")], None, nominatim)
+    text = "Park at Versailles"
+    with_anchor = resolve_artwork_places([_mention(text, "Park"), _mention(text, "Versailles")], None, nominatim)
+
+    assert alone["Park"] is None
+    assert with_anchor["Park"]["name"] == "Park of Versailles"
+
+
+def test_a_place_of_origin_is_not_an_anchor():
+    text = "View of the Pont Neuf. Printed in London"
+    nominatim = FakeNominatim({
+        "London": [_city("London", 51.5, -0.12, "GB", 0.9)],
+        "Pont Neuf": [_monument("Pont Neuf", 48.857, 2.341, "FR", importance=0.5)],
+    })
+
+    resolved = resolve_artwork_places([_mention(text, "Pont Neuf"), _mention(text, "London")], None, nominatim)
+
+    assert resolved["Pont Neuf"]["country_code"] == "FR"
+    assert resolved["Pont Neuf"]["resolution"] == "global"
+
+
+def test_an_anchor_without_country_code_is_not_searched():
+    text = "Le Nys, Amsterdam"
+    nominatim = FakeNominatim({
+        "Amsterdam": [{**_city("Amsterdam", 52.37, 4.9, "NL", 0.8), "country_code": None}],
+        "Le Nys": [_monument("Carrière de Nys", 49.5, 3.6, "FR")],
+    })
+
+    resolved = resolve_artwork_places([_mention(text, "Le Nys"), _mention(text, "Amsterdam")], None, nominatim)
+
+    assert resolved["Le Nys"] is None
+
+
+def test_results_found_in_an_area_must_carry_the_mention_words():
+    text = "Cardiff Castle, Cardiff"
+    nominatim = FakeNominatim(
+        {"Cardiff": [_city("Cardiff", 51.48, -3.18, "GB", 0.7)], "Cardiff Castle": []},
+        within={("Cardiff Castle", "GB"): [_monument("Cardiff Avenue", 51.49, -3.17, "GB")]},
+    )
+
+    resolved = resolve_artwork_places([_mention(text, "Cardiff Castle"), _mention(text, "Cardiff")], None, nominatim)
+
+    assert resolved["Cardiff Castle"] is None
+
+
+def test_a_prominent_city_is_not_dragged_by_a_city_level_homonym():
+    text = "The Red House, Berlin"
+    nominatim = FakeNominatim({
+        "Red House": [_city("Town of Red House", 37.1, -78.8, "US", 0.3)],
+        "Berlin": [_city("Berlin", 52.52, 13.4, "DE", 0.85), _city("Berlin", 37.0, -78.0, "US", 0.4)],
+    })
+
+    resolved = resolve_artwork_places([_mention(text, "Red House"), _mention(text, "Berlin")], None, nominatim)
+
+    assert resolved["Berlin"]["country_code"] == "DE"
+
+
+def test_a_distant_anchor_keeps_the_best_guess_with_a_conflict():
+    description = "x" * 200 + " The artist lived in Berlin."
+    nominatim = FakeNominatim({
+        "Berlin": [_city("Berlin", 52.52, 13.4, "DE", 0.85)],
+        "Nidden": [_city("Nida", 55.3, 21.0, "LT", 0.4) | {"place_rank": 19}],
+    })
+    # "lived in" is an origin cue: use a neutral sentence for the anchor.
+    description = description.replace("The artist lived in Berlin.", "Berlin and its painters.")
+
+    resolved = resolve_artwork_places(
+        [_mention("Nidden", "Nidden", "description"), _mention(description, "Berlin", "description")],
+        None,
+        nominatim,
+    )
+
+    assert resolved["Nidden"]["country_code"] == "LT"
+    assert resolved["Nidden"]["context_conflict"] is True
+
+
+def test_generic_names_are_never_anchors():
+    text = "The Entrance to the Forest by the Bridge, Kew"
+    nominatim = FakeNominatim({
+        "Forest": [_city("Forest County", 45.6, -88.8, "US", 0.4)],
+        "Kew": [_city("Kew", 51.48, -0.29, "GB", 0.5) | {"place_rank": 19}],
+    })
+
+    resolved = resolve_artwork_places([_mention(text, "Forest"), _mention(text, "Kew")], None, nominatim)
+
+    assert resolved["Forest"] is None
+    assert resolved["Kew"]["country_code"] == "GB"

@@ -7,6 +7,8 @@ from src.data.filtering_logreg import (
     evaluate_place_identity,
     evaluate_hierarchical_work_predictions,
     evaluate_hierarchical_grouped_cv,
+    evaluate_repeated_grouped_cv,
+    wilson_interval,
     geographic_candidate_label,
     predict_with_hierarchical_model,
     train_hierarchical_model,
@@ -69,6 +71,22 @@ def test_geographic_candidate_label_falls_back_from_exact_place_to_city():
 
     assert geographic_candidate_label(record, city_candidate)["level"] == "city"
     assert geographic_candidate_label(record, exact_candidate)["level"] == "exact_place"
+
+
+def test_extended_object_with_the_annotated_name_matches_beyond_the_point_tolerance():
+    record = {"annotations": {"place_status": "depicted", "depicted_place": {
+        "name": "Champ de Mars", "precision": "exact_place", "latitude": 48.8556, "longitude": 2.2986,
+        "city": "Paris", "country": "France",
+    }}}
+    candidate = {
+        "name": "Champ de Mars", "feature_code": "park", "place_class": "leisure", "place_rank": 25,
+        "source": "Nominatim", "latitude": 48.8560, "longitude": 2.2920,  # about 490 m away
+        "hierarchy": {"city": "Paris", "country": "France"},
+    }
+    other_object = {**candidate, "name": "Musée du quai Branly"}
+
+    assert geographic_candidate_label(record, candidate)["level"] == "exact_place"
+    assert geographic_candidate_label(record, other_object)["level"] == "city"
 
 
 def test_geographic_candidate_label_does_not_force_unresolved_to_negative():
@@ -400,6 +418,95 @@ def test_nested_grouped_evaluation_measures_outer_work_predictions():
     assert metrics["thresholds_tuned_inside_outer_training_folds"] is True
 
 
+def test_model_selected_artworks_are_trained_on_but_never_tested():
+    import pandas as pd
+
+    records = []
+    rows = []
+    for index in range(33):
+        positive = index < 15 or index >= 30
+        artwork_id = f"art-{index}"
+        annotations = {"place_status": "depicted" if positive else "none"}
+        if index >= 30:
+            annotations["ground_truth_source"] = {"sample_stratum": "precise_keywords"}
+        records.append({"artwork": {"id": artwork_id}, "annotations": annotations})
+        row = {column: 0.0 for column in GEOGRAPHIC_FEATURE_COLUMNS}
+        row["field_title"] = int(positive)
+        row.update({
+            "artwork_id": artwork_id,
+            # art-30 depicts the same place as art-0.
+            "cv_group": "location-group-0" if index == 30 else f"location-group-{index}",
+            "place_status": annotations["place_status"],
+            "label_status": "match" if positive else "negative",
+            "label_level": "exact_place" if positive else "none",
+            "candidate_level": "exact_place",
+        })
+        rows.append(row)
+    table = pd.DataFrame(rows)
+    table.attrs["artwork_cv_groups"] = {row["artwork_id"]: row["cv_group"] for row in rows}
+
+    metrics = evaluate_hierarchical_grouped_cv(
+        records,
+        table,
+        n_splits=3,
+        training_options={
+            "n_splits": 3,
+            "regularization_values": (1.0,),
+            "minimum_positive_groups": 3,
+            "minimum_prediction_groups": 3,
+            "minimum_predictions": 3,
+        },
+    )
+
+    assert metrics["artwork_count"] == 30
+    assert metrics["train_only_artwork_count"] == 3
+    assert sum(fold["test_artworks"] for fold in metrics["folds"]) == 30
+    # art-30 is left out of the fold that tests art-0.
+    assert sum(fold["train_only_artworks"] for fold in metrics["folds"]) == 3 * 3 - 1
+
+
+def test_repeated_evaluation_shuffles_the_partition_with_each_seed():
+    import pandas as pd
+
+    records = []
+    rows = []
+    for index in range(30):
+        positive = index < 15
+        artwork_id = f"art-{index}"
+        records.append({"artwork": {"id": artwork_id}, "annotations": {"place_status": "depicted" if positive else "none"}})
+        row = {column: 0.0 for column in GEOGRAPHIC_FEATURE_COLUMNS}
+        row["field_title"] = int(positive)
+        row.update({
+            "artwork_id": artwork_id,
+            "cv_group": f"location-group-{index}",
+            "label_status": "match" if positive else "negative",
+            "label_level": "exact_place" if positive else "none",
+            "candidate_level": "exact_place",
+        })
+        rows.append(row)
+    table = pd.DataFrame(rows)
+    table.attrs["artwork_cv_groups"] = {row["artwork_id"]: row["cv_group"] for row in rows}
+    options = {
+        "n_splits": 3,
+        "regularization_values": (1.0,),
+        "minimum_positive_groups": 3,
+        "minimum_prediction_groups": 3,
+        "minimum_predictions": 3,
+    }
+
+    first = evaluate_hierarchical_grouped_cv(records, table, n_splits=3, training_options=options, shuffle_seed=0)
+    second = evaluate_hierarchical_grouped_cv(records, table, n_splits=3, training_options=options, shuffle_seed=1)
+    repeated = evaluate_repeated_grouped_cv(records, table, repeats=3, n_splits=3, training_options=options)
+
+    assert [fold["metrics"]["artwork_count"] for fold in first["folds"]] == [10, 10, 10]
+    assert [fold["test_artwork_ids"] for fold in first["folds"]] != [
+        fold["test_artwork_ids"] for fold in second["folds"]
+    ]
+    assert [run["shuffle_seed"] for run in repeated["runs"]] == [0, 1, 2]
+    assert repeated["summary"]["precision"] == (1.0, 0.0)
+    assert repeated["metrics_by_level"]["exact_place"]["pooled_precision"] == 1.0
+
+
 def test_cv_groups_join_artworks_that_share_a_target_entity():
     shared_place = {
         "name": "Dresden Cathedral",
@@ -684,3 +791,9 @@ def test_place_evaluation_recognizes_city_when_exact_place_is_not_found():
     assert metrics["city_evaluable"] == 1
 
     connection.close()
+
+def test_wilson_interval_of_a_small_sample():
+    low, high = wilson_interval(18, 22)
+    assert (round(low, 2), round(high, 2)) == (0.61, 0.93)
+    assert wilson_interval(0, 0) == (None, None)
+    assert wilson_interval(10, 10)[1] == 1.0

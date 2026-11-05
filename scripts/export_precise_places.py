@@ -14,10 +14,17 @@ review and is not validated. `p_city` is the v5 model's probability that the
 candidate is right at least to the city.
 
     python scripts/export_precise_places.py --input-csv results/test_keywords_500_v5.csv
+
+Annotating the rows from the top of the p_exact ranking selects them with
+the model: such rows can only be used for training. With --order random the
+rows come in random order, and every prefix of the file is an unbiased
+sample of the artworks with a precise place. --sample-stratum writes the
+stratum that integrate_manual_review.py stores with each annotation.
 """
 
 import argparse
 import csv
+import random
 import sqlite3
 import sys
 from pathlib import Path
@@ -136,6 +143,18 @@ def main():
     parser.add_argument("--aic-dump-dir", default=None)
     parser.add_argument("--nominatim-user-agent", default=None)
     parser.add_argument("--geocode-top-k", type=int, default=3)
+    parser.add_argument(
+        "--order",
+        choices=("p_exact", "random"),
+        default="p_exact",
+        help="Ordre des lignes: p_exact décroissant, ou aléatoire pour une évaluation sans biais.",
+    )
+    parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument(
+        "--sample-stratum",
+        default="precise_keywords",
+        help="Strate enregistrée avec les annotations (precise_keywords = entraînement seulement).",
+    )
     args = parser.parse_args()
 
     # All active levels, as predict_sample_csv.py --use-active-levels, to get p_city.
@@ -178,8 +197,11 @@ def main():
         )
         if precise:
             rows.append(annotation_row(record, result, precise))
-    rows.sort(key=lambda row: -row["p_exact"])
-    rows = [{"rank": rank, **row} for rank, row in enumerate(rows, start=1)]
+    if args.order == "random":
+        random.Random(args.seed).shuffle(rows)
+    else:
+        rows.sort(key=lambda row: -row["p_exact"])
+    rows = [{"rank": rank, "sample_stratum": args.sample_stratum, **row} for rank, row in enumerate(rows, start=1)]
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open("w", encoding="utf-8-sig", newline="") as output_file:

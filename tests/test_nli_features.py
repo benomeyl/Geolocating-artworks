@@ -1,4 +1,4 @@
-from src.data.filtering_logreg import NLI_FEATURE_COLUMNS, nli_features, nli_premise
+from src.data.filtering_logreg import NLI_CONTRAST_COLUMNS, NLI_FEATURE_COLUMNS, nli_features, nli_premise
 from src.data.nli import NliScorer
 
 
@@ -36,9 +36,11 @@ class _RecordingScorer:
 def test_one_feature_per_hypothesis_with_the_place_name():
     scorer = _RecordingScorer()
     features = nli_features([_occurrence("Colorado", "Colorado", "title")], {"title": "Colorado"}, scorer)
-    assert list(features) == NLI_FEATURE_COLUMNS
+    assert list(features) == NLI_FEATURE_COLUMNS + NLI_CONTRAST_COLUMNS
     assert scorer.pairs[0] == ("Title: Colorado.", "This artwork shows a view of the place Colorado.")
     assert features["nli_scene"] == 0.2
+    # max(view 0.1, scene 0.2) - max(made_in 0.4, artist_life 0.5)
+    assert abs(features["nli_depicted_minus_origin"] - (0.2 - 0.5)) < 1e-9
 
 
 def test_scores_are_cached_and_computed_once(tmp_path, monkeypatch):

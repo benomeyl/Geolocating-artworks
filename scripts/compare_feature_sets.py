@@ -6,6 +6,10 @@ CV, thresholds tuned inside the outer training folds). Because the
 thresholded outer metrics rest on a few dozen predictions, the script also
 reports a threshold-free score per level: the out-of-fold average precision
 (area under the precision-recall curve), averaged over several CV seeds.
+Every set is also evaluated on the same --outer-repeats shuffled partitions
+(evaluate_repeated_grouped_cv), and compared partition by partition with
+the first set: a difference that has the same sign on most partitions is
+larger than the noise of the split.
 
     python scripts/compare_feature_sets.py --output results/compare_title.json
 """
@@ -26,9 +30,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from data.filtering_logreg import (  # noqa: E402
     GEOGRAPHIC_FEATURE_COLUMNS,
     GEOGRAPHIC_LEVELS,
-    NLI_FEATURE_COLUMNS,
+    MENTION_ROLE_COLUMNS,
     _levels_up_to,
     evaluate_hierarchical_grouped_cv,
+    evaluate_repeated_grouped_cv,
     extract_all_candidates,
     train_hierarchical_model,
 )
@@ -45,11 +50,11 @@ from run_pipeline import (  # noqa: E402
 
 # Each set adds one feature group to the previous one.
 FEATURE_SETS = {
-    "v4": [column for column in GEOGRAPHIC_FEATURE_COLUMNS if column not in NLI_FEATURE_COLUMNS],
-    "v4 + NLI": GEOGRAPHIC_FEATURE_COLUMNS,
+    "v7": GEOGRAPHIC_FEATURE_COLUMNS,
+    "v7 + rôle de la mention": GEOGRAPHIC_FEATURE_COLUMNS + MENTION_ROLE_COLUMNS,
 }
 # Columns whose weights and discriminative power are reported (the new group).
-NEW_COLUMNS = NLI_FEATURE_COLUMNS
+NEW_COLUMNS = MENTION_ROLE_COLUMNS
 TRAINING_OPTIONS = {
     "n_splits": 5,
     "regularization_values": (0.1, 1.0, 10.0),
@@ -116,11 +121,14 @@ def threshold_free_scores(table, columns):
     return scores
 
 
-def evaluate_feature_set(records, table, columns):
-    """Outer-CV metrics, deployable levels and threshold-free scores of one feature set."""
+def evaluate_feature_set(records, table, columns, repeats, n_jobs):
+    """Outer-CV metrics (fixed and repeated partitions), deployable levels and threshold-free scores."""
     options = {**TRAINING_OPTIONS, "feature_columns": columns}
     model = train_hierarchical_model(table, **options)
     nested = evaluate_hierarchical_grouped_cv(records, table, n_splits=5, training_options=options)
+    repeated = evaluate_repeated_grouped_cv(
+        records, table, repeats=repeats, n_jobs=n_jobs, n_splits=5, training_options=options
+    )
     deployable = deployable_levels(
         model, nested, TRAINING_OPTIONS["minimum_prediction_groups"], TRAINING_OPTIONS["minimum_predictions"]
     )
@@ -141,6 +149,14 @@ def evaluate_feature_set(records, table, columns):
         "active_levels": [level for level in GEOGRAPHIC_LEVELS if model["levels"][level]["status"] == "active"],
         "deployable_levels": deployable,
         "threshold_free": threshold_free_scores(table, columns),
+        "repeated": {
+            "precision": [run["precision"] for run in repeated["runs"]],
+            "recall": [run["recall"] for run in repeated["runs"]],
+            "by_level": {
+                level: {key: repeated["metrics_by_level"][level][key] for key in ("precision", "predictions")}
+                for level in GEOGRAPHIC_LEVELS
+            },
+        },
     }
 
 
@@ -183,6 +199,26 @@ def print_report(results, summary, base_rate):
             f"{result['outer_false_positives']:>4d} {result['outer_false_negatives']:>4d}  {levels}"
             f"  déployés={result['deployable_levels'] or 'aucun'}"
         )
+    reference_name, reference = next(iter(results.items()))
+    print(f"\n=== Validation externe répétée ({len(reference['repeated']['precision'])} découpages identiques pour tous les jeux) ===")
+    for name, result in results.items():
+        repeated = result["repeated"]
+        line = (
+            f"  {name:<28s} préc.={np.mean(repeated['precision']):.3f}±{np.std(repeated['precision']):.3f} "
+            f"rappel={np.mean(repeated['recall']):.3f}±{np.std(repeated['recall']):.3f}"
+        )
+        if name != reference_name:
+            for metric in ("precision", "recall"):
+                differences = np.subtract(repeated[metric], reference["repeated"][metric])
+                line += (
+                    f"  Δ{metric[:4]}={differences.mean():+.3f} "
+                    f"(mieux {int((differences > 0).sum())}/{len(differences)})"
+                )
+        print(line)
+        print("      " + " / ".join(
+            f"{level} {_fmt(repeated['by_level'][level]['precision'][0])} ({repeated['by_level'][level]['predictions'][0] or 0:.0f} préd.)"
+            for level in ("city", "region", "country")
+        ))
     print("\n=== Précision moyenne hors-fold par niveau (sans seuil, moyenne sur 5 graines) ===")
     print(f"  {'jeu':<22s} " + " ".join(f"{level:>14s}" for level in GEOGRAPHIC_LEVELS))
     for name, result in results.items():
@@ -216,6 +252,8 @@ def main():
         action="store_true",
         help="Relire la table en cache au lieu de relancer NER et géocodage (si le code des features n'a pas changé).",
     )
+    parser.add_argument("--outer-repeats", type=int, default=10)
+    parser.add_argument("--outer-jobs", type=int, default=8)
     add_label_arguments(parser)
     add_geocoder_arguments(parser)
     args = parser.parse_args()
@@ -225,7 +263,7 @@ def main():
     results = {}
     for name, columns in FEATURE_SETS.items():
         print(f"[info] Évaluation de « {name} » ({len(columns)} features)...")
-        results[name] = evaluate_feature_set(records, table, columns)
+        results[name] = evaluate_feature_set(records, table, columns, args.outer_repeats, args.outer_jobs)
     largest = list(FEATURE_SETS.values())[-1]
     summary = new_feature_summary(table, largest)
     usable = table[table["label_status"].isin(["negative", "match"])]
