@@ -16056,6 +16056,1562 @@
         "annotator": "manual_review",
         "date": "2026-11-04"
       }
+    },
+    {
+      "artwork": {
+        "id": 74937,
+        "title": "Homes, College Hills Subdivision, Schaumburg, Illinois",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [
+          "Women artists"
+        ],
+        "style_titles": [],
+        "image_id": "3e2ef180-b83c-2ae9-21d8-e7ff7ff410f8",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Schaumburg",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 42.026100923594,
+          "longitude": -88.0705461042449,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P1",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 230592,
+        "title": "Rio Grande",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "706c9469-1c75-7d87-73a9-5311032d77fb",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Río Bravo;Rio Grande",
+          "city": null,
+          "region": null,
+          "country": "United States",
+          "latitude": 29.74434,
+          "longitude": -102.67467,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "region",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P2",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 95997,
+        "title": "Skirts of the Wood (Avon Valley near Bath)",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "d1889b69-77d9-eb66-48df-7593ea39956f",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Avon Valley",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 51.4184486074311,
+          "longitude": -2.4744248157466,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "region",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P3",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 46317,
+        "title": "Le Nys, Amsterdam",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "bd5164de-12b9-fa41-6ca2-be86acbde696",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "undeterminable",
+        "place_type": null,
+        "depicted_place": null,
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P4",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 15833,
+        "title": "The Mechouar, Palace of the Sultan at Marrakesh",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "35e6cd43-e23d-0697-dcac-ad3623f027eb",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Palace El Mechouar",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 34.8817011942383,
+          "longitude": -1.30903733346115,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P5",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 31599,
+        "title": "Saint Catherine of Alexandria",
+        "description": "<p>Peter Paul Rubens was one of the most talented and famous artists in northern Europe in the 17th century. Throughout his career, he relied on professional printmakers to help him publicize his images, but he probably made no more than three etchings, of which <em> Saint Catherine of Alexandria in the Clouds</em> is most often accepted as his work. This sheet depicts the saint atop the wheel of her martyrdom, just as Rubens painted her in the Jesuit church in Antwerp (1620/21). The artist may have turned to printmaking in the 1630s, when he collaborated with Christoffel Jegher to produce 24 woodcuts, and this late state may not have been printed until after his death.</p>\n",
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "26a14daa-8dfd-bfe7-84d0-0603c4d4e8fe",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "none",
+        "place_type": null,
+        "depicted_place": null,
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P6",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 144609,
+        "title": "Hadija and Her Father, Somali Refugee Camp, Mandera, Kenya",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [
+          "children",
+          "fathers",
+          "daughters"
+        ],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "a46507fa-8812-56ad-0229-3cb274ded7ad",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "none",
+        "place_type": null,
+        "depicted_place": null,
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P7",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 48365,
+        "title": "Odessa, U.S.S.R.",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "d98db40a-d788-3fbb-f8c6-c9231dfc6cde",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "none",
+        "place_type": null,
+        "depicted_place": null,
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P8",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 118770,
+        "title": "Four Courts, Dublin-A",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "fa087a8c-acf5-99ba-b1e4-ecf0b5eda293",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "none",
+        "place_type": null,
+        "depicted_place": null,
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P9",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 197437,
+        "title": "Kiso River, Inuyama (Kisogawa (Inuyama))",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [
+          "Japanese (culture or style)"
+        ],
+        "image_id": "d2fc3474-042a-82cb-55f4-398145fc51d5",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "木曽川",
+          "city": "一宮市",
+          "region": "愛知県",
+          "country": "日本",
+          "latitude": 35.3489928,
+          "longitude": 136.7809318,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "region",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P10",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 189354,
+        "title": "Mohammed Hatta Leaves for Transfer Ceremonies in the Hague, Airport Scene, Jakarta",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [
+          "documentary"
+        ],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "9d5a3ffa-6e5e-43f2-754e-e276b933dba7",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Jakarta airport",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": -6.12374034897171,
+          "longitude": 106.658763136824,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P11",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 38356,
+        "title": "Dartmouth, Foss Street",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [
+          "19th century"
+        ],
+        "image_id": "7d368484-05b0-c76e-5fe1-59af17aef8f3",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Foss St",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 50.3524741691779,
+          "longitude": -3.58014713726152,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "neighborhood",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P12",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 84846,
+        "title": "New Colonnade, Central Terminus, Newcastle-on-Tyne",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "59107985-ff73-1f8e-2dc4-8f906c3e2c9e",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Central Station",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 54.9680975193839,
+          "longitude": -1.61875393169272,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P13",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 149184,
+        "title": "Exhibition Stadium, Toronto",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [
+          "writing",
+          "photography"
+        ],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "ffa71d99-3c2f-2655-7853-76e5656ad667",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Exhibition Stadium",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 43.631944,
+          "longitude": -79.417778,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P14",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 118094,
+        "title": "View of the Cloister of the Cathedral of Mainz, plate two from Allemande",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "0423a2ba-4d3e-8ad7-d741-61e4f43d4a73",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Mainz Cathedral",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 49.998958540159,
+          "longitude": 8.27396169041822,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P15",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 151977,
+        "title": "Mazatecs of the State of Oaxaca, from Mexican Costume",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [
+          "Latin American"
+        ],
+        "style_titles": [],
+        "image_id": "d2a22a0c-f0e7-24f9-f579-cc9498c6b835",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "none",
+        "place_type": null,
+        "depicted_place": null,
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P16",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 137882,
+        "title": "Towers of the Bishop's Palace, Beauvais",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "86e31a14-d236-c2f6-53cb-9bfe546963ae",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "undeterminable",
+        "place_type": null,
+        "depicted_place": null,
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P17",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 181379,
+        "title": "The Church of San Miguel, the Oldest in Santa Fe, N.M.",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [
+          "Collected by Hugh Edwards"
+        ],
+        "theme_titles": [],
+        "style_titles": [
+          "19th century"
+        ],
+        "image_id": "88cb6759-35d7-e552-1c1f-d3631f92a714",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "San Miguel Chapel",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 35.68343,
+          "longitude": -105.93767,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P18",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 256865,
+        "title": "La Tallera Siqueiros, Cuernavaca, Mexico",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [
+          "architecture",
+          "Mexico",
+          "exterior",
+          "photography"
+        ],
+        "theme_titles": [],
+        "style_titles": [
+          "21st Century"
+        ],
+        "image_id": "340d4989-a046-f7f2-210f-ab503ea1c402",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Proyecto Siqueiros La Tallera",
+          "city": "Cuernavaca",
+          "region": "Morelos",
+          "country": "México",
+          "latitude": 18.93224,
+          "longitude": -99.2050836,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P19",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 73741,
+        "title": "The Steps, Luxembourg",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "2489153e-c9e4-dee4-a311-4dae4a72ddaa",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Luxembourg",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 49.6093161990936,
+          "longitude": 6.13276445449776,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P20",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 151884,
+        "title": "Monsoon and Teatime, Ooty",
+        "description": "<p>Most photographers in India before Singh’s time worked in black and white, often coloring their images by hand. As early as 1965, Singh brought color directly into his pictures to show a land rich in optimism and possessed of a vibrant everyday life. For many years the best-known Indian photographer internationally, Singh had a long career in which he tried to “catch life in the act of living,” as his mentor, the renowned photographer Henri Cartier-Bresson, said. This photograph was taken during the summer monsoon season in Southern India, a region that receives some of the heaviest rains—which in this case did not stand in the way of a contemplative cup of tea.</p>\n",
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "2eb10a9a-3b8d-68ac-43e3-d93b19ce13c1",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Anna Flyover",
+          "city": "Chennai",
+          "region": "Tamil Nadu",
+          "country": "India",
+          "latitude": 13.0525036,
+          "longitude": 80.2513105,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "region",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P21",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 48626,
+        "title": "Tartar Peasants' Homes in the Village of Déré-Koui, near Yalta, Crimea, August 31, 1837",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "e78aeada-787f-61ee-4dcd-f4b3c6cd0927",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "undeterminable",
+        "place_type": null,
+        "depicted_place": null,
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P22",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 256842,
+        "title": "La Tallera Siqueiros, Cuernavaca, Mexico, Site Research Photograph",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [
+          "architecture",
+          "photography",
+          "Mexico"
+        ],
+        "theme_titles": [],
+        "style_titles": [
+          "21st Century"
+        ],
+        "image_id": "ab6e7cf7-9765-5add-6500-f6450e29eaf7",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Proyecto Siqueiros La Tallera",
+          "city": "Cuernavaca",
+          "region": "Morelos",
+          "country": "México",
+          "latitude": 18.93224,
+          "longitude": -99.2050836,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P23",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 12185,
+        "title": "The Carrière, or Rue Neuve, at Nancy (The New Street)",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "c24b1f22-ecdd-c1fc-5081-e213ff53f7a9",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "The carrière",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 48.6960911462669,
+          "longitude": 6.18152404566788,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P24",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 144327,
+        "title": "Jérusalem, Partie Occidentale Des Murailles; Palestine",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [
+          "Collected by Hugh Edwards",
+          "Egypte, Nubie, Palestine et Syrie"
+        ],
+        "theme_titles": [],
+        "style_titles": [
+          "19th century"
+        ],
+        "image_id": "9fa171b8-0cbb-b250-c724-72f03989b1ca",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Jerusalem",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 31.7769049867686,
+          "longitude": 35.2221252593346,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P25",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 245161,
+        "title": "Hackney Road, East London, December 1983",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [
+          "cityscapes",
+          "buildings",
+          "city scenes"
+        ],
+        "theme_titles": [],
+        "style_titles": [
+          "20th Century"
+        ],
+        "image_id": "a2e70f79-74fc-859e-599a-9e6336e0ea42",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Hackney Road",
+          "city": "Greater London",
+          "region": "England",
+          "country": "United Kingdom",
+          "latitude": 51.5276874,
+          "longitude": -0.0765924,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "neighborhood",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P26",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 245163,
+        "title": "Klub Pod Jaszcurami, Rynek Glowny, Krakow, May 1974",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [
+          "people",
+          "portraits: multiple subjects"
+        ],
+        "theme_titles": [],
+        "style_titles": [
+          "20th Century"
+        ],
+        "image_id": "15d7e739-6965-75f9-81d5-6243c42f7145",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "none",
+        "place_type": null,
+        "depicted_place": null,
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P27",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 151995,
+        "title": "Huastecs of the State of San Luis Potosi, from Mexican Costume",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [
+          "Latin American"
+        ],
+        "style_titles": [],
+        "image_id": "c82548e1-c1d4-7a09-c235-316568c7c8b1",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "none",
+        "place_type": null,
+        "depicted_place": null,
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P28",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 236595,
+        "title": "A.m./p.m. travellers from KwaNdebele buying their weekly season tickets at the PUTCO Bus Depot in Pretoria",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [
+          "African",
+          "portraits: African subject",
+          "portraits",
+          "portrait",
+          "documentary"
+        ],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "c178f5bd-ba1f-b2fd-e2ec-34a13ff68aa5",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "none",
+        "place_type": null,
+        "depicted_place": null,
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P29",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 50200,
+        "title": "Elevation Perspective of l'Hôtel de Ville, Rennes",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "a7afdfbf-3d2e-a5d8-b07f-45368a1b7973",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Hôtel de ville",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 48.111261352555,
+          "longitude": -1.68002210674604,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P30",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 159889,
+        "title": "Lisbon, Ponte 25 de Abril",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [
+          "writing",
+          "photography"
+        ],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "f1903283-4fca-1229-7986-fabe1d2f7859",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Ponte 25 de Abril",
+          "city": "Lisboa",
+          "region": "Lisboa",
+          "country": "Portugal",
+          "latitude": 38.6961507,
+          "longitude": -9.178543,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P31",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 72835,
+        "title": "Saisho Temple in Hirosaki (Hirosaki, Saishoin), from the series \"Collection of Views of Japan, Eastern Japan Edition (Nihon fukei shu higashi Nihon hen)\"",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [
+          "Japanese (culture or style)"
+        ],
+        "image_id": "fb932544-e5b9-e991-5dc9-9b71abfc53c4",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "最勝院",
+          "city": "弘前市",
+          "region": "青森県",
+          "country": "日本",
+          "latitude": 40.5965849,
+          "longitude": 140.4686445,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P32",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 197003,
+        "title": "Great Temple in Madurai",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [
+          "Japanese (culture or style)"
+        ],
+        "image_id": "a9e5406d-ea3e-e62a-a8ff-de512fbcf0e7",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "undeterminable",
+        "place_type": null,
+        "depicted_place": null,
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P33",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 53822,
+        "title": "Great Eastern Gate, Seoul, Korea",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [
+          "Japanese (culture or style)"
+        ],
+        "image_id": "d5f72f2c-2e27-54c9-92ed-6056d4a069df",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Great Eastern Gate",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 37.571111,
+          "longitude": 127.009722,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P34",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 242511,
+        "title": "Chandigarh (Capitol Complex 4)",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [
+          "architecture",
+          "black and white",
+          "cityscapes"
+        ],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "4e464d7f-373f-ce2c-c3dc-fcbd2dd406e0",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Palace of Assembly",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 30.7609161502483,
+          "longitude": 76.8032170729728,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P35",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 267135,
+        "title": "Mozart's Birthplace, Salzburg, Austria",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "15f3a8fb-e50e-5944-c13a-75b5ab8a28a9",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Mozarts Geburtshaus",
+          "city": "Salzburg",
+          "region": "Salzburg",
+          "country": "Österreich",
+          "latitude": 47.799943,
+          "longitude": 13.0435536,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P36",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 68544,
+        "title": "Untitled (Working Class Interior, Rue de Belleville)",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "216de82b-21e4-41e6-9025-614c46e1b50d",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "undeterminable",
+        "place_type": null,
+        "depicted_place": null,
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P37",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-05"
+      }
     }
   ]
 }

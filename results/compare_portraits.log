@@ -1,0 +1,31 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[info] 440 œuvres chargées depuis data/raw/gold_standard/gold_dataset.json.
+[info] 335 œuvres enrichies depuis le dump AIC.
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights: 100%|██████████| 199/199 [00:00<00:00, 4559.87it/s]
+[info] 814 candidats étiquetés, table sauvegardée dans results/feature_table_v10.pkl.
+[info] Statuts: {'negative': 349, 'match': 321, 'unevaluable': 144}
+[info] Évaluation de « v10 » (36 features)...
+[info] Évaluation de « v10 + portraits » (39 features)...
+
+=== Validation externe (mêmes folds, seuils réglés dans chaque fold) ===
+  jeu                     préc. rappel   FP   FN  ville / région / pays (préc., groupes)
+  v10                     0.808  0.440   19  102  0.789 (48) / 0.843 (54) / 0.836 (81)  déployés=aucun
+  v10 + portraits         0.794  0.423   20  105  0.825 (36) / 0.836 (43) / 0.845 (79)  déployés=aucun
+
+=== Validation externe répétée (10 découpages identiques pour tous les jeux) ===
+  v10                          préc.=0.794±0.019 rappel=0.402±0.034
+      city 0.771 (45 préd.) / region 0.816 (60 préd.) / country 0.866 (96 préd.)
+  v10 + portraits              préc.=0.787±0.026 rappel=0.409±0.024  Δprec=-0.006 (mieux 4/10)  Δreca=+0.008 (mieux 6/10)
+      city 0.753 (42 préd.) / region 0.810 (56 préd.) / country 0.851 (102 préd.)
+
+=== Précision moyenne hors-fold par niveau (sans seuil, moyenne sur 5 graines) ===
+  jeu                       exact_place   neighborhood           city         region        country
+  v10                       0.631±0.025    0.669±0.018    0.774±0.013    0.808±0.006    0.848±0.006
+  v10 + portraits           0.609±0.027    0.652±0.016    0.773±0.017    0.811±0.008    0.856±0.006
+
+=== Nouvelles features (taux de candidats justes global: 0.48) ===
+  title_names_person moyenne justes=0.05 faux=0.13 (œuvres sans lieu 0.13) AUC seule=0.457 poids ville=-0.80 pays=-1.00
+  subject_people     moyenne justes=0.09 faux=0.20 (œuvres sans lieu 0.19) AUC seule=0.445 poids ville=-0.54 pays=-0.58
+  title_place_suffix moyenne justes=0.28 faux=0.07 (œuvres sans lieu 0.06) AUC seule=0.604 poids ville=+0.10 pays=+0.43
+
+[ok] Résultats écrits dans results/compare_portraits.json

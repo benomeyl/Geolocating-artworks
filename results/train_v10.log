@@ -1,0 +1,54 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[info] 440 œuvres chargées depuis data/raw/gold_standard/gold_dataset.json.
+[info] 335 œuvres enrichies depuis le dump AIC.
+[info] Training hiérarchique: labels issus des coordonnées et de la hiérarchie; validation groupée par œuvre et cible géographique.
+[info] Chargement du modèle NER et extraction des candidats...
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights:  83%|████████▎ | 165/199 [00:00<00:00, 1576.74it/s]Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1734.50it/s]
+Nominatim lookup failed for 'Saint Catherine of Alexandria, Antwerp': HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=10)
+Nominatim bounded lookup failed for 'Airport Scene||cc=id|vb=106.55,-6.51,107.15,-5.91': HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=10)
+Nominatim bounded lookup failed for 'Exhibition Stadium||cc=ca|vb=-79.70,43.41,-79.10,44.01': HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=10)
+Nominatim reverse lookup failed for reverse:49.60932,6.13276: HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=10)
+Nominatim bounded lookup failed for 'Partie Occidentale Des Murailles||cc=il|vb=34.93,31.48,35.53,32.08': HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=10)
+[info] 959 candidats NER bruts.
+[info] Géocodage et scores NLI des candidats...
+[info] 814 candidats avec étiquettes géographiques.
+[info] Niveaux: {'none': 308, 'unevaluable': 144, 'city': 143, 'exact_place': 69, 'country': 53, 'region': 47, 'no_match': 42, 'neighborhood': 8}
+[info] Statuts: {'negative': 350, 'match': 320, 'unevaluable': 144}
+
+=== Seuils par niveau (précision empirique OOF) ===
+  exact_place      abstention: precision_target_unmet (groupes+=45)
+  neighborhood     abstention: precision_target_unmet (groupes+=53)
+  city             seuil=0.958 précision OOF=1.000 rappel OOF=0.036 support=8 groupes+=120
+  region           seuil=0.929 précision OOF=0.958 rappel OOF=0.086 support=24 groupes+=134
+  country          seuil=0.925 précision OOF=0.956 rappel OOF=0.134 support=45 groupes+=149
+
+=== Décision hiérarchique par œuvre (OOF de réglage, indicatif) ===
+  précision=0.923 rappel=0.185 FP=3 FN=159 lieux mal prédits=2
+  rappel minimal 0.50 atteint: False
+  Note: les seuils OOF sont réglés sur ces folds; ces métriques ne sont pas une estimation finale indépendante.
+
+=== Déployabilité par niveau (validation externe) ===
+  exact_place      précision=n/a  (0/0) groupes=0 déployé=False
+  neighborhood     précision=0.000 [0.00 – 0.66] (0/2) groupes=2 déployé=False
+  city             précision=0.862 [0.69 – 0.95] (25/29) groupes=24 déployé=False
+  region           précision=0.750 [0.57 – 0.87] (21/28) groupes=24 déployé=False
+  country          précision=0.915 [0.80 – 0.97] (43/47) groupes=34 déployé=True
+[info] Niveaux activés: ['country']
+
+=== Validation externe groupée par cible (estimation hors-fold) ===
+  œuvres évaluées=377 (+16 utilisées seulement à l'entraînement: precise_keywords)
+  précision=0.780 [0.65 – 0.87] rappel=0.214 FP=11 FN=143 lieux mal prédits=6 folds=5
+[avertissement] Le rappel externe est sous le minimum demandé; les cibles de précision n'ont pas été relâchées.
+
+=== Validation externe répétée (10 découpages mélangés) ===
+  précision=0.820 ± 0.037 rappel=0.222 ± 0.020 TP=40.4 ± 3.7 FP=8.9 ± 2.1
+  exact_place      précision=0.430 ± 0.399 (cumulée 0.529) prédictions=1.7 ± 2.0 découpages avec prédictions=5/10
+  neighborhood     précision=0.390 ± 0.329 (cumulée 0.389) prédictions=1.8 ± 1.6 découpages avec prédictions=7/10
+  city             précision=0.797 ± 0.052 (cumulée 0.793) prédictions=14.5 ± 7.4 découpages avec prédictions=10/10
+  region           précision=0.782 ± 0.068 (cumulée 0.784) prédictions=20.4 ± 3.8 découpages avec prédictions=10/10
+  country          précision=0.902 ± 0.030 (cumulée 0.902) prédictions=50.9 ± 6.0 découpages avec prédictions=10/10
+  Note: avec plusieurs découpages, la déployabilité est décidée ici (règle D): moyenne >= cible et chaque découpage >= cible - 0.05.
+[info] Règle de déploiement: mean precision over shuffled partitions >= target and >= target - 0.05 on each
+[info] Niveaux activés: ['country']
+
+[ok] Modèle hiérarchique sauvegardé dans results/model_hierarchical_v10.joblib
