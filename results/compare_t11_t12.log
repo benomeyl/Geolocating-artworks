@@ -1,0 +1,35 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[info] 403 œuvres chargées depuis data/raw/gold_standard/gold_dataset.json.
+[info] 298 œuvres enrichies depuis le dump AIC.
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights: 100%|██████████| 199/199 [00:00<00:00, 3856.32it/s]
+[info] 719 candidats étiquetés, table sauvegardée dans results/feature_table_t11_t12.pkl.
+[info] Statuts: {'negative': 338, 'match': 288, 'unevaluable': 93}
+[info] Évaluation de « v7 » (36 features)...
+[info] Évaluation de « v7 + rôle de la mention » (43 features)...
+
+=== Validation externe (mêmes folds, seuils réglés dans chaque fold) ===
+  jeu                     préc. rappel   FP   FN  ville / région / pays (préc., groupes)
+  v7                      0.833  0.475   15   83  0.763 (36) / 0.840 (62) / 0.833 (65)  déployés=aucun
+  v7 + rôle de la mention  0.790  0.405   17   94  0.765 (31) / 0.793 (45) / 0.857 (62)  déployés=aucun
+
+=== Validation externe répétée (10 découpages identiques pour tous les jeux) ===
+  v7                           préc.=0.821±0.023 rappel=0.477±0.030
+      city 0.796 (39 préd.) / region 0.854 (67 préd.) / country 0.854 (101 préd.)
+  v7 + rôle de la mention      préc.=0.818±0.017 rappel=0.471±0.034  Δprec=-0.002 (mieux 3/10)  Δreca=-0.006 (mieux 3/10)
+      city 0.765 (27 préd.) / region 0.825 (50 préd.) / country 0.845 (107 préd.)
+
+=== Précision moyenne hors-fold par niveau (sans seuil, moyenne sur 5 graines) ===
+  jeu                       exact_place   neighborhood           city         region        country
+  v7                        0.600±0.016    0.639±0.008    0.792±0.003    0.817±0.004    0.856±0.003
+  v7 + rôle de la mention    0.583±0.011    0.625±0.018    0.781±0.006    0.812±0.007    0.856±0.004
+
+=== Nouvelles features (taux de candidats justes global: 0.46) ===
+  role_depiction_cue moyenne justes=0.01 faux=0.00 (œuvres sans lieu 0.00) AUC seule=0.505 poids ville=+0.35 pays=+0.21
+  role_origin_cue    moyenne justes=0.01 faux=0.04 (œuvres sans lieu 0.04) AUC seule=0.486 poids ville=-0.33 pays=-0.10
+  role_location_preposition moyenne justes=0.07 faux=0.13 (œuvres sans lieu 0.13) AUC seule=0.470 poids ville=-0.36 pays=+0.01
+  role_from          moyenne justes=0.02 faux=0.01 (œuvres sans lieu 0.01) AUC seule=0.501 poids ville=-0.48 pays=-0.03
+  role_title_head    moyenne justes=0.20 faux=0.16 (œuvres sans lieu 0.15) AUC seule=0.521 poids ville=-0.16 pays=-0.22
+  role_title_after_comma moyenne justes=0.21 faux=0.04 (œuvres sans lieu 0.04) AUC seule=0.588 poids ville=+0.24 pays=+0.65
+  role_institution_name moyenne justes=0.01 faux=0.01 (œuvres sans lieu 0.01) AUC seule=0.501 poids ville=-0.11 pays=-0.17
+
+[ok] Résultats écrits dans results/compare_t11_t12.json

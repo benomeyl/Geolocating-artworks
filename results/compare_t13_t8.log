@@ -1,0 +1,36 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[info] 403 œuvres chargées depuis data/raw/gold_standard/gold_dataset.json.
+[info] 298 œuvres enrichies depuis le dump AIC.
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights: 100%|██████████| 199/199 [00:00<00:00, 4017.40it/s]
+[info] 719 candidats étiquetés, table sauvegardée dans results/feature_table_t13_t8.pkl.
+[info] Statuts: {'negative': 338, 'match': 288, 'unevaluable': 93}
+[info] Évaluation de « v6 » (36 features)...
+[info] Évaluation de « v6 + contraste NLI » (37 features)...
+[info] Évaluation de « v6 + contraste + homonymes » (39 features)...
+
+=== Validation externe (mêmes folds, seuils réglés dans chaque fold) ===
+  jeu                     préc. rappel   FP   FN  ville / région / pays (préc., groupes)
+  v6                      0.844  0.481   14   82  0.763 (36) / 0.840 (62) / 0.833 (65)  déployés=aucun
+  v6 + contraste NLI      0.852  0.437   12   89  0.840 (42) / 0.859 (55) / 0.837 (61)  déployés=aucun
+  v6 + contraste + homonymes  0.807  0.424   16   91  0.829 (35) / 0.850 (47) / 0.892 (60)  déployés=aucun
+
+=== Validation externe répétée (10 découpages identiques pour tous les jeux) ===
+  v6                           préc.=0.825±0.019 rappel=0.478±0.029
+      city 0.796 (39 préd.) / region 0.854 (67 préd.) / country 0.854 (101 préd.)
+  v6 + contraste NLI           préc.=0.830±0.023 rappel=0.461±0.027  Δprec=+0.005 (mieux 5/10)  Δreca=-0.018 (mieux 3/10)
+      city 0.826 (49 préd.) / region 0.863 (70 préd.) / country 0.855 (94 préd.)
+  v6 + contraste + homonymes   préc.=0.818±0.022 rappel=0.453±0.028  Δprec=-0.007 (mieux 5/10)  Δreca=-0.026 (mieux 1/10)
+      city 0.812 (45 préd.) / region 0.858 (65 préd.) / country 0.856 (93 préd.)
+
+=== Précision moyenne hors-fold par niveau (sans seuil, moyenne sur 5 graines) ===
+  jeu                       exact_place   neighborhood           city         region        country
+  v6                        0.605±0.023    0.655±0.018    0.792±0.003    0.817±0.004    0.856±0.003
+  v6 + contraste NLI        0.595±0.017    0.644±0.013    0.798±0.004    0.820±0.004    0.856±0.004
+  v6 + contraste + homonymes    0.612±0.022    0.655±0.015    0.796±0.004    0.820±0.005    0.857±0.006
+
+=== Nouvelles features (taux de candidats justes global: 0.46) ===
+  nli_depicted_minus_origin moyenne justes=0.34 faux=0.11 (œuvres sans lieu 0.10) AUC seule=0.765 poids ville=+1.62 pays=+1.72
+  geo_homonym_count  moyenne justes=2.12 faux=1.72 (œuvres sans lieu 1.61) AUC seule=0.544 poids ville=+0.07 pays=+0.16
+  geo_importance_gap moyenne justes=0.33 faux=0.34 (œuvres sans lieu 0.36) AUC seule=0.535 poids ville=+0.12 pays=-0.10
+
+[ok] Résultats écrits dans results/compare_t13_t8.json

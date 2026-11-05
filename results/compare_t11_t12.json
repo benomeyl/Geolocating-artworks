@@ -1,0 +1,385 @@
+{
+  "feature_sets": {
+    "v7": {
+      "feature_count": 36,
+      "outer_precision": 0.8333333333333334,
+      "outer_recall": 0.47468354430379744,
+      "outer_false_positives": 15,
+      "outer_false_negatives": 83,
+      "outer_mislocated": 3,
+      "outer_by_level": {
+        "exact_place": {
+          "precision": null,
+          "predictions": 0,
+          "prediction_groups": 0,
+          "false_positives": 0
+        },
+        "neighborhood": {
+          "precision": 0.5,
+          "predictions": 2,
+          "prediction_groups": 2,
+          "false_positives": 1
+        },
+        "city": {
+          "precision": 0.7631578947368421,
+          "predictions": 38,
+          "prediction_groups": 36,
+          "false_positives": 9
+        },
+        "region": {
+          "precision": 0.8395061728395061,
+          "predictions": 81,
+          "prediction_groups": 62,
+          "false_positives": 13
+        },
+        "country": {
+          "precision": 0.8333333333333334,
+          "predictions": 96,
+          "prediction_groups": 65,
+          "false_positives": 16
+        }
+      },
+      "active_levels": [
+        "city",
+        "region",
+        "country"
+      ],
+      "deployable_levels": [],
+      "threshold_free": {
+        "exact_place": {
+          "positives": 62,
+          "rows": 626,
+          "average_precision": 0.5997291243422913,
+          "average_precision_std": 0.015569793003951145,
+          "roc_auc": 0.9373312743079388
+        },
+        "neighborhood": {
+          "positives": 70,
+          "rows": 626,
+          "average_precision": 0.6392171560845062,
+          "average_precision_std": 0.00830869455269326,
+          "roc_auc": 0.946382322713258
+        },
+        "city": {
+          "positives": 202,
+          "rows": 626,
+          "average_precision": 0.7922648620072373,
+          "average_precision_std": 0.003111693534520265,
+          "roc_auc": 0.9097398654959836
+        },
+        "region": {
+          "positives": 238,
+          "rows": 626,
+          "average_precision": 0.8169303588968907,
+          "average_precision_std": 0.004208938378623422,
+          "roc_auc": 0.9003855150307546
+        },
+        "country": {
+          "positives": 288,
+          "rows": 626,
+          "average_precision": 0.855863803990859,
+          "average_precision_std": 0.0034518361919952134,
+          "roc_auc": 0.8900271203155817
+        }
+      },
+      "repeated": {
+        "precision": [
+          0.8191489361702128,
+          0.8441558441558441,
+          0.7938144329896907,
+          0.7752808988764045,
+          0.8241758241758241,
+          0.8172043010752689,
+          0.8210526315789474,
+          0.8604651162790697,
+          0.8367346938775511,
+          0.8163265306122449
+        ],
+        "recall": [
+          0.4873417721518987,
+          0.41139240506329117,
+          0.4873417721518987,
+          0.43670886075949367,
+          0.47468354430379744,
+          0.4810126582278481,
+          0.4936708860759494,
+          0.46835443037974683,
+          0.5189873417721519,
+          0.5063291139240507
+        ],
+        "by_level": {
+          "exact_place": {
+            "precision": [
+              0.3628571428571429,
+              0.3039333976450789
+            ],
+            "predictions": [
+              1.6,
+              2.3323807579381204
+            ]
+          },
+          "neighborhood": {
+            "precision": [
+              0.4236111111111111,
+              0.3556613340917188
+            ],
+            "predictions": [
+              2.2,
+              2.481934729198171
+            ]
+          },
+          "city": {
+            "precision": [
+              0.795971971799772,
+              0.030007490748503497
+            ],
+            "predictions": [
+              39.3,
+              6.1489836558572835
+            ]
+          },
+          "region": {
+            "precision": [
+              0.8543661707091201,
+              0.019170786105396704
+            ],
+            "predictions": [
+              67.0,
+              9.45515732285825
+            ]
+          },
+          "country": {
+            "precision": [
+              0.8543616720877074,
+              0.035305332818756
+            ],
+            "predictions": [
+              101.3,
+              11.018620603324175
+            ]
+          }
+        }
+      }
+    },
+    "v7 + rôle de la mention": {
+      "feature_count": 43,
+      "outer_precision": 0.7901234567901234,
+      "outer_recall": 0.4050632911392405,
+      "outer_false_positives": 17,
+      "outer_false_negatives": 94,
+      "outer_mislocated": 5,
+      "outer_by_level": {
+        "exact_place": {
+          "precision": 0.5,
+          "predictions": 2,
+          "prediction_groups": 2,
+          "false_positives": 1
+        },
+        "neighborhood": {
+          "precision": 0.8333333333333334,
+          "predictions": 6,
+          "prediction_groups": 6,
+          "false_positives": 1
+        },
+        "city": {
+          "precision": 0.7647058823529411,
+          "predictions": 34,
+          "prediction_groups": 31,
+          "false_positives": 8
+        },
+        "region": {
+          "precision": 0.7931034482758621,
+          "predictions": 58,
+          "prediction_groups": 45,
+          "false_positives": 12
+        },
+        "country": {
+          "precision": 0.8571428571428571,
+          "predictions": 91,
+          "prediction_groups": 62,
+          "false_positives": 13
+        }
+      },
+      "active_levels": [
+        "exact_place",
+        "city",
+        "region",
+        "country"
+      ],
+      "deployable_levels": [],
+      "threshold_free": {
+        "exact_place": {
+          "positives": 62,
+          "rows": 626,
+          "average_precision": 0.5829991415621102,
+          "average_precision_std": 0.01093425208987107,
+          "roc_auc": 0.9332189430336308
+        },
+        "neighborhood": {
+          "positives": 70,
+          "rows": 626,
+          "average_precision": 0.6251411909615578,
+          "average_precision_std": 0.017829595964498995,
+          "roc_auc": 0.9435149023638232
+        },
+        "city": {
+          "positives": 202,
+          "rows": 626,
+          "average_precision": 0.780889021616525,
+          "average_precision_std": 0.0062563832177412295,
+          "roc_auc": 0.9075681860638893
+        },
+        "region": {
+          "positives": 238,
+          "rows": 626,
+          "average_precision": 0.8117596034510612,
+          "average_precision_std": 0.00688406122666749,
+          "roc_auc": 0.9007233821363597
+        },
+        "country": {
+          "positives": 288,
+          "rows": 626,
+          "average_precision": 0.856302063878674,
+          "average_precision_std": 0.004036510468217421,
+          "roc_auc": 0.8896059335963183
+        }
+      },
+      "repeated": {
+        "precision": [
+          0.7894736842105263,
+          0.8488372093023255,
+          0.7938144329896907,
+          0.8243243243243243,
+          0.8295454545454546,
+          0.8125,
+          0.8125,
+          0.8372093023255814,
+          0.8222222222222222,
+          0.8137254901960784
+        ],
+        "recall": [
+          0.47468354430379744,
+          0.4620253164556962,
+          0.4873417721518987,
+          0.3860759493670886,
+          0.4620253164556962,
+          0.4936708860759494,
+          0.4936708860759494,
+          0.45569620253164556,
+          0.46835443037974683,
+          0.5253164556962026
+        ],
+        "by_level": {
+          "exact_place": {
+            "precision": [
+              0.8194444444444443,
+              0.19493984510580833
+            ],
+            "predictions": [
+              1.2,
+              1.32664991614216
+            ]
+          },
+          "neighborhood": {
+            "precision": [
+              0.8888888888888888,
+              0.13028932666176193
+            ],
+            "predictions": [
+              4.1,
+              3.3896902513356584
+            ]
+          },
+          "city": {
+            "precision": [
+              0.7649244465821915,
+              0.0248202609144512
+            ],
+            "predictions": [
+              26.7,
+              5.254521862167861
+            ]
+          },
+          "region": {
+            "precision": [
+              0.8252187584780037,
+              0.022055306650165134
+            ],
+            "predictions": [
+              49.9,
+              17.409480176042017
+            ]
+          },
+          "country": {
+            "precision": [
+              0.8445681198543463,
+              0.03159321293365747
+            ],
+            "predictions": [
+              106.8,
+              8.942035562443264
+            ]
+          }
+        }
+      }
+    }
+  },
+  "new_features": {
+    "role_depiction_cue": {
+      "mean_match": 0.010416666666666666,
+      "mean_negative": 0.0,
+      "mean_negative_not_depicted": 0.0,
+      "auc_alone": 0.5052083333333334,
+      "weight_city": 0.35033241779851976,
+      "weight_country": 0.21111124044368407
+    },
+    "role_origin_cue": {
+      "mean_match": 0.006944444444444444,
+      "mean_negative": 0.03550295857988166,
+      "mean_negative_not_depicted": 0.037800687285223365,
+      "auc_alone": 0.4857207429322814,
+      "weight_city": -0.3303867717017008,
+      "weight_country": -0.09974226648351847
+    },
+    "role_location_preposition": {
+      "mean_match": 0.06944444444444445,
+      "mean_negative": 0.1301775147928994,
+      "mean_negative_not_depicted": 0.13402061855670103,
+      "auc_alone": 0.4696334648257725,
+      "weight_city": -0.35640891006835,
+      "weight_country": 0.005531804552511157
+    },
+    "role_from": {
+      "mean_match": 0.017361111111111112,
+      "mean_negative": 0.014792899408284023,
+      "mean_negative_not_depicted": 0.010309278350515464,
+      "auc_alone": 0.5012841058514136,
+      "weight_city": -0.48282947595641096,
+      "weight_country": -0.034303361409150794
+    },
+    "role_title_head": {
+      "mean_match": 0.2013888888888889,
+      "mean_negative": 0.15976331360946747,
+      "mean_negative_not_depicted": 0.15120274914089346,
+      "auc_alone": 0.5208127876397107,
+      "weight_city": -0.16322079430999184,
+      "weight_country": -0.2187796612541608
+    },
+    "role_title_after_comma": {
+      "mean_match": 0.21180555555555555,
+      "mean_negative": 0.03550295857988166,
+      "mean_negative_not_depicted": 0.037800687285223365,
+      "auc_alone": 0.588151298487837,
+      "weight_city": 0.24061372595723385,
+      "weight_country": 0.6512830470471935
+    },
+    "role_institution_name": {
+      "mean_match": 0.006944444444444444,
+      "mean_negative": 0.005917159763313609,
+      "mean_negative_not_depicted": 0.006872852233676976,
+      "auc_alone": 0.5005136423405654,
+      "weight_city": -0.10983388625224269,
+      "weight_country": -0.1695665996520391
+    }
+  }
+}

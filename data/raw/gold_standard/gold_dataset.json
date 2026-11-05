@@ -15355,6 +15355,707 @@
         "annotator": "manual_review",
         "date": "2026-10-29"
       }
+    },
+    {
+      "artwork": {
+        "id": 111438,
+        "title": "View of the Tuileries, the Louvre and the Pont Neuf",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "0bd3e5d7-868c-9ada-ea66-c530f722bc88",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Musée du Louvre",
+          "city": "Paris",
+          "region": "Île-de-France",
+          "country": "France",
+          "latitude": 48.8611473,
+          "longitude": 2.3380277,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_keywords_500.csv",
+          "review_id": "P4",
+          "sample_stratum": "precise_keywords",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-04"
+      }
+    },
+    {
+      "artwork": {
+        "id": 46660,
+        "title": "Palazzo Vecchio, Florence",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "1de43dbb-aa88-091b-8ee0-521853e77072",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Palazzo Vecchio",
+          "city": "Firenze",
+          "region": "Toscana",
+          "country": "Italia",
+          "latitude": 43.7691437,
+          "longitude": 11.2561385,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_keywords_500.csv",
+          "review_id": "P8",
+          "sample_stratum": "precise_keywords",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-04"
+      }
+    },
+    {
+      "artwork": {
+        "id": 129513,
+        "title": "Brooklyn Bridge from Brooklyn (The Sun)",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "12ac9235-08be-a8b1-d03e-0281ca89375a",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Brooklyn Bridge",
+          "city": "New York",
+          "region": "New York",
+          "country": "United States",
+          "latitude": 40.7062175,
+          "longitude": -73.9970208,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_keywords_500.csv",
+          "review_id": "P9",
+          "sample_stratum": "precise_keywords",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-04"
+      }
+    },
+    {
+      "artwork": {
+        "id": 131194,
+        "title": "Notre Dame, Paris",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "e6092b5d-3886-eb93-8018-b47c000e038a",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Cathédrale Notre-Dame de Paris",
+          "city": "Paris",
+          "region": "Île-de-France",
+          "country": "France",
+          "latitude": 48.8529371,
+          "longitude": 2.3500501,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_keywords_500.csv",
+          "review_id": "P11",
+          "sample_stratum": "precise_keywords",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-04"
+      }
+    },
+    {
+      "artwork": {
+        "id": 141957,
+        "title": "Untitled (Auditorium Building, Street Level)",
+        "description": "<p>While studying photography at the Institute of Design in Chicago, <a href=\"http://www.artic.edu/artists/36011/richard-nickel\">Richard Nickel</a> joined the Sullivan Project, a photographic survey, led by photographer Aaron Siskind, that documented the architecture of Louis Sullivan. The project was completed in 1954, but Nickel continued photographing Sullivan’s work on his own, finding his calling in the identification, documentation, and preservation of these endangered works of art. Sullivan was revered as the father of the skyscraper and renowned for his use of architectural ornament. His firm, Adler and Sullivan, was based in Chicago, and the city was home to many examples of his work. But by the 1950s urban renewal projects prompted the demolition of his most celebrated structures, including the Garrick Theater and the Stock Exchange Building.</p>\n<p>For nearly two decades, Nickel campaigned to save Sullivan’s works, and when those efforts failed, he worked to rescue their ornament—the elaborate, nature-inspired decoration that adorned both the interiors and exteriors of Sullivan’s buildings. Nickel mourned the disappearance of a city he admired, warning that Chicago could move toward anonymity or, worse, become “a city of contrasts: The superficial glitter of the new mixed with the slum of the old.” Nickel’s photographs let the architecture take center stage, even if his documentation was later overshadowed by his efforts to rescue surviving structures and fragments. In 1972, one such attempt, in the Chicago Stock Exchange Building, cost him his life. The <em>Sun-Times</em> wrote: “Richard Nickel has become a true martyr to the cause of architectural preservation. He is irreplaceable, and Chicago architecture has lost its truest champion.”</p>\n",
+        "short_description": null,
+        "subject_titles": [
+          "Chicago"
+        ],
+        "theme_titles": [],
+        "style_titles": [
+          "20th Century"
+        ],
+        "image_id": "22b7862a-3380-0ea8-9b48-f19291f5aa98",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Auditorium Building",
+          "city": "Chicago",
+          "region": "Illinois",
+          "country": "United States",
+          "latitude": 41.8760807,
+          "longitude": -87.6251976,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_keywords_500.csv",
+          "review_id": "P12",
+          "sample_stratum": "precise_keywords",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-04"
+      }
+    },
+    {
+      "artwork": {
+        "id": 50442,
+        "title": "Le Pont Neuf, Paris",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "ae068565-606f-dc77-12a6-30f26659d1d6",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Pont Neuf",
+          "city": "Paris",
+          "region": "Île-de-France",
+          "country": "France",
+          "latitude": 48.8578031,
+          "longitude": 2.34192,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_keywords_500.csv",
+          "review_id": "P16",
+          "sample_stratum": "precise_keywords",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-04"
+      }
+    },
+    {
+      "artwork": {
+        "id": 133357,
+        "title": "Le Pont Neuf, Paris",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "225ca457-4a58-c963-3441-ebb3d4b6be5f",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Pont Neuf",
+          "city": "Paris",
+          "region": "Île-de-France",
+          "country": "France",
+          "latitude": 48.8578031,
+          "longitude": 2.34192,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_keywords_500.csv",
+          "review_id": "P17",
+          "sample_stratum": "precise_keywords",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-04"
+      }
+    },
+    {
+      "artwork": {
+        "id": 149154,
+        "title": "Arthur Watson Hall, 51 Prospect Street, Yale University, New Haven, Connecticut, from the series \"On This Site: Landscape in Memoriam\"",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "2b1c792d-749c-c9cb-7a48-63e1d1b2ddd9",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Arthur K. Watson Hall",
+          "city": "New Haven",
+          "region": "Connecticut",
+          "country": "United States",
+          "latitude": 41.3130777,
+          "longitude": -72.9248518,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_keywords_500.csv",
+          "review_id": "P21",
+          "sample_stratum": "precise_keywords",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-04"
+      }
+    },
+    {
+      "artwork": {
+        "id": 122351,
+        "title": "Annunciation Bridge in St. Petersburg",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "de3d56aa-c07b-af61-708a-2b51bc27d9da",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Annunciation Bridge",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 59.9349368247219,
+          "longitude": 30.2891171823347,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_keywords_500.csv",
+          "review_id": "P29",
+          "sample_stratum": "precise_keywords",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-04"
+      }
+    },
+    {
+      "artwork": {
+        "id": 221070,
+        "title": "Braxton McKinney and Lavon Thomas",
+        "description": "<p>In <em>The Birmingham Project</em> Dawoud Bey memorialized the tragic events that took place on September 15, 1963, when Ku Klux Klan members bombed the 16th Street Baptist Church in Birmingham, Alabama, killing four young black girls. Later that day two black teenage boys also died in related incidents of racist violence. In each diptych Bey paired a youth of the same age as one of the murdered children with an adult who has reached the age that the six boys and girls would be today. These two portraits were taken at the Bethel Baptist Church, which occupied a central role in the civil rights movement as the headquarters for the Alabama Christian Movement for Human Rights. By bringing together two sitters 50 years apart in age, Bey provoked a reflection on a half-century of change and the legacy left for future generations.</p>\n",
+        "short_description": null,
+        "subject_titles": [
+          "civil rights",
+          "Chicago"
+        ],
+        "theme_titles": [
+          "Chicago Artists",
+          "African Diaspora",
+          "African American artists"
+        ],
+        "style_titles": [
+          "contemporary",
+          "21st Century"
+        ],
+        "image_id": "d9193608-ff6c-91ec-8ba4-e3dcfbe84b28",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "none",
+        "place_type": null,
+        "depicted_place": null,
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_keywords_500.csv",
+          "review_id": "P78",
+          "sample_stratum": "precise_keywords",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-04"
+      }
+    },
+    {
+      "artwork": {
+        "id": 114026,
+        "title": "Foregate Street, Chester",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "6f3f6535-5096-37ff-6284-0be66937c0ce",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Foregate Street",
+          "city": "Chester",
+          "region": "England",
+          "country": "United Kingdom",
+          "latitude": 53.1911769,
+          "longitude": -2.8870413,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "neighborhood",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_keywords_500.csv",
+          "review_id": "P79",
+          "sample_stratum": "precise_keywords",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-04"
+      }
+    },
+    {
+      "artwork": {
+        "id": 11766,
+        "title": "Rue Mouffetard, Paris",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "c32c7ae5-cc14-0453-fa59-31127c4b3efb",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Rue Mouffetard",
+          "city": "Paris",
+          "region": "Île-de-France",
+          "country": "France",
+          "latitude": 48.8423013,
+          "longitude": 2.3497717,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "neighborhood",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_keywords_500.csv",
+          "review_id": "P80",
+          "sample_stratum": "precise_keywords",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-04"
+      }
+    },
+    {
+      "artwork": {
+        "id": 229496,
+        "title": "Wu Street",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "0e10c5f6-6ce6-bc14-7618-73da1ecdb718",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "none",
+        "place_type": null,
+        "depicted_place": null,
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_keywords_500.csv",
+          "review_id": "P81",
+          "sample_stratum": "precise_keywords",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-04"
+      }
+    },
+    {
+      "artwork": {
+        "id": 70038,
+        "title": "From a Day with Juan IV",
+        "description": "<p>Georgia O’Keeffe painted this canvas in response to seeing the Washington Monument during a trip to Washington, DC, in October 1976 with her assistant Juan Hamilton. She depicted it as an abstract form, a solid white block that dominates the composition, leaving narrow triangles of blue sky on either side. One can envision the 90-year-old artist craning her neck to take in the monumental shape, drawn to its strict geometries, as she toured the Mall on a brilliant fall day.</p>\n",
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [
+          "Women artists",
+          "Chicago Artists",
+          "SAIC Alumni and Faculty"
+        ],
+        "style_titles": [
+          "Modernism"
+        ],
+        "image_id": "7f59a75c-7b22-bf2e-92fc-e2cd5f7d2f3d",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "none",
+        "place_type": null,
+        "depicted_place": null,
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_keywords_500.csv",
+          "review_id": "P82",
+          "sample_stratum": "precise_keywords",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-04"
+      }
+    },
+    {
+      "artwork": {
+        "id": 8925,
+        "title": "Madison Square",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "c9a7b438-ff70-d7fe-244e-12c8133c7301",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Madison square",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 40.7423576746872,
+          "longitude": -73.9880635730131,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_keywords_500.csv",
+          "review_id": "P124",
+          "sample_stratum": "precise_keywords",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-04"
+      }
+    },
+    {
+      "artwork": {
+        "id": 247888,
+        "title": "John Hancock Center, Chicago, Illinois, Sections",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [
+          "John Hancock Center",
+          "Michigan Avenue",
+          "skyscrapers",
+          "Chicago",
+          "office building",
+          "skyscraper",
+          "architecture"
+        ],
+        "theme_titles": [],
+        "style_titles": [
+          "20th Century"
+        ],
+        "image_id": null,
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "John Hancock Center",
+          "city": "Chicago",
+          "region": "Illinois",
+          "country": "United States",
+          "latitude": 41.8989,
+          "longitude": -87.6231,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_keywords_500.csv",
+          "review_id": "P167",
+          "sample_stratum": "precise_keywords",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-04"
+      }
     }
   ]
 }

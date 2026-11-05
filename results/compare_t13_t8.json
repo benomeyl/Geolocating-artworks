@@ -1,0 +1,513 @@
+{
+  "feature_sets": {
+    "v6": {
+      "feature_count": 36,
+      "outer_precision": 0.8444444444444444,
+      "outer_recall": 0.4810126582278481,
+      "outer_false_positives": 14,
+      "outer_false_negatives": 82,
+      "outer_mislocated": 2,
+      "outer_by_level": {
+        "exact_place": {
+          "precision": null,
+          "predictions": 0,
+          "prediction_groups": 0,
+          "false_positives": 0
+        },
+        "neighborhood": {
+          "precision": null,
+          "predictions": 0,
+          "prediction_groups": 0,
+          "false_positives": 0
+        },
+        "city": {
+          "precision": 0.7631578947368421,
+          "predictions": 38,
+          "prediction_groups": 36,
+          "false_positives": 9
+        },
+        "region": {
+          "precision": 0.8395061728395061,
+          "predictions": 81,
+          "prediction_groups": 62,
+          "false_positives": 13
+        },
+        "country": {
+          "precision": 0.8333333333333334,
+          "predictions": 96,
+          "prediction_groups": 65,
+          "false_positives": 16
+        }
+      },
+      "active_levels": [
+        "city",
+        "region",
+        "country"
+      ],
+      "deployable_levels": [],
+      "threshold_free": {
+        "exact_place": {
+          "positives": 60,
+          "rows": 626,
+          "average_precision": 0.6048330217376121,
+          "average_precision_std": 0.023215868609751784,
+          "roc_auc": 0.9371201413427561
+        },
+        "neighborhood": {
+          "positives": 68,
+          "rows": 626,
+          "average_precision": 0.6545083575840173,
+          "average_precision_std": 0.01805381516177025,
+          "roc_auc": 0.9471747838920515
+        },
+        "city": {
+          "positives": 202,
+          "rows": 626,
+          "average_precision": 0.7922648620072373,
+          "average_precision_std": 0.003111693534520265,
+          "roc_auc": 0.9097398654959836
+        },
+        "region": {
+          "positives": 238,
+          "rows": 626,
+          "average_precision": 0.8169303588968907,
+          "average_precision_std": 0.004208938378623422,
+          "roc_auc": 0.9003855150307546
+        },
+        "country": {
+          "positives": 288,
+          "rows": 626,
+          "average_precision": 0.855863803990859,
+          "average_precision_std": 0.0034518361919952134,
+          "roc_auc": 0.8900271203155817
+        }
+      },
+      "repeated": {
+        "precision": [
+          0.8191489361702128,
+          0.8441558441558441,
+          0.7938144329896907,
+          0.797752808988764,
+          0.8241758241758241,
+          0.8260869565217391,
+          0.8210526315789474,
+          0.8604651162790697,
+          0.826530612244898,
+          0.8367346938775511
+        ],
+        "recall": [
+          0.4873417721518987,
+          0.41139240506329117,
+          0.4873417721518987,
+          0.44936708860759494,
+          0.47468354430379744,
+          0.4810126582278481,
+          0.4936708860759494,
+          0.46835443037974683,
+          0.5126582278481012,
+          0.5189873417721519
+        ],
+        "by_level": {
+          "exact_place": {
+            "precision": [
+              0.25,
+              0.25
+            ],
+            "predictions": [
+              0.3,
+              0.6403124237432849
+            ]
+          },
+          "neighborhood": {
+            "precision": [
+              0.6458333333333334,
+              0.35660922434632686
+            ],
+            "predictions": [
+              1.8,
+              2.4000000000000004
+            ]
+          },
+          "city": {
+            "precision": [
+              0.795971971799772,
+              0.030007490748503497
+            ],
+            "predictions": [
+              39.3,
+              6.1489836558572835
+            ]
+          },
+          "region": {
+            "precision": [
+              0.8543661707091201,
+              0.019170786105396704
+            ],
+            "predictions": [
+              67.0,
+              9.45515732285825
+            ]
+          },
+          "country": {
+            "precision": [
+              0.8543616720877074,
+              0.035305332818756
+            ],
+            "predictions": [
+              101.3,
+              11.018620603324175
+            ]
+          }
+        }
+      }
+    },
+    "v6 + contraste NLI": {
+      "feature_count": 37,
+      "outer_precision": 0.8518518518518519,
+      "outer_recall": 0.43670886075949367,
+      "outer_false_positives": 12,
+      "outer_false_negatives": 89,
+      "outer_mislocated": 2,
+      "outer_by_level": {
+        "exact_place": {
+          "precision": null,
+          "predictions": 0,
+          "prediction_groups": 0,
+          "false_positives": 0
+        },
+        "neighborhood": {
+          "precision": null,
+          "predictions": 0,
+          "prediction_groups": 0,
+          "false_positives": 0
+        },
+        "city": {
+          "precision": 0.84,
+          "predictions": 50,
+          "prediction_groups": 42,
+          "false_positives": 8
+        },
+        "region": {
+          "precision": 0.8591549295774648,
+          "predictions": 71,
+          "prediction_groups": 55,
+          "false_positives": 10
+        },
+        "country": {
+          "precision": 0.8369565217391305,
+          "predictions": 92,
+          "prediction_groups": 61,
+          "false_positives": 15
+        }
+      },
+      "active_levels": [
+        "city",
+        "region",
+        "country"
+      ],
+      "deployable_levels": [],
+      "threshold_free": {
+        "exact_place": {
+          "positives": 60,
+          "rows": 626,
+          "average_precision": 0.5952198168613517,
+          "average_precision_std": 0.01661388575447585,
+          "roc_auc": 0.9371731448763251
+        },
+        "neighborhood": {
+          "positives": 68,
+          "rows": 626,
+          "average_precision": 0.6443274463444465,
+          "average_precision_std": 0.013439893305305168,
+          "roc_auc": 0.9474330592452034
+        },
+        "city": {
+          "positives": 202,
+          "rows": 626,
+          "average_precision": 0.7976553802648784,
+          "average_precision_std": 0.004447189965497283,
+          "roc_auc": 0.9105618344853355
+        },
+        "region": {
+          "positives": 238,
+          "rows": 626,
+          "average_precision": 0.8202469518684337,
+          "average_precision_std": 0.0038752437258776666,
+          "roc_auc": 0.9008035172832021
+        },
+        "country": {
+          "positives": 288,
+          "rows": 626,
+          "average_precision": 0.8564366910295635,
+          "average_precision_std": 0.004077126492695453,
+          "roc_auc": 0.8903805062458907
+        }
+      },
+      "repeated": {
+        "precision": [
+          0.8315789473684211,
+          0.8214285714285714,
+          0.7777777777777778,
+          0.8375,
+          0.8210526315789474,
+          0.8433734939759037,
+          0.8352941176470589,
+          0.8536585365853658,
+          0.8651685393258427,
+          0.8105263157894737
+        ],
+        "recall": [
+          0.5,
+          0.43670886075949367,
+          0.4430379746835443,
+          0.4240506329113924,
+          0.4936708860759494,
+          0.4430379746835443,
+          0.44936708860759494,
+          0.4430379746835443,
+          0.4873417721518987,
+          0.4873417721518987
+        ],
+        "by_level": {
+          "exact_place": {
+            "precision": [
+              0.6666666666666666,
+              0.0
+            ],
+            "predictions": [
+              0.3,
+              0.9000000000000001
+            ]
+          },
+          "neighborhood": {
+            "precision": [
+              0.3333333333333333,
+              0.23570226039551584
+            ],
+            "predictions": [
+              0.5,
+              0.806225774829855
+            ]
+          },
+          "city": {
+            "precision": [
+              0.8257701361840182,
+              0.0392528740503322
+            ],
+            "predictions": [
+              49.4,
+              4.673328578219169
+            ]
+          },
+          "region": {
+            "precision": [
+              0.862503575726208,
+              0.02388979966659909
+            ],
+            "predictions": [
+              70.2,
+              5.2115256883181535
+            ]
+          },
+          "country": {
+            "precision": [
+              0.8553529308582772,
+              0.02591413109877027
+            ],
+            "predictions": [
+              94.2,
+              7.068238818828917
+            ]
+          }
+        }
+      }
+    },
+    "v6 + contraste + homonymes": {
+      "feature_count": 39,
+      "outer_precision": 0.8072289156626506,
+      "outer_recall": 0.4240506329113924,
+      "outer_false_positives": 16,
+      "outer_false_negatives": 91,
+      "outer_mislocated": 6,
+      "outer_by_level": {
+        "exact_place": {
+          "precision": 0.3333333333333333,
+          "predictions": 3,
+          "prediction_groups": 3,
+          "false_positives": 2
+        },
+        "neighborhood": {
+          "precision": null,
+          "predictions": 0,
+          "prediction_groups": 0,
+          "false_positives": 0
+        },
+        "city": {
+          "precision": 0.8292682926829268,
+          "predictions": 41,
+          "prediction_groups": 35,
+          "false_positives": 7
+        },
+        "region": {
+          "precision": 0.85,
+          "predictions": 60,
+          "prediction_groups": 47,
+          "false_positives": 9
+        },
+        "country": {
+          "precision": 0.891566265060241,
+          "predictions": 83,
+          "prediction_groups": 60,
+          "false_positives": 9
+        }
+      },
+      "active_levels": [
+        "city",
+        "region",
+        "country"
+      ],
+      "deployable_levels": [],
+      "threshold_free": {
+        "exact_place": {
+          "positives": 60,
+          "rows": 626,
+          "average_precision": 0.6118702706545285,
+          "average_precision_std": 0.021944476340347605,
+          "roc_auc": 0.9371083627797407
+        },
+        "neighborhood": {
+          "positives": 68,
+          "rows": 626,
+          "average_precision": 0.6548286977987259,
+          "average_precision_std": 0.01458079131192571,
+          "roc_auc": 0.9476544381193337
+        },
+        "city": {
+          "positives": 202,
+          "rows": 626,
+          "average_precision": 0.7958522079653333,
+          "average_precision_std": 0.004411146379669659,
+          "roc_auc": 0.9105735101812067
+        },
+        "region": {
+          "positives": 238,
+          "rows": 626,
+          "average_precision": 0.8195622948785626,
+          "average_precision_std": 0.005075573865851582,
+          "roc_auc": 0.9006432469895176
+        },
+        "country": {
+          "positives": 288,
+          "rows": 626,
+          "average_precision": 0.857360116865876,
+          "average_precision_std": 0.0056162682232035865,
+          "roc_auc": 0.894512245233399
+        }
+      },
+      "repeated": {
+        "precision": [
+          0.8222222222222222,
+          0.8048780487804879,
+          0.8085106382978723,
+          0.8292682926829268,
+          0.8045977011494253,
+          0.7951807228915663,
+          0.7777777777777778,
+          0.8414634146341463,
+          0.8461538461538461,
+          0.8494623655913979
+        ],
+        "recall": [
+          0.46835443037974683,
+          0.4177215189873418,
+          0.4810126582278481,
+          0.43037974683544306,
+          0.4430379746835443,
+          0.4177215189873418,
+          0.4430379746835443,
+          0.43670886075949367,
+          0.4873417721518987,
+          0.5
+        ],
+        "by_level": {
+          "exact_place": {
+            "precision": [
+              0.4444444444444444,
+              0.31426968052735443
+            ],
+            "predictions": [
+              0.7,
+              1.1874342087037917
+            ]
+          },
+          "neighborhood": {
+            "precision": [
+              0.2857142857142857,
+              0.24743582965269675
+            ],
+            "predictions": [
+              1.3,
+              1.1874342087037917
+            ]
+          },
+          "city": {
+            "precision": [
+              0.812012280096627,
+              0.027433278440093144
+            ],
+            "predictions": [
+              45.2,
+              4.812483766206386
+            ]
+          },
+          "region": {
+            "precision": [
+              0.858468221112321,
+              0.028381778225477633
+            ],
+            "predictions": [
+              64.9,
+              5.906775770248943
+            ]
+          },
+          "country": {
+            "precision": [
+              0.8555691456543922,
+              0.01714276302358716
+            ],
+            "predictions": [
+              93.4,
+              11.39473562659529
+            ]
+          }
+        }
+      }
+    }
+  },
+  "new_features": {
+    "nli_depicted_minus_origin": {
+      "mean_match": 0.33884064356486004,
+      "mean_negative": 0.11004799498608832,
+      "mean_negative_not_depicted": 0.09881857252612557,
+      "auc_alone": 0.7653219510190663,
+      "weight_city": 1.6233668873576839,
+      "weight_country": 1.7240563849458572
+    },
+    "geo_homonym_count": {
+      "mean_match": 2.1180555555555554,
+      "mean_negative": 1.7189349112426036,
+      "mean_negative_not_depicted": 1.611683848797251,
+      "auc_alone": 0.5444351988823142,
+      "weight_city": 0.06819920543907057,
+      "weight_country": 0.16175997040711554
+    },
+    "geo_importance_gap": {
+      "mean_match": 0.3342218872137806,
+      "mean_negative": 0.3385217656451971,
+      "mean_negative_not_depicted": 0.36149780438732165,
+      "auc_alone": 0.5352820923734385,
+      "weight_city": 0.12215305657581867,
+      "weight_country": -0.10376551207561134
+    }
+  }
+}

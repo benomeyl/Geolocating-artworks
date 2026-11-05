@@ -1,0 +1,11 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[info] 582 œuvres tirées (seed=42), hors gold standard.
+[info] 582 œuvres enrichies depuis le dump AIC.
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights: 100%|██████████| 199/199 [00:00<00:00, 3815.57it/s]
+/home/benoitmeylan/Documents/EPFL/Geolocating-artworks/.venv/lib/python3.13/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+Loading weights:   0%|          | 0/202 [00:00<?, ?it/s]Loading weights: 100%|██████████| 202/202 [00:00<00:00, 2334.84it/s]
+Nominatim lookup failed for 'The Beach': HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=10)
+[info] Statuts: {'uncertain': 502, 'no_candidate': 80}
+[info] Niveaux prédits: {}
+[ok] Résultats écrits dans results/test_diverse_v6.csv

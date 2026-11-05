@@ -1,0 +1,61 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[info] 403 œuvres chargées depuis data/raw/gold_standard/gold_dataset.json.
+[info] 298 œuvres enrichies depuis le dump AIC.
+[info] Training hiérarchique: labels issus des coordonnées et de la hiérarchie; validation groupée par œuvre et cible géographique.
+[info] Chargement du modèle NER et extraction des candidats...
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights: 100%|██████████| 199/199 [00:00<00:00, 3993.07it/s]
+Nominatim lookup failed for 'Tuscan, Italy': HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=10)
+Nominatim bounded lookup failed for 'Boost West||cc=us|vb=-99.50,33.49,-95.50,37.49': HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=10)
+Nominatim bounded lookup failed for 'East 50th Street||cc=mx|vb=-100.21,16.58,-99.61,17.18': HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=10)
+Nominatim bounded lookup failed for 'Maison Internationale de la Cite Universitaire||cc=fr|vb=2.05,48.55,2.65,49.15': HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=10)
+Nominatim bounded lookup failed for 'Crater Range||cc=pe': HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=10)
+Nominatim bounded lookup failed for 'Winston Block||cc=us|vb=-91.25,38.00,-87.25,42.00': HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=10)
+Nominatim bounded lookup failed for 'Coonleys||cc=us|vb=-88.12,41.54,-87.52,42.14': HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=10)
+Nominatim bounded lookup failed for 'Chicago Tribune Tower II||cc=us|vb=-87.95,41.55,-87.35,42.15': HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=10)
+Nominatim bounded lookup failed for "Truckman's House||cc=us|vb=-76.01,38.71,-72.01,42.71": HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=10)
+Nominatim bounded lookup failed for 'Jewelled Bowl||cc=it|vb=12.03,45.14,12.63,45.74': HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=10)
+Nominatim bounded lookup failed for 'Prado Museum||cc=us|vb=-94.12,41.58,-93.52,42.18': HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=10)
+Nominatim bounded lookup failed for 'Chicago Stock Exchange Building||cc=us|vb=-87.95,41.55,-87.35,42.15': HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=10)
+[info] 859 candidats NER bruts.
+[info] Géocodage et scores NLI des candidats...
+[info] 719 candidats avec étiquettes géographiques.
+[info] Niveaux: {'none': 291, 'city': 135, 'unevaluable': 118, 'exact_place': 62, 'region': 41, 'country': 41, 'no_match': 25, 'neighborhood': 6}
+[info] Statuts: {'negative': 316, 'match': 285, 'unevaluable': 118}
+
+=== Seuils par niveau (précision empirique OOF) ===
+  exact_place      abstention: precision_target_unmet (groupes+=42)
+  neighborhood     abstention: precision_target_unmet (groupes+=48)
+  city             abstention: precision_target_unmet (groupes+=105)
+  region           seuil=0.875 précision OOF=1.000 rappel OOF=0.033 support=8 groupes+=118
+  country          seuil=0.826 précision OOF=0.956 rappel OOF=0.151 support=45 groupes+=131
+
+=== Décision hiérarchique par œuvre (OOF de réglage, indicatif) ===
+  précision=0.950 rappel=0.222 FP=2 FN=133 lieux mal prédits=1
+  rappel minimal 0.50 atteint: False
+  Note: les seuils OOF sont réglés sur ces folds; ces métriques ne sont pas une estimation finale indépendante.
+
+=== Déployabilité par niveau (validation externe) ===
+  exact_place      précision=0.500 [0.09 – 0.91] (1/2) groupes=2 déployé=False
+  neighborhood     précision=n/a  (0/0) groupes=0 déployé=False
+  city             précision=0.571 [0.25 – 0.84] (4/7) groupes=7 déployé=False
+  region           précision=0.846 [0.58 – 0.96] (11/13) groupes=11 déployé=False
+  country          précision=0.897 [0.79 – 0.95] (52/58) groupes=42 déployé=False
+[info] Niveaux activés: aucun (abstention)
+
+=== Validation externe groupée par cible (estimation hors-fold) ===
+  œuvres évaluées=345 (+16 utilisées seulement à l'entraînement: precise_keywords)
+  précision=0.855 [0.74 – 0.92] rappel=0.297 FP=8 FN=111 lieux mal prédits=3 folds=5
+[avertissement] Le rappel externe est sous le minimum demandé; les cibles de précision n'ont pas été relâchées.
+
+=== Validation externe répétée (10 découpages mélangés) ===
+  précision=0.851 ± 0.016 rappel=0.289 ± 0.053 TP=45.6 ± 8.4 FP=8.0 ± 1.7
+  exact_place      précision=0.208 ± 0.361 (cumulée 0.500) prédictions=1.0 ± 1.8 découpages avec prédictions=4/10
+  neighborhood     précision=0.610 ± 0.220 (cumulée 0.609) prédictions=2.3 ± 1.6 découpages avec prédictions=8/10
+  city             précision=0.760 ± 0.150 (cumulée 0.750) prédictions=8.8 ± 5.4 découpages avec prédictions=10/10
+  region           précision=0.826 ± 0.061 (cumulée 0.826) prédictions=13.2 ± 6.8 découpages avec prédictions=9/10
+  country          précision=0.871 ± 0.016 (cumulée 0.870) prédictions=56.1 ± 12.2 découpages avec prédictions=10/10
+  Note: avec plusieurs découpages, la déployabilité est décidée ici (règle D): moyenne >= cible et chaque découpage >= cible - 0.05.
+[info] Règle de déploiement: mean precision over shuffled partitions >= target and >= target - 0.05 on each
+[info] Niveaux activés: aucun (abstention)
+
+[ok] Modèle hiérarchique sauvegardé dans results/model_hierarchical_v8.joblib
