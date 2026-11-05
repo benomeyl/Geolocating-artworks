@@ -30,7 +30,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from data.filtering_logreg import (  # noqa: E402
     GEOGRAPHIC_FEATURE_COLUMNS,
     GEOGRAPHIC_LEVELS,
-    MENTION_ROLE_COLUMNS,
+    PORTRAIT_FEATURE_COLUMNS,
     _levels_up_to,
     evaluate_hierarchical_grouped_cv,
     evaluate_repeated_grouped_cv,
@@ -50,11 +50,11 @@ from run_pipeline import (  # noqa: E402
 
 # Each set adds one feature group to the previous one.
 FEATURE_SETS = {
-    "v7": GEOGRAPHIC_FEATURE_COLUMNS,
-    "v7 + rôle de la mention": GEOGRAPHIC_FEATURE_COLUMNS + MENTION_ROLE_COLUMNS,
+    "v10": GEOGRAPHIC_FEATURE_COLUMNS,
+    "v10 + portraits": GEOGRAPHIC_FEATURE_COLUMNS + PORTRAIT_FEATURE_COLUMNS,
 }
 # Columns whose weights and discriminative power are reported (the new group).
-NEW_COLUMNS = MENTION_ROLE_COLUMNS
+NEW_COLUMNS = PORTRAIT_FEATURE_COLUMNS
 TRAINING_OPTIONS = {
     "n_splits": 5,
     "regularization_values": (0.1, 1.0, 10.0),

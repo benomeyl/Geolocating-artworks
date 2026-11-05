@@ -1,4 +1,4 @@
-from src.data.filtering_logreg import mention_role_features
+from src.data.filtering_logreg import mention_role_features, portrait_features
 
 
 def _occurrence(text, place, field="title", start=None):
@@ -35,3 +35,16 @@ def test_place_names_inside_institution_names():
 def test_any_occurrence_sets_the_feature():
     roles = _roles(_occurrence("Venice", "Venice"), _occurrence("Painted in Venice", "Venice", "description"))
     assert roles == {"role_title_head", "role_location_preposition"}
+
+
+def test_portrait_clues():
+    title = "Alfred Stieglitz and Georgia O'Keeffe, New York City"
+    occurrence = {**_occurrence(title, "New York City"), "title_person_count": 2}
+    assert portrait_features([occurrence], {"subject_titles": ["Portraits", "women"]}) == {
+        "title_names_person": 1, "subject_people": 1, "title_place_suffix": 1,
+    }
+    bridge = _occurrence("Annunciation Bridge in St. Petersburg", "St. Petersburg")
+    assert portrait_features([bridge], {"subject_titles": ["Bridges"]}) == {
+        "title_names_person": 0, "subject_people": 0, "title_place_suffix": 1,
+    }
+    assert portrait_features([_occurrence("Paris Street; Rainy Day", "Paris")], {})["title_place_suffix"] == 0

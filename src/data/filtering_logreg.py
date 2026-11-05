@@ -143,6 +143,18 @@ MENTION_ROLE_COLUMNS = [
     "role_title_after_comma",
     "role_institution_name",
 ]
+# Portraits and objects: "Alfred Stieglitz and Georgia O'Keeffe, New York
+# City" names a city but depicts people (guideline of 2026-11-05: "X, city"
+# is a depicted city unless the artwork is a portrait or an object).
+# Candidate features, not yet in GEOGRAPHIC_FEATURE_COLUMNS.
+PORTRAIT_FEATURE_COLUMNS = ["title_names_person", "subject_people", "title_place_suffix"]
+# AIC subjects that describe people rather than a place.
+_PEOPLE_SUBJECT_WORDS = {
+    "portrait", "portraits", "man", "men", "woman", "women", "child", "children", "girl", "girls", "boy",
+    "boys", "family", "families", "couple", "couples", "people", "figure", "figures", "self-portraits",
+}
+# Minimum NER score of a person name in the title.
+_PERSON_NER_FLOOR = 0.5
 # Homonyms of the chosen location (gazetter.resolve_artwork_places). Not in
 # GEOGRAPHIC_FEATURE_COLUMNS: AUC alone 0.54, recall lower on 9/10 partitions;
 # most false positives are artworks without a depicted place, not homonyms.
@@ -491,10 +503,16 @@ def extract_candidate_artwork(artwork, ner, threshold=DEFAULT_NER_FLOOR):
     of the merged pieces, and the score itself stays a model feature.
     """
     candidates = []
+    title_person_count = 0
     for field, text in _artwork_text_fields(artwork).items():
         if not text.strip():
             continue
-        locations = [result for result in ner(text) if result["entity_group"] == "LOC"]
+        entities = ner(text)
+        if field == "title":
+            title_person_count = sum(
+                1 for result in entities if result["entity_group"] == "PER" and result["score"] >= _PERSON_NER_FLOOR
+            )
+        locations = [result for result in entities if result["entity_group"] == "LOC"]
         for span in _clean_entity_spans(text, locations):
             if span["score"] >= threshold:
                 candidates.append({
@@ -505,6 +523,9 @@ def extract_candidate_artwork(artwork, ner, threshold=DEFAULT_NER_FLOOR):
                     "end": span["end"],
                     "source_text": text,
                 })
+    # Artwork-level clue, copied to every candidate (see portrait_features).
+    for candidate in candidates:
+        candidate["title_person_count"] = title_person_count
     return candidates
 
 
@@ -647,6 +668,33 @@ def mention_role_features(occurrences):
     return features
 
 
+def portrait_features(occurrences, artwork):
+    """Clues that a title naming a place describes people or an object rather than the place.
+
+    - title_names_person: the NER found a person's name in the title;
+    - subject_people: an AIC subject describes people ("Portraits", "Women");
+    - title_place_suffix: the mention ends the title after a comma or
+      "in/at" ("Le Pont Neuf, Paris", "Bridge in St. Petersburg").
+    """
+    subjects = " ".join(artwork.get("subject_titles") or []).lower()
+    subject_words = set(re.findall(r"[\w-]+", subjects))
+    suffix = False
+    for occurrence in occurrences:
+        if occurrence["field"] != "title":
+            continue
+        text = occurrence["source_text"]
+        before = text[:occurrence["start"]].rstrip().lower()
+        after = text[occurrence["end"]:].strip()
+        suffix |= (before.endswith(",") or before.endswith((" in", " at"))) and (
+            not after or after[0] in ",;:()[]–—-."
+        )
+    return {
+        "title_names_person": int(occurrences[0].get("title_person_count", 0) > 0),
+        "subject_people": int(bool(subject_words & _PEOPLE_SUBJECT_WORDS)),
+        "title_place_suffix": int(suffix),
+    }
+
+
 def _plain_text(text):
     """Text without HTML tags (AIC descriptions are HTML) and with collapsed spaces."""
     return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", text or "")).strip()
@@ -780,6 +828,7 @@ def _hierarchical_candidate_features(occurrences, location, artwork, nli_scorer=
     features["geo_name_similarity"] = _name_similarity(place_name, location)
     features["geo_context_conflict"] = int(bool((location or {}).get("context_conflict")))
     features.update(mention_role_features(occurrences))
+    features.update(portrait_features(occurrences, artwork))
     features["geo_homonym_count"] = int((location or {}).get("homonym_count") or 0)
     features["geo_importance_gap"] = float((location or {}).get("importance_gap") or 0.0)
     if nli_scorer is not None:
