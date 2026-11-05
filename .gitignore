@@ -15,3 +15,6 @@ data/processed/
 .ruff_cache/
 
 
+
+# LibreOffice lock files
+.~lock.*#
