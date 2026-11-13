@@ -1,0 +1,187 @@
+<title>Feuille de route géolocalisation</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column; a level ladder (exact → pays) as the subject's own figure; tables for tasks, short cards for avenues. */
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --ink: #18212b;
+  --muted: #5a6573;
+  --rule: #d9dee5;
+  --accent: #1f5f8b;
+  --accent-soft: #e3eef6;
+  --ok: #2f7d4f;
+  --ok-soft: #e2f2e8;
+  --wait: #9a6a12;
+  --wait-soft: #f7eed9;
+  --font-display: "IBM Plex Sans Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11161c; --surface: #18202a; --ink: #e6ebf1; --muted: #9aa6b4; --rule: #2b3643;
+    --accent: #7fb6dd; --accent-soft: #1d3446; --ok: #7fcf9e; --ok-soft: #1b3326;
+    --wait: #e2b45c; --wait-soft: #3a2f17; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11161c; --surface: #18202a; --ink: #e6ebf1; --muted: #9aa6b4; --rule: #2b3643;
+  --accent: #7fb6dd; --accent-soft: #1d3446; --ok: #7fcf9e; --ok-soft: #1b3326;
+  --wait: #e2b45c; --wait-soft: #3a2f17; color-scheme: dark;
+}
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.6; }
+.page { max-width: 880px; margin: 0 auto; padding-block: 48px 72px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 48px; }
+header { display: grid; gap: 12px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.2; }
+h1 { font-size: clamp(30px, 5vw, 40px); font-weight: 600; }
+h2 { font-size: 24px; font-weight: 600; }
+h3 { font-size: 17px; font-weight: 600; }
+p { margin: 0; max-width: 68ch; }
+.lead { font-size: 18px; }
+section { display: grid; gap: 16px; }
+.muted { color: var(--muted); }
+.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+/* Level ladder */
+.ladder { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.rung { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 12px; display: grid; gap: 4px; min-width: 0; }
+.rung.on { border-color: var(--ok); box-shadow: inset 0 3px 0 var(--ok); }
+.rung .name { font-family: var(--font-display); font-weight: 600; font-size: 15px; }
+.rung .prec { font-family: var(--font-mono); font-size: 22px; font-variant-numeric: tabular-nums; }
+.rung .meta { font-size: 12.5px; color: var(--muted); }
+.rung .state { font-size: 12px; font-weight: 600; }
+.rung.on .state { color: var(--ok); }
+.rung:not(.on) .state { color: var(--muted); }
+.ladder-note { font-size: 14px; color: var(--muted); }
+@media (max-width: 640px) { .ladder { grid-template-columns: repeat(2, minmax(0, 1fr)); } .rung.on { grid-column: 1 / -1; } }
+
+/* Tables */
+.table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; }
+table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 14.5px; }
+th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--rule); }
+th { font-size: 12.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); font-weight: 500; background: var(--bg); }
+tr:last-child td { border-bottom: 0; }
+td.rank { font-family: var(--font-mono); color: var(--accent); font-weight: 500; width: 2.5em; }
+td strong { font-weight: 600; }
+.chip { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.chip.week1 { background: var(--accent-soft); color: var(--accent); }
+.chip.week2 { background: var(--ok-soft); color: var(--ok); }
+.chip.later { background: var(--wait-soft); color: var(--wait); }
+
+/* Avenues */
+.avenues { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.avenue { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 16px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.avenue dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; font-size: 14px; }
+.avenue dt { color: var(--muted); }
+.avenue dd { margin: 0; }
+.tag { font-size: 12px; color: var(--wait); font-weight: 600; }
+@media (max-width: 640px) { .avenues { grid-template-columns: 1fr; } }
+
+ul.plain { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; max-width: 72ch; }
+.questions { counter-reset: q; margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.questions li { counter-increment: q; background: var(--surface); border: 1px solid var(--rule); border-left: 3px solid var(--wait); border-radius: 6px; padding: 12px 14px; }
+.questions li::before { content: "Q" counter(q); font-family: var(--font-mono); font-size: 12.5px; color: var(--wait); margin-right: 8px; }
+footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 16px; }
+</style>
+
+<main class="page">
+  <header>
+    <div class="eyebrow">Projet EPFL · Géolocalisation d'œuvres de l'Art Institute of Chicago · point du 13 novembre 2026</div>
+    <h1>Feuille de route : ce qu'il reste à faire</h1>
+    <p class="lead">Le projet n'a pas avancé cette semaine. Ce point repart de l'état du 5 novembre (modèle v10) et fixe la suite : six tâches prioritaires, six pistes de recherche et quatre décisions à prendre.</p>
+  </header>
+
+  <section aria-labelledby="etat">
+    <h2 id="etat">Point de départ : un seul niveau activé</h2>
+    <p>Le modèle répond à cinq niveaux, du plus précis au plus large. Un niveau n'est activé que si sa précision moyenne sur 10 découpages atteint 0.90 sans descendre sous 0.85. Aujourd'hui, seul le pays passe.</p>
+    <div class="ladder" role="list">
+      <div class="rung" role="listitem"><span class="name">Lieu exact</span><span class="prec">0.43</span><span class="meta">1.7 prédiction par découpage</span><span class="state">trop peu de cas</span></div>
+      <div class="rung" role="listitem"><span class="name">Quartier</span><span class="prec">0.39</span><span class="meta">1.8 prédiction</span><span class="state">trop peu de cas</span></div>
+      <div class="rung" role="listitem"><span class="name">Ville</span><span class="prec">0.80</span><span class="meta">14.5 prédictions</span><span class="state">sous la cible</span></div>
+      <div class="rung" role="listitem"><span class="name">Région</span><span class="prec">0.78</span><span class="meta">20.4 prédictions</span><span class="state">sous la cible</span></div>
+      <div class="rung on" role="listitem"><span class="name">Pays</span><span class="prec">0.90</span><span class="meta">50.9 prédictions, ± 0.03</span><span class="state">activé</span></div>
+    </div>
+    <p class="ladder-note">Précision moyenne par niveau, modèle v10, 440 œuvres annotées, 377 testées. Par œuvre : précision 0.82, rappel 0.22. Sur les seules œuvres d'origine (hors échantillon diversifié) : précision 0.90, rappel 0.23.</p>
+  </section>
+
+  <section aria-labelledby="taches">
+    <h2 id="taches">Tâches prioritaires</h2>
+    <p>Ordre proposé : les deux premières débloquent le niveau exact, les suivantes sont courtes ou préparent l'évaluation.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Tâche</th><th>Pourquoi</th><th>Effort</th><th>Quand</th></tr></thead>
+        <tbody>
+          <tr><td class="rank">1</td><td><strong>Finir l'annotation de l'échantillon diversifié</strong> : 112 œuvres sur 149 restent à annoter.</td><td>Donne des exemples de lieux exacts hors Paris et Chicago, et règle les seuils sur des œuvres proches de la vraie collection.</td><td class="num">≈ 4 h</td><td><span class="chip week1">semaine 1</span></td></tr>
+          <tr><td class="rank">2</td><td><strong>Récupérer les lieux exacts perdus avant le modèle.</strong> 55 des 115 lieux exacts annotés n'arrivent jamais comme candidat exact : seule la ville est trouvée (33), la région (9), le pays (5), un autre lieu (4), rien de géocodé (3), rien d'extrait (1).</td><td>Jusqu'à 55 exemples exacts de plus sans nouvelle annotation. Exemples : « St Mark's Campanile » réduit à Venise, « Madlener House » à Chicago, « L'Estaque » non extrait.</td><td class="num">≈ 1 jour</td><td><span class="chip week1">semaine 1</span></td></tr>
+          <tr><td class="rank">3</td><td><strong>Corrections rapides</strong> : ajouter « cloister », « courtyard », « interior », « room » aux mots génériques ; retirer les possessifs (« France’s » géocodé en « s ») ; trancher deux annotations (Mechouar : Tlemcen ou Marrakech ; Jérusalem : Israël ou Palestine).</td><td>Retire des fausses réponses parmi les plus confiantes du modèle.</td><td class="num">≈ 2 h</td><td><span class="chip week1">semaine 1</span></td></tr>
+          <tr><td class="rank">4</td><td><strong>Revoir la règle de décision avec les œuvres diversifiées</strong> : re-mesurer la marge de 0.05, calibrer les probabilités (Platt ou isotonique), rapporter à part la précision sur les œuvres diversifiées.</td><td>Ajouter 37 œuvres difficiles a divisé le rappel par deux sur les œuvres d'origine : les seuils sont peut-être trop stricts.</td><td class="num">≈ 1 jour</td><td><span class="chip week2">semaine 2</span></td></tr>
+          <tr><td class="rank">5</td><td><strong>Mesurer la part d'œuvres AIC qui représentent un lieu</strong> : 200 œuvres tirées au hasard, réponse oui ou non.</td><td>Aucune estimation fiable aujourd'hui : toutes les œuvres AIC du gold ont été choisies selon le modèle. Marge attendue ± 5 points.</td><td class="num">≈ 2 h</td><td><span class="chip week2">semaine 2</span></td></tr>
+          <tr><td class="rank">6</td><td><strong>Fusionner la branche <span class="num">top-down-geocoding</span></strong> dans <span class="num">main</span> par une pull request.</td><td>Le géocodage hiérarchique, la règle de décision et les tests (111) ne sont pas encore dans la branche principale.</td><td class="num">≈ 30 min</td><td><span class="chip week2">semaine 2</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="pistes">
+    <h2 id="pistes">Pistes à explorer</h2>
+    <p>Plus longues ou plus incertaines que les tâches ci-dessus. Les deux premières répondent directement au manque de lieux exacts.</p>
+    <div class="avenues">
+      <article class="avenue">
+        <h3>Dictionnaire de monuments</h3>
+        <p>Chercher dans les titres les noms de monuments connus de Wikidata ou d'OpenStreetMap, en plus du NER.</p>
+        <dl><dt>Vise</dt><dd>les 33 œuvres où seule la ville est trouvée</dd><dt>Risque</dt><dd>faux positifs sur des noms courts ou communs</dd></dl>
+      </article>
+      <article class="avenue">
+        <h3>Wikidata comme source d'annotations</h3>
+        <p>Utiliser les œuvres AIC liées à Wikidata dont la fiche indique ce qu'elles représentent ou le lieu représenté.</p>
+        <dl><dt>Vise</dt><dd>des centaines d'exemples sans annotation manuelle</dd><dt>Risque</dt><dd>couverture et qualité à vérifier sur un échantillon</dd></dl>
+      </article>
+      <article class="avenue">
+        <h3>Un modèle unique pour tous les niveaux</h3>
+        <p>Une seule régression calibrée avec le niveau comme feature, au lieu de cinq modèles séparés.</p>
+        <dl><dt>Vise</dt><dd>le lieu exact, qui partagerait les données des autres niveaux</dd><dt>Risque</dt><dd>seuils moins spécifiques à chaque niveau</dd></dl>
+      </article>
+      <article class="avenue">
+        <h3>Point de comparaison avec un LLM</h3>
+        <p>Un grand modèle de langage lit les métadonnées et donne le lieu et son niveau, sans entraînement.</p>
+        <dl><dt>Vise</dt><dd>un plafond de référence, ou une feature de plus</dd><dt>Risque</dt><dd>coût par œuvre, résultats difficiles à reproduire</dd></dl>
+      </article>
+      <article class="avenue">
+        <h3>Un indice tiré de l'image <span class="tag">hors périmètre actuel</span></h3>
+        <p>Une classification zéro-shot (type CLIP) « vue d'un lieu » contre « portrait » ou « objet ».</p>
+        <dl><dt>Vise</dt><dd>portraits titrés « X, ville » et photos abstraites, environ un tiers des fausses réponses confiantes</dd><dt>Risque</dt><dd>sort du principe « métadonnées seules »</dd></dl>
+      </article>
+      <article class="avenue">
+        <h3>Accélérer le calcul NLI</h3>
+        <p>Calcul sur GPU (cluster EPFL), modèle NLI plus petit, ou NLI limité aux trois meilleurs candidats.</p>
+        <dl><dt>Vise</dt><dd>3 h 15 aujourd'hui pour prédire 582 œuvres sur processeur</dd><dt>Risque</dt><dd>un modèle plus petit peut perdre en qualité</dd></dl>
+      </article>
+    </div>
+  </section>
+
+  <section aria-labelledby="teste">
+    <h2 id="teste">Déjà testé, sans gain</h2>
+    <p>Chaque groupe a été comparé au modèle de référence sur les mêmes 10 découpages. Aucun n'a dépassé le bruit (± 0.02 à 0.03). Ils sont calculés mais laissés hors du modèle.</p>
+    <ul class="plain">
+      <li><strong>Contraste des scores NLI</strong> (« montre » moins « fait à ») : l'information est déjà dans les cinq scores NLI.</li>
+      <li><strong>Nombre d'homonymes du lieu</strong> : les lieux célèbres en ont beaucoup, le signal ne sépare pas bons et mauvais candidats.</li>
+      <li><strong>Mots juste avant la mention</strong> (« View of », « printed in ») : moins de 5 % des candidats en ont, les titres AIC sont trop courts.</li>
+      <li><strong>Indices de portrait</strong> (nom de personne dans le titre, sujets AIC) : les sujets ne sont renseignés que pour 16 % des œuvres figuratives.</li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="questions">
+    <h2 id="questions">Décisions à prendre</h2>
+    <ol class="questions">
+      <li><strong>Image ou métadonnées seules ?</strong> Faut-il s'autoriser un indice tiré de l'image pour les portraits et les photos abstraites, ou garder cette limite comme frontière du projet ?</li>
+      <li><strong>Quelle mesure de référence ?</strong> La précision tombe de 0.90 sur les œuvres d'origine à 0.82 avec l'échantillon diversifié. Lequel des deux chiffres présenter comme performance du projet ?</li>
+      <li><strong>Quelle cible pour le lieu exact ?</strong> La cible est de 0.90 pour tous les niveaux. Une cible plus basse pour le lieu exact, avec repli sur la ville en cas de doute, est-elle acceptable ?</li>
+      <li><strong>Quelle convention pour les frontières contestées ?</strong> Jérusalem compte-t-elle comme Israël, Palestine, ou les deux pour juger la réponse au niveau pays ?</li>
+    </ol>
+  </section>
+
+  <footer>Chiffres issus du modèle v10 (5 novembre 2026), validation croisée groupée par lieu, répétée sur 10 découpages. Code et résultats sur la branche <span class="num">top-down-geocoding</span>.</footer>
+</main>

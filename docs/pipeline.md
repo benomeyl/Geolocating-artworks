@@ -1,4 +1,4 @@
-# Pipeline de géolocalisation des œuvres — état au 01/11/2026
+# Pipeline de géolocalisation des œuvres — état au 13/11/2026
 
 ## 1. Objectif
 
@@ -41,15 +41,25 @@ manuels) : plus aucun code ne l'importe.
 
 | Fichier | Contenu |
 |---|---|
-| `data/raw/gold_standard/gold_dataset.json` | Jeu annoté (387 œuvres) : Wikidata, CSV Dresde/Venise, revues manuelles AIC |
+| `data/raw/gold_standard/gold_dataset.json` | Jeu annoté (440 œuvres) : Wikidata, CSV Dresde/Venise, revues manuelles AIC, lieux précis |
+| `data/raw/aic/diverse_places_sample.json` | 582 œuvres AIC dont le titre nomme une ville (424 villes, 86 pays), recréé par `scripts/sample_diverse_places.py` |
 | `data/raw/aic/aic_useful_fields.json` | 19 998 œuvres AIC, champs réduits (sert au test aléatoire) |
 | `data/raw/artic-api-data/json/artworks/` | Dump AIC complet (134 078 fichiers, un par œuvre) |
 | `data/gazetter/geonames.db` | GeoNames local (SQLite) |
 | `data/processed/nominatim_cache.sqlite` | Cache des réponses Nominatim (évite de refaire les requêtes) |
 
-Composition du gold : les œuvres AIC représentent un lieu dans **21 %** des
-cas (29/136), les autres sources dans **70 %** des cas. Ce déséquilibre
-explique une partie des difficultés (voir §8).
+Composition du gold (440 œuvres) : 195 `depicted` (115 lieux exacts,
+16 quartiers, 46 villes, 17 régions, 1 pays), 190 `none`, 47
+`undeterminable`, 8 `mentioned_only` ; 340 œuvres AIC et 100 d'autres
+sources. Les œuvres AIC n'ont jamais été tirées au hasard : la part
+d'œuvres AIC représentant un lieu (37 % dans le gold) n'est pas celle de la
+collection.
+
+Chaque annotation garde sa provenance (`ground_truth_source.sample_stratum`).
+Les strates choisies par le modèle (`precise_keywords` : lignes annotées
+dans l'ordre de `p_exact`) servent à l'entraînement mais jamais au test
+(`TRAIN_ONLY_STRATA`). L'échantillon `precise_diverse`, exporté dans un
+ordre aléatoire, sert aux deux.
 
 Chaque annotation contient `place_status` (`depicted`, `none`,
 `mentioned_only`, `undeterminable`) et, si `depicted`, un `depicted_place`
@@ -112,6 +122,14 @@ candidat. Ses features :
   d'un vase pour « Vase ». Scores en cache dans
   `data/processed/nli_cache.sqlite` (≈ 0,4 s par paire sur CPU).
 
+Features calculées mais **hors du modèle** (testées sur 10 découpages
+appariés, aucun gain au-delà du bruit, voir `results/compare_*.log`) :
+`NLI_CONTRAST_COLUMNS` (contraste « montre » − « fait à »),
+`HOMONYM_FEATURE_COLUMNS` (nombre d'homonymes, écart d'importance),
+`MENTION_ROLE_COLUMNS` (mots juste avant la mention, position dans le
+titre, nom d'institution), `PORTRAIT_FEATURE_COLUMNS` (nom de personne
+dans le titre, sujets AIC de personnes, « X, ville » en fin de titre).
+
 ### 4.4 Géocodage (`gazetter.py`)
 
 **Alternatives d'un nom** (`location_alternatives`) :
@@ -140,17 +158,37 @@ candidat. Ses features :
    Texas).
 5. Les entrées GeoNames non fiables ne servent que si rien d'autre n'est trouvé.
 
-**Désambiguïsation par le contexte** (`resolve_artwork_places`) : les
-lieux d'une œuvre sont géocodés ensemble. Un lieu cité à moins de 80
-caractères d'un « point d'ancrage » du même champ (pays, région ou lieu
-habité dont le nom correspond bien) choisit l'alternative du même pays ou à
-moins de 150 km (Logan County dans l'Illinois à côté de Cornland). Sans
-alternative compatible, on cherche « lieu, contexte » dans Nominatim ; en
-cas d'échec, le premier résultat est gardé et marqué `context_conflict`. Un
-nom de pays n'est jamais remis en cause par un lieu plus petit, ni un lieu
-très connu (importance ≥ 0,6 : Rome, Paris) par la recherche « lieu,
-contexte » (« Rome, France » trouvait la station de métro Rome à Paris) :
-il est gardé et marqué `context_conflict`.
+**Géocodage du plus large au plus précis** (`resolve_artwork_places`,
+depuis le 05/11/2026) : les lieux d'une œuvre sont géocodés ensemble.
+
+1. **Ancres** : pays, régions et lieux habités dont le nom correspond à la
+   mention (ou lieu célèbre sous son nom local : « Florence » → « Firenze »),
+   **n'importe où dans l'œuvre**. Sont exclus les noms génériques
+   (`GENERIC_PLACE_WORDS` : « Park », « Town Hall ») et les mentions qui ne
+   suivent qu'un indice d'origine (`ORIGIN_CUES` : « born in », « printed
+   in »). Une ancre choisit l'alternative qui s'accorde avec les autres
+   (même pays, proche) ; une ancre célèbre (importance ≥ 0,6) n'est révisée
+   que par un pays ou une région (« Red House » ne déplace plus Berlin aux
+   États-Unis). Un nom de pays n'est jamais révisé.
+2. **Lieux précis** (les autres mentions) : la première alternative située
+   dans la zone d'une ancre (ville : 30 km ; région : même pays et 500 km ;
+   pays : même pays), l'ancre la plus proche dans le texte d'abord ; sinon
+   une recherche Nominatim **limitée à la zone** (`search_within` :
+   `countrycodes` + `viewbox` borné), puis « lieu, ancre » ; le résultat doit
+   contenir tous les mots de la mention (« Cardiff Castle » ≠ « Cardiff
+   Avenue »).
+3. **Échec** : si une ancre est juste à côté (≤ 80 caractères, « Le Nys,
+   Amsterdam »), la mention n'a **pas de lieu** (sauf lieu célèbre, gardé et
+   marqué `context_conflict`) : l'œuvre est placée par son ancre plutôt que
+   par un homonyme. Avec une ancre lointaine, le premier résultat est gardé
+   et marqué `context_conflict`.
+4. **Sans ancre** : premier résultat, sauf pour un nom générique (aucun
+   lieu).
+
+Chaque lieu porte `resolution` (`anchor`, `in_anchor`,
+`searched_in_anchor`, `name_and_anchor`, `outside_anchors`, `global`).
+Effet mesuré (v9 contre v7, mêmes découpages) : rappel +0,18 (10/10),
+précision +0,03 (8/10).
 
 **Hiérarchie** ville/région/pays : par géocodage inverse Nominatim.
 
@@ -172,7 +210,7 @@ cible annotée et on note **le niveau le plus précis qui correspond** :
 
 | Niveau | Condition principale |
 |---|---|
-| `exact_place` | candidat de niveau lieu exact à ≤ 0,25 km de la cible |
+| `exact_place` | candidat de niveau lieu exact à ≤ 0,25 km de la cible, ou portant le nom annoté à ≤ 2 km (rues, parcs, jetées) |
 | `neighborhood` | même quartier, ou lieu exact à ≤ 2 km |
 | `city` | même ville, ou à ≤ 25 km |
 | `region` / `country` | même région / même pays |
@@ -193,15 +231,28 @@ cible annotée et on note **le niveau le plus précis qui correspond** :
   (ex. plusieurs vues de la Tour Eiffel) restent dans le même fold, pour
   ne pas surestimer les performances.
 - **Seuil par niveau** : le plus permissif qui garde la précision
-  hors-fold au-dessus de la cible (95 % lieu exact, 93 % quartier, 90 %
-  ville/région/pays), avec au moins 5 prédictions et 5 groupes. Sinon le
-  niveau s'abstient (`precision_target_unmet`,
-  `insufficient_positive_groups`…).
+  hors-fold au-dessus de la cible **+ une marge** (`--threshold-margin`,
+  0,05 par défaut ; cible 0,90 à tous les niveaux depuis le 05/11/2026),
+  avec au moins 5 prédictions et 5 groupes. Sinon le niveau s'abstient
+  (`precision_target_unmet`, `insufficient_positive_groups`…). La marge
+  compense l'optimisme des seuils réglés sur les folds d'entraînement
+  (≈ 0,05 de précision perdue sur des œuvres nouvelles).
 - **Validation externe** (`evaluate_hierarchical_grouped_cv`) : on refait
-  tout l'entraînement, seuils compris, sur 5 folds externes. Un niveau est
-  **déployable** seulement si sa précision externe atteint aussi la cible.
-  C'est la seule métrique honnête ; les métriques « OOF » affichées avant
-  ont servi à choisir les seuils et sont optimistes.
+  tout l'entraînement, seuils compris, sur 5 folds externes ; les œuvres
+  des strates `TRAIN_ONLY_STRATA` sont ajoutées à l'entraînement de chaque
+  fold mais jamais testées. Les métriques « OOF » affichées avant ont servi
+  à choisir les seuils et sont optimistes.
+- **Validation répétée** (`evaluate_repeated_grouped_cv`, `--outer-repeats
+  10`, `--outer-jobs 4`) : la même validation sur 10 découpages mélangés
+  (`StratifiedGroupKFold`, seeds 0 à 9) ; moyenne ± écart-type. Deux
+  versions évaluées sur le même gold partagent les mêmes découpages : on les
+  compare découpage par découpage.
+- **Règle de déploiement D** (`deployable_levels`) : un niveau est activé
+  si sa précision moyenne sur les découpages atteint la cible, qu'elle
+  reste ≥ cible − 0,05 sur chacun et qu'il prédit sur chacun. Avec
+  `--outer-repeats 1`, l'ancienne règle (découpage fixe) s'applique.
+- **Intervalles de Wilson à 95 %** (`wilson_interval`) affichés à côté de
+  chaque précision du découpage fixe.
 
 ### 4.7 Prédiction (`predict_with_hierarchical_model`)
 
@@ -221,11 +272,17 @@ l'œuvre est `uncertain`.
 | `python scripts/predict_sample_csv.py --model … --output results/….csv` | Test sur 500 œuvres AIC aléatoires hors gold, export CSV avec liens image |
 | `python scripts/create_manual_review_sample.py …` | Échantillon stratifié de prédictions à annoter |
 | `python scripts/create_annotation_csv.py` | CSV simple à annoter à partir du test aléatoire (œuvres `uncertain`) |
-| `python scripts/integrate_manual_review.py [--review-csv …] [--write]` | Ajoute un CSV annoté au gold |
+| `python scripts/integrate_manual_review.py [--review-csv …] [--write]` | Ajoute un CSV annoté au gold (lit aussi les colonnes `review_*` des exports de lieux précis ; œuvres absentes lues dans le dump AIC) |
+| `python scripts/sample_diverse_places.py --size 800` | Tire des œuvres AIC dont le titre nomme une ville (≤ 2 par ville, ≤ 30 par pays) |
+| `python scripts/export_precise_places.py --input-csv … --order random --sample-stratum precise_diverse` | Exporte les œuvres ayant un candidat de niveau lieu exact, à annoter |
+| `python scripts/relabel_city_in_title.py [--apply]` | Relecture des œuvres « X, ville » annotées sans lieu |
 | `python scripts/integrate_identified_csvs.py [--write]` | Ajoute les CSV Dresde/Venise au gold |
 | `python scripts/audit_geographic_annotations.py` | Liste les champs manquants des annotations |
-| `python scripts/compare_feature_sets.py [--reuse-table] --output results/….json` | Compare des jeux de features sur la même table (validation externe + précision moyenne hors-fold par niveau) |
-| `python -m pytest -q` | Tests (84) |
+| `python scripts/compare_feature_sets.py [--reuse-table] --output results/….json` | Compare des jeux de features sur la même table (validation externe, 10 découpages appariés, précision moyenne hors-fold par niveau) |
+| `python -m pytest -q` | Tests (111) |
+
+Lancer avec `.venv/bin/python` : l'interpréteur Anaconda de base n'a pas
+`transformers`.
 
 ## 6. Résultats
 
@@ -277,6 +334,26 @@ prédictions.
   Venice ») et mentions mal découpées par le NER (« Paris Street » pour
   *Paris Street; Rainy Day*, « South Gate of »).
 
+### Validation répétée et règle D (05/11/2026)
+
+Moyenne ± écart-type sur 10 découpages ; colonnes Pays et Ville =
+précision moyenne de ce niveau.
+
+| Version | Changement | Œuvres testées | Précision | Rappel | Pays | Ville | Activé |
+|---|---|---|---|---|---|---|---|
+| v6 | + 16 lieux précis, ancienne règle | 345 | 0,825 ± 0,019 | 0,478 ± 0,029 | 0,854 | 0,796 | aucun |
+| v7 | règle D | 345 | 0,840 ± 0,021 | 0,238 ± 0,028 | 0,904 | 0,670 | pays |
+| v9 | géocodage du plus large au plus précis | 345 | 0,870 ± 0,021 | 0,419 ± 0,030 | 0,919 | 0,848 | pays |
+| v10 | + 37 œuvres de l'échantillon diversifié | 377 | 0,820 ± 0,037 | 0,222 ± 0,020 | 0,902 | 0,797 | pays |
+
+- v10 sur les seules 345 œuvres d'origine (mêmes découpages que v9) :
+  précision 0,902, rappel 0,234, 4,1 fausses réponses par découpage contre
+  9,9. Les œuvres diversifiées, plus difficiles, rendent les seuils plus
+  stricts ; l'ancien gold surestimait la précision.
+- Niveau lieu exact : ≈ 1,7 prédiction par découpage. Sur 115 lieux exacts
+  annotés, 60 seulement ont un candidat juste au niveau exact (45 lieux
+  distincts) ; les autres sont perdus au NER ou au géocodage.
+
 ## 7. Fichiers de code
 
 | Fichier | Rôle |
@@ -291,15 +368,19 @@ prédictions.
 
 ## 8. Limites connues et pistes
 
-- **Peu d'exemples AIC positifs** (29) : c'est le principal frein. Les
-  niveaux lieu exact et quartier n'ont que 20 à 23 groupes positifs.
-  Priorité : annoter les œuvres `uncertain` du test aléatoire.
+- **Lieux exacts** : ≈ 70 candidats justes pour 45 lieux distincts ; 55 des
+  115 lieux exacts annotés n'arrivent jamais comme candidat exact (ville
+  seule 33, région 9, pays 5, ailleurs 4, non géocodé 3, non extrait 1).
+- **Métadonnées seules** : un portrait ou une photo abstraite titrés
+  « X, ville » ne peuvent pas être distingués d'une vue de la ville ; les
+  sujets AIC ne sont renseignés que pour 16 % des œuvres figuratives.
 - **67 % des œuvres AIC tirées au hasard n'ont aucun candidat** : surtout
   des titres sans lieu (« Untitled », « Vase ») ; 7 % seulement ont une
   description.
-- **Géocodage** : un lieu cité seul reste ambigu (« Conway Castle » →
-  Floride ; aucune source ne connaît cette orthographe de Conwy) ; un lieu
-  sans ancrage fiable à côté n'est pas désambiguïsé.
+- **Calcul** : NLI sur CPU, ≈ 3 h 15 pour prédire 582 œuvres ; Nominatim
+  limité à une requête par seconde.
 - **Descriptions longues** tronquées à 512 tokens par le NER.
-- Pistes : liaison Wikidata, désambiguïsation par le contexte, LLM local
-  comme feature, second NER (GLiNER multilingue).
+- Pistes et tâches détaillées dans `docs/feuille_de_route_2026-11-13.html` :
+  finir l'annotation de l'échantillon diversifié, récupérer les lieux
+  exacts perdus, dictionnaire de monuments, labels Wikidata, modèle unique
+  calibré, comparaison avec un LLM, accélération du NLI.
