@@ -5126,8 +5126,8 @@
           "city": "Chicago",
           "region": "Illinois",
           "country": "United States",
-          "latitude": 42.9096176,
-          "longitude": -86.6291489,
+          "latitude": 41.9096176,
+          "longitude": -87.6291489,
           "geonameid": null,
           "geonameid_match": "none",
           "precision": "exact_place",
@@ -17611,6 +17611,2761 @@
         "status": "verified",
         "annotator": "manual_review",
         "date": "2026-11-05"
+      }
+    },
+    {
+      "artwork": {
+        "id": 87395,
+        "title": "Mountain Temple at Sendai (Sendai yamanodera), from the series \"Collection of Scenic Views of Japan, Eastern Japan Edition (Nihon fukei shu higashi Nihon hen)\"",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [
+          "Japanese (culture or style)"
+        ],
+        "image_id": "cc585182-d9e7-fd16-83d0-e832820acdef",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Yama-dera temple",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 38.3131454233235,
+          "longitude": 140.434590590784,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P38",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 147578,
+        "title": "Palais du Prince, Liege, from Facsimiles of Sketches made in Flanders and Germany",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "a7e3a5e4-d045-eafa-1d3d-8c4878e77747",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Palais des Princes-Évêques",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 50.6463750262901,
+          "longitude": 5.57319058175121,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P39",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 87274,
+        "title": "Kiso River at Inuyama (Kisogawa [Inuyama])",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [
+          "Japanese (culture or style)"
+        ],
+        "image_id": "cd43beac-f07f-f195-624a-6849c5d5808a",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Inuyama’s castle",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 35.3901501625816,
+          "longitude": 136.93860386043,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P40",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 28567,
+        "title": "Marble Bridge, Copenhagen",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "c97ed619-bbc3-b53d-290e-cde39bf4ba86",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Marmorbroen",
+          "city": "København",
+          "region": "Region Hovedstaden",
+          "country": "Danmark",
+          "latitude": 55.6749006,
+          "longitude": 12.5767753,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P41",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 268149,
+        "title": "Landscape with Gallows (near Haarlem), from Landscapes",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "2ceb05be-6236-a571-7906-4628b02794d6",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "haarlem",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 52.3869278318417,
+          "longitude": 4.64304980484048,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P42",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 243185,
+        "title": "Seven Portraits (Mies Crown Hall Americas Prize, Pin-Up Fall Winter 2014/15 Supplement): Bloch Building, Nelson-Atkins Museum (Kansas City, USA), Steven Holl Architects and BNIM",
+        "description": "<p>David Hartt’s <em>Seven Portraits</em> is a portfolio of photographs of seven contemporary buildings across the Americas, ranging from the Seattle Library by Rem Koolhaas to Restaurante Mestizo in Santiago, Chile, by Smiljan Radic. The portfolio was commissioned by the Illinois Institute of Technology’s College of Architecture in partnership with PIN-UP magazine to celebrate the inaugural Mies Crown Hall Americas Prize and was first published as a supplement in the magazine. For a later unique commission by the Art Institute, Hartt produced these 12 large panels featuring both published and unpublished photos from the project.</p>\n<p>Unlike architectural photographers, who typically attempt to convey the designer’s vision, Hartt used this work to free buildings from the preconceptions of their architects. He emphasized the ordinary and the unexpected, like a plant growing in the crack of a deck or a building’s facade in the background of a quinceañera photoshoot. The series shows Hartt’s interest in the specificity of place and the cultural and social meanings of built environments. Instead of presenting an architect’s idealized intentions for a space, these photographs examine the personal, idiosyncratic encounters between a building and its context and inhabitants. <em>Seven Portraits</em> prompts reflection on the unpredictable ways humans use and experience design, giving buildings purpose far beyond what architects can predict.</p>\n",
+        "short_description": null,
+        "subject_titles": [
+          "kansas city",
+          "architecture",
+          "united states of america",
+          "museum",
+          "photograph",
+          "photography",
+          "Kansas"
+        ],
+        "theme_titles": [
+          "Chicago Artists",
+          "African Diaspora",
+          "African American artists"
+        ],
+        "style_titles": [
+          "21st Century"
+        ],
+        "image_id": "6ca6424c-6f75-ce60-8314-ebc649123f02",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Nelson-Atkins Museum of Art",
+          "city": "Kansas City",
+          "region": "Missouri",
+          "country": "United States",
+          "latitude": 39.0449664,
+          "longitude": -94.5809582,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P43",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 74944,
+        "title": "View of Metro West Building with Canadian Geese, Naperville, Illinois",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [
+          "Women artists"
+        ],
+        "style_titles": [],
+        "image_id": "48d99666-6d9f-583a-53b2-4a2a57978dc0",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Metro west",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 41.8050555847696,
+          "longitude": -88.1443126632156,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P44",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 243186,
+        "title": "Seven Portraits (Mies Crown Hall Americas Prize, Pin-Up Fall Winter 2014/15 Supplement): Bloch Building, Nelson-Atkins Museum (Kansas City, USA), Steven Holl Architects and BNIM",
+        "description": "<p>David Hartt’s <em>Seven Portraits</em> is a portfolio of photographs of seven contemporary buildings across the Americas, ranging from the Seattle Library by Rem Koolhaas to Restaurante Mestizo in Santiago, Chile, by Smiljan Radic. The portfolio was commissioned by the Illinois Institute of Technology’s College of Architecture in partnership with PIN-UP magazine to celebrate the inaugural Mies Crown Hall Americas Prize and was first published as a supplement in the magazine. For a later unique commission by the Art Institute, Hartt produced these 12 large panels featuring both published and unpublished photos from the project.</p>\n<p>Unlike architectural photographers, who typically attempt to convey the designer’s vision, Hartt used this work to free buildings from the preconceptions of their architects. He emphasized the ordinary and the unexpected, like a plant growing in the crack of a deck or a building’s facade in the background of a quinceañera photoshoot. The series shows Hartt’s interest in the specificity of place and the cultural and social meanings of built environments. Instead of presenting an architect’s idealized intentions for a space, these photographs examine the personal, idiosyncratic encounters between a building and its context and inhabitants. <em>Seven Portraits</em> prompts reflection on the unpredictable ways humans use and experience design, giving buildings purpose far beyond what architects can predict.</p>\n",
+        "short_description": null,
+        "subject_titles": [
+          "kansas city",
+          "architecture",
+          "united states of america",
+          "museum",
+          "Kansas",
+          "museums",
+          "photograph"
+        ],
+        "theme_titles": [
+          "Chicago Artists",
+          "African Diaspora",
+          "African American artists"
+        ],
+        "style_titles": [
+          "21st Century"
+        ],
+        "image_id": "54eddc55-526d-69b0-e9fe-84f88383e0bf",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Nelson-Atkins Museum of Art",
+          "city": "Kansas City",
+          "region": "Missouri",
+          "country": "United States",
+          "latitude": 39.0449664,
+          "longitude": -94.5809582,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P45",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 234064,
+        "title": "From a Day of Grief, Kerch, Crimea",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [
+          "21st Century"
+        ],
+        "image_id": "dbdf9e70-ccd5-de7e-2478-573c7d76df57",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Kerch",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 45.3531481098588,
+          "longitude": 36.4674849999326,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P46",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 181951,
+        "title": "Temple of Amon, Luxor, Egypt",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "6159a8aa-72ee-acde-9991-893a04c11ac1",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Temple of Amon",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 25.6999540067652,
+          "longitude": 32.6391676486207,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P47",
+          "sample_stratum": "precise_diverse",
+          "review_notes": "normaly easy to depict",
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 32314,
+        "title": "Foreigner Checking Documents at a Merchant House in Yokohama (Yokohama shoka komojin sho mitomu no zu)",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [
+          "Japanese (culture or style)"
+        ],
+        "image_id": "6b08301f-52a2-cfa4-13a8-3c514aa2b5ad",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Yokohama",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 35.4498160667395,
+          "longitude": 139.606035567355,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P48",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 198923,
+        "title": "Wollaton Hall in the County of Nottingham, plate 68 from Britannia Illustrata",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "6a2c3ac0-4768-084d-4d49-8b73a24cc7b9",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Wollaton Hall",
+          "city": "City of Nottingham",
+          "region": "England",
+          "country": "United Kingdom",
+          "latitude": 52.9479602,
+          "longitude": -1.209771,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P49",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 94010,
+        "title": "The Amazon River, Iquitos, Peru",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [
+          "Chicago"
+        ],
+        "theme_titles": [
+          "Chicago Artists",
+          "SAIC Alumni and Faculty"
+        ],
+        "style_titles": [],
+        "image_id": "98960beb-fd9b-1b44-5443-ac648a585d13",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Amazon river",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": -3.6977544632472026,
+          "longitude": -73.2233917327803,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P50",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 152001,
+        "title": "Toltecs of the State of Puebla, from Mexican Costume",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [
+          "Latin American"
+        ],
+        "style_titles": [],
+        "image_id": "929276ec-f496-49a9-c970-f686f3413fd9",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "none",
+        "place_type": null,
+        "depicted_place": null,
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P51",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 185496,
+        "title": "Sea Defense, Beirut, Lebanon",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [
+          "21st Century"
+        ],
+        "image_id": "b8229486-4de7-bd05-e39d-f37d981b42c6",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Beirut",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 33.8909640731221,
+          "longitude": 35.4991236127832,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P52",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 212093,
+        "title": "Terraces, Salamanca (Terrasses, Salamanque)",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "ab2ead67-0797-6c29-1865-67636ffc38ad",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Salamanca",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 40.9697825519428,
+          "longitude": -5.66474959527249,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P53",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 46624,
+        "title": "The Clock Tower, Venice",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "865ad110-ecad-197c-c9cc-1538e3e37e23",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "St Mark's Clocktower",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 45.4348189002345,
+          "longitude": 12.3389453391124,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P54",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 103900,
+        "title": "Water Mills in Meaux",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "afaa3c74-d00f-ddcf-903a-312dcbc44b29",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Meaux",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 48.9578057252056,
+          "longitude": 2.87782838542908,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P55",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 266907,
+        "title": "Windhoek, Southwest Africa",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [
+          "photography",
+          "photograph"
+        ],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "4e7b33c2-5c1f-de33-f8a5-b14f80f19e55",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Windhoek",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": -22.563735254310874,
+          "longitude": 17.0769854839194,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P56",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 115978,
+        "title": "The Garden of the Island, Aranjuez",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "dc40b183-302d-2984-3717-2b197f4d8fce",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Jardín de la Isla",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 40.0386583832662,
+          "longitude": -3.60943340287414,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "neighborhood",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P57",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 218888,
+        "title": "Untitled (Haus Lange - Haus Esters, Krefeld, Germany, 2000–2001)",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [
+          "21st Century"
+        ],
+        "image_id": "1a7ef72b-35b8-c155-f156-c7ad11f10b4f",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "undeterminable",
+        "place_type": null,
+        "depicted_place": null,
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P58",
+          "sample_stratum": "precise_diverse",
+          "review_notes": "clearly not in germany",
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 221823,
+        "title": "Pottery Maker (Chanenetla District, Puebla, State of Puebla), from Mexican People",
+        "description": "<p>Intended for a U.S. audience, the group portfolio <a href=\"https://www.artic.edu/artworks/139299\"><em>Mexican People</em></a> was originally commissioned by the Council for Pan-American Democracy in New York to promote Mexican products for export to the United States. Ultimately published by American Associated Artists (AAA) of New York—the Taller de Gráfica Popular’s first such collaboration with a U.S. organization—the 12 lithographs were accompanied by a map indicating the resources and industries of the various regions that each of the 10 artists had visited, funded by the AAA, in order to prepare his print. Although varied in tone and artistic approach, the prints tend to focus on labor and distinctive regional customs rather than on the portrayal of individuals, and some bear traces of the project’s original conception in their semi-ethnographic feel.</p>\n<p><strong>Español:</strong><br>Dirigido a un público estadounidense, el portafolio colectivo <a href=\"https://www.artic.edu/artworks/139299\"><em>Mexican People</em></a> fue encargado por el Consejo para la Democracia Panamericana en Nueva York para promover la exportación de productos mexicanos a los Estados Unidos. Al final fue publicado por la Asociación de Artistas Americanos de Nueva York y representa la primera colaboración de este tipo entre el Taller de Gráfica Popular y una organización estadounidense. Las 12 litografías que lo componen iban acompañadas de un mapa que indicaba los recursos y las industrias de las diferentes regiones que los diez artistas habían visitado, con el financiamiento de la asociación, para preparar sus grabados. Aunque diferentes en tono y estilo artístico, los grabados tienden a centrarse en la representación del trabajo y en las distintas costumbres regionales más que en el retrato de individuos; algunos incluso conservaron rastros de la concepción semietnográfica original del proyecto.</p>\n",
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [
+          "Latin American"
+        ],
+        "style_titles": [],
+        "image_id": "11a655c0-9f8a-953c-97b7-2dc42667dba9",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Barrio de Xanenetla",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 19.0530983584772,
+          "longitude": -98.1893348010349,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "neighborhood",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P59",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 67194,
+        "title": "Eldorado: Aristide Bruant",
+        "description": "<p>During his popular cabaret performances, Aristide Bruant adopted the role of a social outsider who regularly criticized upper-class society and commented on current events with biting humor. Despite its antiestablishment reputation, Bruant’s cabaret, Le Mirliton, attracted patrons from a wide variety of backgrounds—even upper-class Parisians, who came expecting Bruant to openly ridicule them during and after the shows.</p>\n<p>In 1892 Bruant commissioned Henri de Toulouse-Lautrec to design a poster advertising his performances at the upscale Ambassadeurs and Eldorado clubs. The artist created an iconic portrait of the singer that reduced his likeness to its most memorable elements: a wide-brimmed hat, black cloak, and bright-red scarf. Over time Toulouse-Lautrec reused and adapted this unmistakable image in many different designs to publicize Bruant’s shows at Le Mirliton.</p>\n",
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "45da9221-948b-bdda-64b4-5b6c2675df11",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "none",
+        "place_type": null,
+        "depicted_place": null,
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P60",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 43211,
+        "title": "Interior of the Oude Kerk, Delft",
+        "description": "<p>Having been stripped of their images and whitewashed by Protestant reformers in the 16th century, the Dutch Republic’s large Gothic churches offered a compelling subject for artists. Emanuel de Witte was one of a small group of painters who specialized in explorations of the light, shade, and volume particular to church interiors. In this painting, executed late in the artist’s career, the organ and genealogical panels honoring the dead (suspended from the ceiling and affixed to the columns) are the only decoration.</p>\n",
+        "short_description": null,
+        "subject_titles": [
+          "interior",
+          "church",
+          "figures",
+          "instruments",
+          "men"
+        ],
+        "theme_titles": [],
+        "style_titles": [
+          "17th Century"
+        ],
+        "image_id": "0905c8a0-b2f1-b534-fa37-0f1aa016bec5",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Oude Kerk",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 52.01265120692928,
+          "longitude": 4.35597479805765,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P61",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 61208,
+        "title": "Tree and Sign, Panama City, U.S.A.",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "99b73195-e10a-dec9-7fd0-7c630d647a98",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Panama city",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 30.179305605589,
+          "longitude": -85.6635192425458,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P62",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 242501,
+        "title": "Diwali Mela at Great America, Santa Clara, California, from the series \"The Americans,\" (2000-2007)",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [
+          "India",
+          "portraits: Indian subject",
+          "portraits"
+        ],
+        "theme_titles": [
+          "Women artists"
+        ],
+        "style_titles": [
+          "contemporary",
+          "21st Century"
+        ],
+        "image_id": "e0f40658-3440-8639-88a0-e2af5b1d6add",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Santa Clara-Great America",
+          "city": "Santa Clara",
+          "region": "California",
+          "country": "United States",
+          "latitude": 37.4066163,
+          "longitude": -121.9668715,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P63",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 45786,
+        "title": "Coal Wharf, Alexandria, Virginia",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [
+          "19th century"
+        ],
+        "image_id": "35972143-79ec-0188-6308-7e45be99ae5b",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Alexandria",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 38.8043828747532,
+          "longitude": -77.0491792563976,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P64",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 79124,
+        "title": "At the Garden of Essai, Algiers",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [
+          "gardens"
+        ],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "e1521cba-be91-81fc-e293-e0a4fde915db",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Jardin d'essai du Hamma حديقة التجارب الحامة",
+          "city": null,
+          "region": "الجزائر ⴷⵣⴰⵢⴻⵔ",
+          "country": "ⵍⵣⵣⴰⵢⴻⵔ الجزائر",
+          "latitude": 36.7485522,
+          "longitude": 3.0759272,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P65",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 38391,
+        "title": "Cheltenham, the Promenade",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [
+          "19th century"
+        ],
+        "image_id": "523dbac1-7caf-c86b-c86b-5e8f787792fb",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Promenade",
+          "city": "Cheltenham",
+          "region": "England",
+          "country": "United Kingdom",
+          "latitude": 51.8999856,
+          "longitude": -2.076137,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P66",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 123648,
+        "title": "Notre Dame de Poitiers (Vienne), West Facade",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [
+          "Collected by Hugh Edwards"
+        ],
+        "theme_titles": [],
+        "style_titles": [
+          "19th century"
+        ],
+        "image_id": "3090a06d-77d8-5bc0-dd17-28676b0e50c0",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Notre-Dame-la-Grande",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 46.5832997668059,
+          "longitude": 0.343885353184759,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P67",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 151882,
+        "title": "Itinerant Folk Musicians, Mathura-Delhi Road",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "69be4ca6-dccb-c13d-106f-8a898a2bf9b2",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Delhi Public School, Mathura Road",
+          "city": "Delhi",
+          "region": "Delhi",
+          "country": "India",
+          "latitude": 28.5969507,
+          "longitude": 77.242643,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "neighborhood",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P68",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 90010,
+        "title": "Morning Promenade Upon the Cliff, Brighton",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "da1cc9df-21ef-6bda-7069-db2a9f896ad7",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Brighton",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 50.812665324615,
+          "longitude": -0.0952056626520389,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P69",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 184528,
+        "title": "View of Mountain Range in Kyushu from the Sea of Amakusa (Kyushu renzan Amakusa-nada yori",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [
+          "Japanese (culture or style)"
+        ],
+        "image_id": "bb0c848d-1ccc-34b4-1efc-7e5d1c322a1a",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "mountain range",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 32.816667,
+          "longitude": 131.383333,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "region",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P70",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 18257,
+        "title": "Fuchu: The Abe River (Fuchu, Abekawa), from the series \"Fifty-three Stations of the Tokaido Road (Tokaido gojusan tsugi no uchi),\" also known as the Hoeido Tokaido",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [
+          "Japanese (culture or style)"
+        ],
+        "image_id": "0b31e6cd-dae0-d123-9be6-a79fa5befcac",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Shizuoka (Fuchu / Sunpu)",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 34.9756,
+          "longitude": 138.3828,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P71",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 147592,
+        "title": "Hotel de Ville, Utrecht, from Facsimiles of Sketches made in Flanders and Germany",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "db996768-3a47-4ca8-1283-afa9ec4d6adf",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Stadhuis Utrecht",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 52.0916506665069,
+          "longitude": 5.11967282483739,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P72",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 87424,
+        "title": "Kaesong, Korea (Chosen Kaijo), from the series \"Korean Views Supplement (Zoku Chosen fukei)\"",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [
+          "Japanese (culture or style)"
+        ],
+        "image_id": "78982a57-5db7-0614-83c6-929006b36c45",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Kaesong",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 37.966667,
+          "longitude": 126.55,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P73",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 183065,
+        "title": "Sophia Hedwichia, Countess of Nassau-Dietz",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "50291333-5205-560b-146e-74bc5d2b461b",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "none",
+        "place_type": null,
+        "depicted_place": null,
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P74",
+          "sample_stratum": "precise_diverse",
+          "review_notes": "portrait",
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 236166,
+        "title": "Castle Rock, Green River Valley",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [
+          "Collected by Hugh Edwards",
+          "landscapes"
+        ],
+        "theme_titles": [],
+        "style_titles": [
+          "19th century"
+        ],
+        "image_id": "85c2f379-0a0b-1f18-7c14-e678230f78a1",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Castle rock",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 41.5409375518937,
+          "longitude": -109.481257716746,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P75",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 129691,
+        "title": "Mixtecs of the State of Oaxaca, from Mexican Costume",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [
+          "Latin American"
+        ],
+        "style_titles": [],
+        "image_id": "a678624e-ee5e-8880-d025-6a371b4bbf13",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "none",
+        "place_type": null,
+        "depicted_place": null,
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P76",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 223529,
+        "title": "Advancing across the Ansong River at the Battle of Asan (Gazan gekisen Anjo no watashi shingeki no zu)",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [
+          "Japanese (culture or style)"
+        ],
+        "image_id": "7d07ad50-4f79-16c0-00cc-c8e1f75ae654",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Ansong River",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 36.910278,
+          "longitude": 127.120833,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P77",
+          "sample_stratum": "precise_diverse",
+          "review_notes": "Precise place depictable because it was a battle",
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 189125,
+        "title": "Merchant's House in Takehara, Hiroshima (Hiroshima Takehara shoka)",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [
+          "21st Century"
+        ],
+        "image_id": "f5e2d8ce-7289-b3c8-8b69-53b6cc703d1d",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Takehara",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 34.3421571788692,
+          "longitude": 132.906680753106,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P78",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 211208,
+        "title": "Inside the Wall near Treptow",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [
+          "21st Century"
+        ],
+        "image_id": "c6d530b9-b97d-ab6e-3a3e-300efd200be2",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Treptow",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 52.484167,
+          "longitude": 13.479444,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "neighborhood",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P79",
+          "sample_stratum": "precise_diverse",
+          "review_notes": "Almost right place just we can be a more specific",
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 147551,
+        "title": "Zwinger Palace, Dresden, from Facsimiles of Sketches made in Flanders and Germany",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "9498683d-14ae-eee5-f82a-a101363e80e6",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Zwinger Palace",
+          "city": "Dresden",
+          "region": "Sachsen",
+          "country": "Deutschland",
+          "latitude": 51.05302,
+          "longitude": 13.73376,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P80",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 4550,
+        "title": "The Public Gardens, Perugia",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "174c779d-2ba1-4cf4-8c22-443a9a777ef1",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Perugia",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 43.1021808463042,
+          "longitude": 12.3848264227585,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P81",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 225678,
+        "title": "Wash Houses, Hyères",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "93dee6c6-e32d-b704-88ce-ae2a0be46335",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Hyères",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 43.1175894333364,
+          "longitude": 6.13048748174047,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P82",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 184627,
+        "title": "View from a Living Room, Pilsen, from the book \"Along the Divide: Photographs of the Dan Ryan Expressway\"",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [
+          "Chicago"
+        ],
+        "theme_titles": [],
+        "style_titles": [
+          "21st Century"
+        ],
+        "image_id": "320f2557-d08a-c84f-5608-89ce6dfd8be2",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Pilsen",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 49.7500954768907,
+          "longitude": 13.3740189018056,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P83",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 84727,
+        "title": "The Church of Saint-Gervais Seen From the Ramparts at Geneva",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "0865be58-a166-e9cd-73a4-45cc3f182725",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Holy Trinity Church",
+          "city": "Genève",
+          "region": "Genève",
+          "country": "Schweiz / Suisse / Svizzera / Svizra",
+          "latitude": 46.208075,
+          "longitude": 6.146466,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P84",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 73579,
+        "title": "Fishing Quay, Ostend",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "b8709499-0f47-b762-598a-86f3e5d6b8ed",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Ostend",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 51.2358712195054,
+          "longitude": 2.92361124431041,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P85",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 80338,
+        "title": "Tiruvannamalai, Southern India",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "156d5df8-1079-b5dc-80bf-6a175cc64615",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Tiruvannamalai",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 12.2230054577852,
+          "longitude": 79.0656974686112,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P86",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 147550,
+        "title": "Zwinger Palace, Dresden, from Facsimiles of Sketches made in Flanders and Germany",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "a060826d-2b7c-755c-c6a1-037d6593b372",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Zwinger Palace",
+          "city": "Dresden",
+          "region": "Sachsen",
+          "country": "Deutschland",
+          "latitude": 51.05302,
+          "longitude": 13.73376,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P87",
+          "sample_stratum": "precise_diverse",
+          "review_notes": "why p is so low ???",
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 197320,
+        "title": "Kotsuki River, Kagoshima, from the series \"Selection of Scenes from Japan\" (Nihon fukei senshu, Kagoshima Kotsukigawa)",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [
+          "Japanese (culture or style)"
+        ],
+        "image_id": "0e9179be-2560-5904-938d-dadffd1117b9",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "甲突川左岸緑地",
+          "city": "鹿児島市",
+          "region": "鹿児島県",
+          "country": "日本",
+          "latitude": 31.5793818,
+          "longitude": 130.5587846,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P88",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 190699,
+        "title": "The Beach, Hastings",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "d5cc4d0d-2712-7c0d-2b37-c5ff402b3a64",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Hastings",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 50.8703547917158,
+          "longitude": 0.574120149322317,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P89",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 46505,
+        "title": "Rue des Halles, Vannes, Brittany",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "c010bf45-6a56-dd3f-afe2-c5ea327fcb06",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Rue des Halles (Vannes)",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 47.6571415908512,
+          "longitude": -2.75782504174753,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P90",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 49407,
+        "title": "Bishop's Lodge, Santa Fe, New Mexico",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [
+          "Women artists"
+        ],
+        "style_titles": [],
+        "image_id": "51cd746b-f8c7-0bb8-372b-92dc109fd62a",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Bishop's Lodge (Santa Fe)",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 35.7302930736606,
+          "longitude": -105.909923687554,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P91",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 79135,
+        "title": "The Route to Birmandreïs, Algiers",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "625a8cdd-6152-b4ee-d2b5-264b4bc5c33e",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Algiers",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 36.7321115356716,
+          "longitude": 3.08645626925567,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P92",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 147570,
+        "title": "Ancien Palais, Bamberg, from Facsimiles of Sketches made in Flanders and Germany",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "346fb930-b227-87b2-8232-68d271fb2068",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Bamberg",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 49.8913747201215,
+          "longitude": 10.8869388132123,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P93",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 245164,
+        "title": "Cage, Bronowicka, Krakow, April 1979",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [
+          "people"
+        ],
+        "theme_titles": [],
+        "style_titles": [
+          "20th Century"
+        ],
+        "image_id": "6f7c9688-9b55-71a6-77a8-a5731adfdf80",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Bronowicka",
+          "city": "Kraków",
+          "region": "województwo małopolskie",
+          "country": "Polska",
+          "latitude": 50.0783514,
+          "longitude": 19.8994405,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "neighborhood",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P94",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 210482,
+        "title": "I'timad-ud-Daula's Tomb at Agra",
+        "description": "<p>This architectural rendering of a magnificent tomb at Agra provides an accurate depiction of the <em>pietra dura</em> inlays and carved marble jali screens of the mausoleum built by the Mughal empress Nur Jahan in honor of her father, Mirza Ghiyas Beg, who rose to become the prime minister under the emperor Jahangir (r. 1605–27) and held the exalted title I’timad-ud-Daula (Pillar of the Empire). The powerful Nur Jahan had immense financial resources at her disposal. Built between 1622 and 1628 and modest in size, as befitted the mausoleum of a nobleman rather than an emperor, the structure is lavish in its use of semiprecious stones, and the workmanship and design are of unsurpassed quality. In its exclusive use of white marble, it antedates the Taj Mahal and is considered by many to be the finer monument.</p>\n<p>This drawing was created in the Company style, named after the British East India Company, which spearheaded English mercantile and political interests in the subcontinent from the early seventeenth to the mid-nineteenth century. The British were eager to record and catalogue everything they saw. In the absence of photography, first British and later Indian artists, who excelled in drawing and painting fine details, recorded the sights. The style arose in the later part of the eighteenth century and ended in the mid-nineteenth with the beginning of photography. In addition to architectural drawings, other subjects included animal and botanical studies, occupations and trades, regional dress, festivals, and scenes of village life.</p>\n",
+        "short_description": null,
+        "subject_titles": [
+          "graves"
+        ],
+        "theme_titles": [],
+        "style_titles": [
+          "Indian (South Asian)"
+        ],
+        "image_id": "36e70de8-0ba3-2fe5-dd2e-53612b48a395",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Daula's Tomb",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 27.192906362501,
+          "longitude": 78.0308735083419,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P95",
+          "sample_stratum": "precise_diverse",
+          "review_notes": "right city",
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 199758,
+        "title": "Abbotsford - The Hall",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [
+          "19th century"
+        ],
+        "image_id": "2ae931fc-2f19-1267-51ff-ec825493bb0b",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Abbotsford House",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 55.5997,
+          "longitude": -2.782,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P96",
+          "sample_stratum": "precise_diverse",
+          "review_notes": "corrected: Abbotsford House (Scotland), not Abbotsford BC",
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 13203,
+        "title": "High Street, Brussels",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "d6499c58-e1be-d68a-1ce1-22d23ea440a0",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Rue Neuve (Bruxelles)",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 50.8527328983888,
+          "longitude": 4.35604311480971,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "neighborhood",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P97",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
+      }
+    },
+    {
+      "artwork": {
+        "id": 245157,
+        "title": "E. Horsfield, Well Street, East London, May 1987",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [
+          "female figures",
+          "black and white",
+          "female",
+          "portraits: female subject",
+          "portraits"
+        ],
+        "theme_titles": [],
+        "style_titles": [
+          "20th Century"
+        ],
+        "image_id": "5eaca3fc-1278-7586-43de-d4269f697879",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Well Street",
+          "city": "Greater London",
+          "region": "England",
+          "country": "United Kingdom",
+          "latitude": 51.5401302,
+          "longitude": -0.0537698,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "neighborhood",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P98",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-16"
       }
     }
   ]

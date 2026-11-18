@@ -1,0 +1,54 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[info] 501 œuvres chargées depuis data/raw/gold_standard/gold_dataset.json.
+[info] 396 œuvres enrichies depuis le dump AIC.
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights: 100%|██████████| 199/199 [00:00<00:00, 4153.64it/s]
+/home/benoitmeylan/Documents/EPFL/Geolocating-artworks/.venv/lib/python3.13/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+[info] 31 candidats ajoutés par le parsing des titres.
+[info] Géocodage et étiquetage: baseline...
+[info] Géocodage et étiquetage: title_parse...
+Loading weights:   0%|          | 0/202 [00:00<?, ?it/s]Loading weights:  85%|████████▌ | 172/202 [00:00<00:00, 1702.58it/s]Loading weights: 100%|██████████| 202/202 [00:00<00:00, 1748.07it/s]
+Nominatim lookup failed for 'This Bridge': HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=10)
+[info] baseline: 993 candidats, statuts {'match': 413, 'negative': 389, 'unevaluable': 191}
+[info] title_parse: 1024 candidats, statuts {'match': 419, 'negative': 397, 'unevaluable': 208}
+[info] Évaluation de « baseline (v11) »...
+[info] Évaluation de « title parse »...
+[info] Évaluation de « title parse + feature »...
+
+=== Couverture des candidats (œuvres depicted) ===
+  niveau annoté / résultat             baseline  title_parse
+  city / atteint                             63           63
+  city / aucun                                2            2
+  city / plus large                           5            5
+  country / atteint                           1            1
+  exact_place / atteint                      72           74
+  exact_place / aucun                        11           11
+  exact_place / plus large                   56           54
+  neighborhood / atteint                     10           10
+  neighborhood / aucun                        5            5
+  neighborhood / plus large                   8            8
+  region / atteint                           11           11
+  region / aucun                              2            2
+  region / plus large                         5            5
+
+=== Validation externe répétée (mêmes graines de découpage) ===
+  baseline (v11)             préc.=0.858±0.027 rappel=0.197±0.035 TP=47.0 FP=7.8
+      exact_place   préc.=0.470 (min 0.000) préd.=1.3 déployable=False
+      neighborhood  préc.=0.683 (min 0.500) préd.=1.8 déployable=False
+      city          préc.=0.794 (min 0.667) préd.=13.3 déployable=False
+      region        préc.=0.841 (min 0.667) préd.=14.2 déployable=False
+      country       préc.=0.898 (min 0.847) préd.=58.9 déployable=False
+  title parse                préc.=0.849±0.032 rappel=0.192±0.021 TP=45.7 FP=8.1  Δprec=-0.008 (mieux 3/10)  Δreca=-0.005 (mieux 5/10)
+      exact_place   préc.=0.500 (min 0.000) préd.=0.4 déployable=False
+      neighborhood  préc.=0.287 (min 0.000) préd.=1.5 déployable=False
+      city          préc.=0.795 (min 0.737) préd.=16.3 déployable=False
+      region        préc.=0.860 (min 0.769) préd.=16.9 déployable=False
+      country       préc.=0.880 (min 0.833) préd.=58.4 déployable=False
+  title parse + feature      préc.=0.851±0.034 rappel=0.193±0.026 TP=45.9 FP=8.0  Δprec=-0.007 (mieux 4/10)  Δreca=-0.005 (mieux 5/10)
+      exact_place   préc.=0.500 (min 0.000) préd.=0.4 déployable=False
+      neighborhood  préc.=0.387 (min 0.000) préd.=1.6 déployable=False
+      city          préc.=0.786 (min 0.727) préd.=16.0 déployable=False
+      region        préc.=0.856 (min 0.692) préd.=16.6 déployable=False
+      country       préc.=0.884 (min 0.830) préd.=58.2 déployable=False
+
+[ok] Résultats écrits dans results/compare_title_parsing.json

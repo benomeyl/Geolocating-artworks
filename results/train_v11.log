@@ -1,0 +1,52 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[info] 501 œuvres chargées depuis data/raw/gold_standard/gold_dataset.json.
+[info] 396 œuvres enrichies depuis le dump AIC.
+[info] Training hiérarchique: labels issus des coordonnées et de la hiérarchie; validation groupée par œuvre et cible géographique.
+[info] Chargement du modèle NER et extraction des candidats...
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights:  88%|████████▊ | 175/199 [00:00<00:00, 1739.92it/s]Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1833.53it/s]
+Nominatim bounded lookup failed for 'Bloch Building||cc=cl': HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=10)
+Nominatim lookup failed for 'Ramparts, Geneva': HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=10)
+Nominatim bounded lookup failed for 'Ancien Palais||cc=de|vb=10.60,49.60,11.20,50.20': HTTPSConnectionPool(host='nominatim.openstreetmap.org', port=443): Read timed out. (read timeout=10)
+[info] 1146 candidats NER bruts.
+[info] Géocodage et scores NLI des candidats...
+[info] 993 candidats avec étiquettes géographiques.
+[info] Niveaux: {'none': 315, 'unevaluable': 191, 'city': 186, 'exact_place': 81, 'country': 79, 'no_match': 74, 'region': 57, 'neighborhood': 10}
+[info] Statuts: {'match': 413, 'negative': 389, 'unevaluable': 191}
+
+=== Seuils par niveau (précision empirique OOF) ===
+  exact_place      abstention: precision_target_unmet (groupes+=55)
+  neighborhood     abstention: precision_target_unmet (groupes+=65)
+  city             seuil=0.976 précision OOF=1.000 rappel OOF=0.040 support=11 groupes+=161
+  region           seuil=0.978 précision OOF=1.000 rappel OOF=0.027 support=9 groupes+=176
+  country          seuil=0.937 précision OOF=0.952 rappel OOF=0.097 support=42 groupes+=198
+
+=== Décision hiérarchique par œuvre (OOF de réglage, indicatif) ===
+  précision=0.972 rappel=0.139 FP=1 FN=216 lieux mal prédits=1
+  rappel minimal 0.50 atteint: False
+  Note: les seuils OOF sont réglés sur ces folds; ces métriques ne sont pas une estimation finale indépendante.
+
+=== Déployabilité par niveau (validation externe) ===
+  exact_place      précision=n/a  (0/0) groupes=0 déployé=False
+  neighborhood     précision=n/a  (0/0) groupes=0 déployé=False
+  city             précision=0.786 [0.52 – 0.92] (11/14) groupes=13 déployé=False
+  region           précision=0.765 [0.53 – 0.90] (13/17) groupes=17 déployé=False
+  country          précision=0.866 [0.76 – 0.93] (58/67) groupes=53 déployé=False
+[info] Niveaux activés: aucun (abstention)
+
+=== Validation externe groupée par cible (estimation hors-fold) ===
+  œuvres évaluées=437 (+16 utilisées seulement à l'entraînement: precise_keywords)
+  précision=0.820 [0.71 – 0.90] rappel=0.210 FP=11 FN=188 lieux mal prédits=4 folds=5
+[avertissement] Le rappel externe est sous le minimum demandé; les cibles de précision n'ont pas été relâchées.
+
+=== Validation externe répétée (10 découpages mélangés) ===
+  précision=0.858 ± 0.027 rappel=0.197 ± 0.035 TP=47.0 ± 8.4 FP=7.8 ± 2.1
+  exact_place      précision=0.470 ± 0.283 (cumulée 0.615) prédictions=1.3 ± 2.1 découpages avec prédictions=4/10
+  neighborhood     précision=0.683 ± 0.227 (cumulée 0.667) prédictions=1.8 ± 1.7 découpages avec prédictions=6/10
+  city             précision=0.794 ± 0.054 (cumulée 0.789) prédictions=13.3 ± 5.3 découpages avec prédictions=10/10
+  region           précision=0.841 ± 0.071 (cumulée 0.845) prédictions=14.2 ± 2.1 découpages avec prédictions=10/10
+  country          précision=0.898 ± 0.030 (cumulée 0.893) prédictions=58.9 ± 14.8 découpages avec prédictions=10/10
+  Note: avec plusieurs découpages, la déployabilité est décidée ici (règle D): moyenne >= cible et chaque découpage >= cible - 0.05.
+[info] Règle de déploiement: mean precision over shuffled partitions >= target and >= target - 0.05 on each
+[info] Niveaux activés: aucun (abstention)
+
+[ok] Modèle hiérarchique sauvegardé dans results/model_hierarchical_v11.joblib
