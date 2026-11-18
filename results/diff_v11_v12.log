@@ -1,0 +1,16 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[info] 501 œuvres chargées depuis data/raw/gold_standard/gold_dataset.json.
+[info] 396 œuvres enrichies depuis le dump AIC.
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights:  61%|██████▏   | 122/199 [00:00<00:00, 1217.69it/s]Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1202.27it/s]
+[diff] 5 candidats changent d'étiquette sur 993
+label_status_v11  label_level_v11  label_status_v12  label_level_v12
+match             city             match             exact_place        1
+                  country          match             city               1
+                                                     exact_place        1
+negative          no_match         match             exact_place        1
+                                   unevaluable       unevaluable        1
+  'Saint Sulpice, Paris: La Grande Tour'                    'Saint Sulpice'                match/country -> match/exact_place  (Saint-Sulpice, searched_in_anchor)
+  'The Clock Tower, Venice'                                 'Clock Tower'                  negative/no_match -> unevaluable/unevaluable  (None, None)
+  'Stock Yards, Chicago'                                    'Stock Yards'                  match/country -> match/city  (Union Stock Yards Gate, searched_in_anchor)
+  'Notre Dame, Paris'                                       'Notre Dame'                   negative/no_match -> match/exact_place  (Cathédrale Notre-Dame de Paris, in_anchor)
+  'Room 18, West, Madlener House'                           'Madlener House'               match/city -> match/exact_place  (Madlener House, in_anchor)

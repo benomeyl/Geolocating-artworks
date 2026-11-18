@@ -685,6 +685,12 @@ def _names_the_mention(name, location):
     return bool(mention_tokens) and mention_tokens <= _name_tokens(location.get("name"))
 
 
+def _shares_distinctive_word(name, location):
+    """True if the location's name holds a non-generic word of the mention ("Eiffel" in "Tour Eiffel")."""
+    distinctive = _name_tokens(name) - GENERIC_PLACE_WORDS - _ARTICLES
+    return bool(distinctive & _name_tokens(location.get("name")))
+
+
 def _is_generic_name(name):
     """True if every word of `name` is a GENERIC_PLACE_WORDS ("Town Hall", "Grove of Trees")."""
     tokens = _name_tokens(name)
@@ -752,6 +758,22 @@ def _text_distance(occurrences_a, occurrences_b):
     return min(distances, default=math.inf)
 
 
+# Text between a place and the larger place that locates it: "X, Y", "X in Y".
+_LOCATING_GAP = re.compile(r"^\s*(?:,|in|at|near|bei|à|a)\s*$", re.IGNORECASE)
+
+
+def _locates(occurrences, container_occurrences):
+    """True if a container mention directly follows a mention ("Notre Dame, Paris")."""
+    return any(
+        a["field"] == b["field"]
+        and a.get("source_text") == b.get("source_text")
+        and b["start"] >= a["end"]
+        and _LOCATING_GAP.match(a["source_text"][a["end"]:b["start"]])
+        for a in occurrences
+        for b in container_occurrences
+    )
+
+
 def _contextual_search(name, context_names, context_locations, nominatim_client):
     """Search "name, context" with Nominatim and keep a result in the context's country."""
     if nominatim_client is None:
@@ -795,6 +817,10 @@ def resolve_artwork_places(mentions, conn, nominatim_client=None, alternatives_c
        country, nearby); if none agrees, "name, context" is searched, unless
        the first alternative is prominent (`_PROMINENT_IMPORTANCE`); if that
        fails too, the first alternative is kept and flagged `context_conflict`.
+       An anchor directly followed by a more important anchor whose area it
+       lies outside ("Notre Dame, Paris" -> Notre Dame, Indiana) is demoted
+       to a precise place and resolved in step 2, inside that anchor; if it
+       is not found there, it keeps its anchor resolution.
     2. Other mentions (monuments, streets, misread words): with anchors, the
        first alternative lying in an anchor's area (`_fits_anchor`, closest
        anchor in the text first); otherwise the name is searched inside the
@@ -802,7 +828,9 @@ def resolve_artwork_places(mentions, conn, nominatim_client=None, alternatives_c
        anchor", keeping only results that carry the mention's words
        (`_names_the_mention`). If all fail and an anchor is right next to the
        mention ("Le Nys, Amsterdam"), the mention gets no location unless its
-       first alternative is prominent: the artwork is then placed by its
+       first alternative is prominent and, when it lies in another country,
+       shares a distinctive word with the mention ("Clock Tower, Venice" is
+       not Ghanta Ghar): the artwork is then placed by its
        anchors ("Palazzo Vecchio, Florence" -> Florence) rather than by a
        homonym elsewhere. With only distant anchors, the first alternative is
        kept; both kept cases are flagged `context_conflict`. Without anchors,
@@ -863,6 +891,27 @@ def resolve_artwork_places(mentions, conn, nominatim_client=None, alternatives_c
                 choice, conflict = (contextual, False) if contextual else (options[0], True)
         resolved[name] = _resolved(choice, options, nominatim_client, conflict, "anchor")
 
+    # "X, Y": Y locates X. An anchor X lying outside the area of a more
+    # important anchor Y written right after it is a place inside Y named
+    # like a town ("Notre Dame, Paris" is not Notre Dame, Indiana, nor
+    # "Saint Sulpice, Paris" the commune of Saint-Sulpice): it is resolved
+    # below as a precise place, inside Y.
+    demoted = {
+        name
+        for name, occurrences in anchor_mentions
+        for container_name, container_occurrences in anchor_mentions
+        if container_name != name
+        and _locates(occurrences, container_occurrences)
+        and (resolved[container_name].get("importance") or 0.0) > (resolved[name].get("importance") or 0.0)
+        and not _fits_anchor(resolved[name], resolved[container_name])
+    }
+    # A demoted mention not found inside its container keeps its anchor
+    # resolution ("Takehara, Hiroshima": the prefecture, not the city).
+    demoted_fallback = {name: resolved.pop(name) for name in demoted}
+    if demoted:
+        anchor_mentions = [(name, occurrences) for name, occurrences in anchor_mentions if name not in demoted]
+        anchor_names -= demoted
+
     search_within = getattr(nominatim_client, "search_within", None)
     for name, occurrences in mentions:
         if name in anchor_names:
@@ -919,8 +968,22 @@ def resolve_artwork_places(mentions, conn, nominatim_client=None, alternatives_c
         # ("Le Nys, Amsterdam") says where it is: no location rather than a
         # homonym elsewhere. A distant anchor (another sentence) may concern
         # something else: keep the best guess, flagged as a conflict.
+        if name in demoted_fallback:
+            resolved[name] = demoted_fallback[name]
+            continue
         nearby_anchor = _text_distance(occurrences, anchors[0][1]) <= CONTEXT_WINDOW_CHARS
-        prominent = (options[0].get("importance") or 0.0) >= _PROMINENT_IMPORTANCE if options else False
+        # A prominent homonym in another country than the nearby anchor must
+        # share a distinctive word with the mention: "Clock Tower, Venice" is
+        # not the "Ghanta Ghar" (clock tower) of Dehradun, while "Eiffel
+        # Tower" -> "Tour Eiffel" and "Crimea" -> "Крымский полуостров"
+        # (same country as Kerch) are kept.
+        prominent = bool(options) and (
+            (options[0].get("importance") or 0.0) >= _PROMINENT_IMPORTANCE
+            and (
+                options[0].get("country_code") == anchor_locations[0].get("country_code")
+                or _shares_distinctive_word(name, options[0])
+            )
+        )
         keep = options and not _is_generic_name(name) and (prominent or not nearby_anchor)
         resolved[name] = (
             _resolved(options[0], options, nominatim_client, True, "outside_anchors") if keep else None

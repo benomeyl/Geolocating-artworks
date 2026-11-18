@@ -436,3 +436,83 @@ def test_generic_names_are_never_anchors():
 
     assert resolved["Forest"] is None
     assert resolved["Kew"]["country_code"] == "GB"
+
+
+def test_a_town_named_like_a_monument_is_searched_inside_the_city_that_follows():
+    text = "Notre Dame, Paris"
+    cathedral = _monument("Cathédrale Notre-Dame de Paris", 48.853, 2.350, "FR", importance=0.61)
+    nominatim = FakeNominatim({
+        "Notre Dame": [_city("Notre Dame", 41.70, -86.24, "US", 0.63), cathedral],
+        "Paris": [_city("Paris", 48.853, 2.349, "FR", 0.9)],
+    })
+
+    resolved = resolve_artwork_places([_mention(text, "Notre Dame"), _mention(text, "Paris")], None, nominatim)
+
+    assert resolved["Notre Dame"]["name"] == "Cathédrale Notre-Dame de Paris"
+    assert resolved["Notre Dame"]["resolution"] == "in_anchor"
+    assert resolved["Paris"]["country_code"] == "FR"
+
+
+def test_a_town_inside_the_place_that_follows_stays_an_anchor():
+    text = "Moonrise, Hernandez, New Mexico"
+    new_mexico = {**_nominatim_location("New Mexico", 34.4, -106.1, "US"), "place_rank": 8, "importance": 0.7}
+    nominatim = FakeNominatim({
+        "Hernandez": [_city("Hernandez", 36.06, -106.12, "US", 0.3)],
+        "New Mexico": [new_mexico],
+    })
+
+    resolved = resolve_artwork_places(
+        [_mention(text, "Hernandez"), _mention(text, "New Mexico")], None, nominatim
+    )
+
+    assert resolved["Hernandez"]["resolution"] == "anchor"
+
+
+def test_a_famous_homonym_under_another_name_is_not_kept_next_to_its_city():
+    text = "The Clock Tower, Venice"
+    nominatim = FakeNominatim({
+        "Clock Tower": [_monument("Ghanta Ghar", 30.32, 78.04, "IN", importance=0.63)],
+        "Venice": [_city("Venice", 45.44, 12.33, "IT", 0.77)],
+    })
+
+    resolved = resolve_artwork_places([_mention(text, "Clock Tower"), _mention(text, "Venice")], None, nominatim)
+
+    assert resolved["Clock Tower"] is None
+
+
+def test_a_demoted_town_not_found_inside_the_container_keeps_its_anchor_resolution():
+    text = "Merchant's House in Takehara, Hiroshima"
+    nominatim = FakeNominatim({
+        "Takehara": [_city("Takehara", 34.34, 132.91, "JP", 0.48)],
+        "Hiroshima": [_city("Hiroshima", 34.39, 132.46, "JP", 0.68)],
+    })
+
+    resolved = resolve_artwork_places([_mention(text, "Takehara"), _mention(text, "Hiroshima")], None, nominatim)
+
+    assert resolved["Takehara"]["name"] == "Takehara"
+    assert resolved["Takehara"]["resolution"] == "anchor"
+
+
+def test_a_famous_place_under_a_local_name_is_kept_next_to_its_city():
+    text = "From a Day of Grief, Kerch, Crimea"
+    crimea = _monument("Крымский полуостров", 45.3, 34.4, "UA", importance=0.72)
+    nominatim = FakeNominatim({
+        "Kerch": [_city("Kerch", 45.36, 36.47, "UA", 0.59)],
+        "Crimea": [crimea],
+    })
+
+    resolved = resolve_artwork_places([_mention(text, "Kerch"), _mention(text, "Crimea")], None, nominatim)
+
+    assert resolved["Crimea"]["name"] == "Крымский полуостров"
+
+
+def test_a_famous_place_sharing_a_distinctive_word_is_kept_abroad():
+    text = "Vienna, Eiffel Tower"
+    nominatim = FakeNominatim({
+        "Vienna": [_city("Vienna", 48.21, 16.37, "AT", 0.83)],
+        "Eiffel Tower": [_monument("Tour Eiffel", 48.858, 2.294, "FR", importance=0.62)],
+    })
+
+    resolved = resolve_artwork_places([_mention(text, "Vienna"), _mention(text, "Eiffel Tower")], None, nominatim)
+
+    assert resolved["Eiffel Tower"]["name"] == "Tour Eiffel"
