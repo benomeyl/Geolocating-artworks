@@ -8,7 +8,10 @@ from src.data.filtering_logreg import (
     evaluate_hierarchical_work_predictions,
     evaluate_hierarchical_grouped_cv,
     evaluate_repeated_grouped_cv,
+    stable_group_folds,
     wilson_interval,
+    FoldAverageClassifier,
+    _threshold_for_precision,
     geographic_candidate_label,
     predict_with_hierarchical_model,
     train_hierarchical_model,
@@ -498,7 +501,8 @@ def test_repeated_evaluation_shuffles_the_partition_with_each_seed():
     second = evaluate_hierarchical_grouped_cv(records, table, n_splits=3, training_options=options, shuffle_seed=1)
     repeated = evaluate_repeated_grouped_cv(records, table, repeats=3, n_splits=3, training_options=options)
 
-    assert [fold["metrics"]["artwork_count"] for fold in first["folds"]] == [10, 10, 10]
+    assert sum(fold["metrics"]["artwork_count"] for fold in first["folds"]) == 30
+    assert len(first["folds"]) == 3
     assert [fold["test_artwork_ids"] for fold in first["folds"]] != [
         fold["test_artwork_ids"] for fold in second["folds"]
     ]
@@ -797,3 +801,93 @@ def test_wilson_interval_of_a_small_sample():
     assert (round(low, 2), round(high, 2)) == (0.61, 0.93)
     assert wilson_interval(0, 0) == (None, None)
     assert wilson_interval(10, 10)[1] == 1.0
+
+
+def _fold_of(artwork_ids, splits):
+    return {artwork_ids[index]: fold for fold, (_, test) in enumerate(splits) for index in test}
+
+
+def test_stable_folds_keep_every_group_together_and_repeat_identically():
+    artwork_ids = list(range(40))
+    groups = [f"g{artwork_id // 2}" for artwork_id in artwork_ids]
+    first = _fold_of(artwork_ids, stable_group_folds(artwork_ids, groups, 5, seed=3))
+    second = _fold_of(artwork_ids, stable_group_folds(artwork_ids, groups, 5, seed=3))
+    assert first == second
+    assert all(first[2 * pair] == first[2 * pair + 1] for pair in range(20))
+    other_seed = _fold_of(artwork_ids, stable_group_folds(artwork_ids, groups, 5, seed=4))
+    assert other_seed != first
+
+
+def test_merging_two_groups_only_moves_the_merged_artworks():
+    artwork_ids = list(range(60))
+    groups = [f"artwork:{artwork_id}" for artwork_id in artwork_ids]
+    merged = list(groups)
+    merged[41] = merged[40]  # a geocoding fix joins two views of one monument
+    for seed in range(5):
+        before = _fold_of(artwork_ids, stable_group_folds(artwork_ids, groups, 5, seed))
+        after = _fold_of(artwork_ids, stable_group_folds(artwork_ids, merged, 5, seed))
+        moved = {artwork_id for artwork_id in artwork_ids if before[artwork_id] != after[artwork_id]}
+        assert moved <= {41}
+        assert after[40] == after[41]
+
+
+def _separable_table(count=24):
+    import pandas as pd
+
+    rows = []
+    for index in range(count):
+        positive = index < count // 2
+        row = {column: 0.0 for column in GEOGRAPHIC_FEATURE_COLUMNS}
+        row["field_title"] = int(positive)
+        row.update({
+            "cv_group": f"group-{index}",
+            "artwork_id": index,
+            "label_status": "match" if positive else "negative",
+            "label_level": "exact_place" if positive else "no_match",
+            "candidate_level": "exact_place",
+        })
+        rows.append(row)
+    return pd.DataFrame(rows)
+
+
+def test_fold_average_model_predicts_with_the_inner_fold_classifiers():
+    model = train_hierarchical_model(
+        _separable_table(),
+        regularization_values=(1.0,),
+        prediction_model="fold_average",
+        inner_repeats=2,
+    )
+    exact = model["levels"]["exact_place"]
+    assert exact["status"] == "active"
+    assert isinstance(exact["model"], FoldAverageClassifier)
+    assert len(exact["model"].classifiers) == 2 * exact["cv_splits"]
+    probabilities = exact["model"].predict_proba([[0.0] * len(model["feature_columns"])])
+    assert probabilities.shape == (1, 2)
+
+
+def test_wilson_rule_needs_more_support_than_the_point_precision():
+    import numpy as np
+
+    labels = np.array([1] * 10 + [0] * 10)
+    probabilities = np.linspace(1.0, 0.0, 20)
+    groups = np.array([f"g{index}" for index in range(20)])
+    options = {"target_precision": 0.9, "minimum_predictions": 5, "minimum_prediction_groups": 5}
+    point = _threshold_for_precision(labels, probabilities, groups, **options)
+    wilson = _threshold_for_precision(labels, probabilities, groups, **options, wilson_z=1.645)
+    assert point["support"] == 10  # 10/10 is >= 0.9
+    assert wilson is None  # the lower bound of 10/10 at z=1.645 is ~0.79
+
+
+def test_pooled_levels_share_one_classifier_with_a_threshold_per_level():
+    model = train_hierarchical_model(
+        _separable_table(),
+        regularization_values=(1.0,),
+        prediction_model="fold_average",
+        pooled_levels=True,
+    )
+    active = [level for level, entry in model["levels"].items() if entry["status"] == "active"]
+    assert "exact_place" in active
+    shared = {id(model["levels"][level]["model"].classifier) for level in active}
+    assert len(shared) == 1
+    exact = model["levels"]["exact_place"]
+    assert exact["oof_precision"] >= exact["target_precision"]

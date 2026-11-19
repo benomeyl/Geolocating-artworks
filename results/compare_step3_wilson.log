@@ -1,0 +1,53 @@
+
+=== base-step2 ===
+  precision          0.853 ± 0.038  (min 0.800, max 0.905)
+  recall             0.186 ± 0.026  (min 0.155, max 0.231)
+  true_positives    44.200 ± 6.145  (min 37.000, max 55.000)
+  false_positives    7.600 ± 2.059  (min 4.000, max 10.000)
+  niveau          précision moy. (min)   prédictions/découpage   FP total
+  exact_place     0.352 (0.000)            3.0                   11
+  neighborhood    0.490 (0.000)            2.2                    9
+  city            0.762 (0.636)           10.5                   25
+  region          0.796 (0.625)           10.9                   24
+  country         0.900 (0.854)           54.7                   55  déployé
+  publié (niveaux country): 492 TP / 55 FP sur 10 découpages, précision 0.899 [0.87 – 0.92]
+
+=== wilson-z1.0 ===
+  precision          0.857 ± 0.026  (min 0.803, max 0.891)
+  recall             0.326 ± 0.045  (min 0.239, max 0.403)
+  true_positives    77.700 ± 10.715  (min 57.000, max 96.000)
+  false_positives   12.900 ± 2.385  (min 10.000, max 17.000)
+  niveau          précision moy. (min)   prédictions/découpage   FP total
+  exact_place     0.578 (0.000)            2.2                    6
+  neighborhood    0.562 (0.000)            1.4                    5
+  city            0.680 (0.500)            6.8                   20
+  region          0.704 (0.000)            8.2                   22
+  country         0.878 (0.821)          101.4                  124
+  publié: aucun niveau déployable (règle D)
+
+--- wilson-z1.0 − base-step2 (apparié, 10 découpages) ---
+  false_positives   +5.300 ± 2.610   mieux 0/10, moins bien 10/10
+  precision         +0.003 ± 0.037   mieux 5/10, moins bien 5/10
+  true_positives   +33.500 ± 6.917   mieux 10/10, moins bien 0/10
+  recall            +0.141 ± 0.029   mieux 10/10, moins bien 0/10
+
+=== wilson-z1.645 ===
+  precision          0.874 ± 0.055  (min 0.800, max 1.000)
+  recall             0.095 ± 0.044  (min 0.021, max 0.172)
+  true_positives    22.500 ± 10.356  (min 5.000, max 41.000)
+  false_positives    3.300 ± 1.345  (min 0.000, max 5.000)
+  niveau          précision moy. (min)   prédictions/découpage   FP total
+  exact_place     n/a                      0.0                    0
+  neighborhood    n/a                      0.0                    0
+  city            n/a                      0.0                    0
+  region          0.500 (0.500)            0.4                    2
+  country         0.856 (0.806)           29.6                   41
+  publié: aucun niveau déployable (règle D)
+
+--- wilson-z1.645 − base-step2 (apparié, 10 découpages) ---
+  false_positives   -4.300 ± 2.532   mieux 9/10, moins bien 0/10
+  precision         +0.021 ± 0.069   mieux 6/10, moins bien 3/10
+  true_positives   -21.700 ± 6.900   mieux 0/10, moins bien 10/10
+  recall            -0.091 ± 0.029   mieux 0/10, moins bien 10/10
+
+[ok] Métriques par découpage dans results/compare_step3_wilson.json

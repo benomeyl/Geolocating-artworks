@@ -1,0 +1,36 @@
+[info] 501 œuvres chargées depuis data/raw/gold_standard/gold_dataset.json.
+[info] 396 œuvres enrichies depuis le dump AIC.
+
+=== v11 ===
+  precision          0.851 ± 0.026  (min 0.809, max 0.898)
+  recall             0.192 ± 0.025  (min 0.147, max 0.223)
+  true_positives    45.700 ± 6.034  (min 35.000, max 53.000)
+  false_positives    8.000 ± 1.612  (min 5.000, max 10.000)
+  niveau          précision moy. (min)   prédictions/découpage   FP total
+  exact_place     0.472 (0.000)            1.8                    8
+  neighborhood    0.767 (0.333)            1.4                    5
+  city            0.762 (0.667)           12.6                   30
+  region          0.815 (0.667)           13.4                   25
+  country         0.900 (0.873)           57.9                   58  déployé
+  publié (niveaux country): 521 TP / 58 FP sur 10 découpages, précision 0.900 [0.87 – 0.92]
+
+=== v12 ===
+  precision          0.832 ± 0.037  (min 0.767, max 0.887)
+  recall             0.194 ± 0.033  (min 0.139, max 0.265)
+  true_positives    46.100 ± 7.842  (min 33.000, max 63.000)
+  false_positives    9.200 ± 2.088  (min 7.000, max 13.000)
+  niveau          précision moy. (min)   prédictions/découpage   FP total
+  exact_place     0.438 (0.000)            2.8                   13
+  neighborhood    0.727 (0.500)            4.3                   13
+  city            0.745 (0.571)           12.1                   30
+  region          0.813 (0.667)           13.8                   28
+  country         0.888 (0.833)           57.3                   64
+  publié: aucun niveau déployable (règle D)
+
+--- v12 − v11 (apparié, 10 découpages) ---
+  false_positives   +1.200 ± 3.092   mieux 3/10, moins bien 5/10
+  precision         -0.019 ± 0.048   mieux 4/10, moins bien 6/10
+  true_positives    +0.400 ± 11.465   mieux 4/10, moins bien 6/10
+  recall            +0.002 ± 0.048   mieux 4/10, moins bien 6/10
+
+[ok] Métriques par découpage dans results/compare_v11_v12_stable.json

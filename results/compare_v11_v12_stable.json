@@ -1,0 +1,1450 @@
+{
+ "v11": {
+  "table": "results/feature_table_v11.pkl",
+  "options": {
+   "n_splits": 5,
+   "regularization_values": [
+    0.1,
+    1.0,
+    10.0
+   ],
+   "minimum_recall": 0.5,
+   "minimum_positive_groups": 5,
+   "minimum_prediction_groups": 5,
+   "minimum_predictions": 5,
+   "threshold_margin": 0.05
+  },
+  "summary": {
+   "deployed": [
+    "country"
+   ],
+   "published_tp": 521,
+   "published_fp": 58
+  },
+  "runs": [
+   {
+    "fold_count": 5,
+    "true_positives": 42,
+    "false_positives": 9,
+    "true_negatives": 195,
+    "false_negatives": 196,
+    "mislocated_count": 5,
+    "precision": 0.8235294117647058,
+    "recall": 0.17647058823529413,
+    "f1": 0.2906574394463668,
+    "accuracy": 0.5423340961098398,
+    "artwork_count": 437,
+    "depicted_artwork_count": 238,
+    "train_only_artwork_count": 16,
+    "metrics_by_level": {
+     "exact_place": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "true_positives": 0,
+      "false_positives": 1,
+      "false_negatives": 31,
+      "predictions": 1,
+      "prediction_groups": 1,
+      "evaluated_candidates": 102
+     },
+     "neighborhood": {
+      "precision": 1.0,
+      "recall": 0.1111111111111111,
+      "true_positives": 2,
+      "false_positives": 0,
+      "false_negatives": 16,
+      "predictions": 2,
+      "prediction_groups": 2,
+      "evaluated_candidates": 51
+     },
+     "city": {
+      "precision": 0.6666666666666666,
+      "recall": 0.031914893617021274,
+      "true_positives": 6,
+      "false_positives": 3,
+      "false_negatives": 182,
+      "predictions": 9,
+      "prediction_groups": 9,
+      "evaluated_candidates": 427
+     },
+     "region": {
+      "precision": 0.8333333333333334,
+      "recall": 0.044642857142857144,
+      "true_positives": 10,
+      "false_positives": 2,
+      "false_negatives": 214,
+      "predictions": 12,
+      "prediction_groups": 12,
+      "evaluated_candidates": 471
+     },
+     "country": {
+      "precision": 0.9056603773584906,
+      "recall": 0.12532637075718014,
+      "true_positives": 48,
+      "false_positives": 5,
+      "false_negatives": 335,
+      "predictions": 53,
+      "prediction_groups": 41,
+      "evaluated_candidates": 695
+     }
+    },
+    "grouping": "connected_artwork_and_target_entities",
+    "thresholds_tuned_inside_outer_training_folds": true,
+    "shuffle_seed": 0
+   },
+   {
+    "fold_count": 5,
+    "true_positives": 52,
+    "false_positives": 10,
+    "true_negatives": 194,
+    "false_negatives": 186,
+    "mislocated_count": 5,
+    "precision": 0.8387096774193549,
+    "recall": 0.2184873949579832,
+    "f1": 0.3466666666666667,
+    "accuracy": 0.562929061784897,
+    "artwork_count": 437,
+    "depicted_artwork_count": 238,
+    "train_only_artwork_count": 16,
+    "metrics_by_level": {
+     "exact_place": {
+      "precision": null,
+      "recall": null,
+      "true_positives": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "predictions": 0,
+      "prediction_groups": 0,
+      "evaluated_candidates": 0
+     },
+     "neighborhood": {
+      "precision": 0.3333333333333333,
+      "recall": 0.15384615384615385,
+      "true_positives": 2,
+      "false_positives": 4,
+      "false_negatives": 11,
+      "predictions": 6,
+      "prediction_groups": 6,
+      "evaluated_candidates": 44
+     },
+     "city": {
+      "precision": 0.8181818181818182,
+      "recall": 0.04054054054054054,
+      "true_positives": 9,
+      "false_positives": 2,
+      "false_negatives": 213,
+      "predictions": 11,
+      "prediction_groups": 9,
+      "evaluated_candidates": 452
+     },
+     "region": {
+      "precision": 0.9,
+      "recall": 0.02922077922077922,
+      "true_positives": 9,
+      "false_positives": 1,
+      "false_negatives": 299,
+      "predictions": 10,
+      "prediction_groups": 9,
+      "evaluated_candidates": 618
+     },
+     "country": {
+      "precision": 0.921875,
+      "recall": 0.15404699738903394,
+      "true_positives": 59,
+      "false_positives": 5,
+      "false_negatives": 324,
+      "predictions": 64,
+      "prediction_groups": 51,
+      "evaluated_candidates": 695
+     }
+    },
+    "grouping": "connected_artwork_and_target_entities",
+    "thresholds_tuned_inside_outer_training_folds": true,
+    "shuffle_seed": 1
+   },
+   {
+    "fold_count": 5,
+    "true_positives": 44,
+    "false_positives": 7,
+    "true_negatives": 195,
+    "false_negatives": 194,
+    "mislocated_count": 3,
+    "precision": 0.8627450980392157,
+    "recall": 0.18487394957983194,
+    "f1": 0.30449826989619383,
+    "accuracy": 0.5469107551487414,
+    "artwork_count": 437,
+    "depicted_artwork_count": 238,
+    "train_only_artwork_count": 16,
+    "metrics_by_level": {
+     "exact_place": {
+      "precision": null,
+      "recall": null,
+      "true_positives": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "predictions": 0,
+      "prediction_groups": 0,
+      "evaluated_candidates": 0
+     },
+     "neighborhood": {
+      "precision": 1.0,
+      "recall": 0.02564102564102564,
+      "true_positives": 1,
+      "false_positives": 0,
+      "false_negatives": 38,
+      "predictions": 1,
+      "prediction_groups": 1,
+      "evaluated_candidates": 110
+     },
+     "city": {
+      "precision": 0.75,
+      "recall": 0.06,
+      "true_positives": 12,
+      "false_positives": 4,
+      "false_negatives": 188,
+      "predictions": 16,
+      "prediction_groups": 14,
+      "evaluated_candidates": 440
+     },
+     "region": {
+      "precision": 0.7391304347826086,
+      "recall": 0.06967213114754098,
+      "true_positives": 17,
+      "false_positives": 6,
+      "false_negatives": 227,
+      "predictions": 23,
+      "prediction_groups": 20,
+      "evaluated_candidates": 487
+     },
+     "country": {
+      "precision": 0.8888888888888888,
+      "recall": 0.12532637075718014,
+      "true_positives": 48,
+      "false_positives": 6,
+      "false_negatives": 335,
+      "predictions": 54,
+      "prediction_groups": 39,
+      "evaluated_candidates": 695
+     }
+    },
+    "grouping": "connected_artwork_and_target_entities",
+    "thresholds_tuned_inside_outer_training_folds": true,
+    "shuffle_seed": 2
+   },
+   {
+    "fold_count": 5,
+    "true_positives": 49,
+    "false_positives": 10,
+    "true_negatives": 196,
+    "false_negatives": 189,
+    "mislocated_count": 7,
+    "precision": 0.8305084745762712,
+    "recall": 0.20588235294117646,
+    "f1": 0.32996632996633,
+    "accuracy": 0.5606407322654462,
+    "artwork_count": 437,
+    "depicted_artwork_count": 238,
+    "train_only_artwork_count": 16,
+    "metrics_by_level": {
+     "exact_place": {
+      "precision": 1.0,
+      "recall": 0.3076923076923077,
+      "true_positives": 4,
+      "false_positives": 0,
+      "false_negatives": 9,
+      "predictions": 4,
+      "prediction_groups": 2,
+      "evaluated_candidates": 41
+     },
+     "neighborhood": {
+      "precision": 0.5,
+      "recall": 0.08333333333333333,
+      "true_positives": 1,
+      "false_positives": 1,
+      "false_negatives": 11,
+      "predictions": 2,
+      "prediction_groups": 2,
+      "evaluated_candidates": 44
+     },
+     "city": {
+      "precision": 0.7391304347826086,
+      "recall": 0.1223021582733813,
+      "true_positives": 17,
+      "false_positives": 6,
+      "false_negatives": 122,
+      "predictions": 23,
+      "prediction_groups": 20,
+      "evaluated_candidates": 327
+     },
+     "region": {
+      "precision": 0.7692307692307693,
+      "recall": 0.04739336492890995,
+      "true_positives": 10,
+      "false_positives": 3,
+      "false_negatives": 201,
+      "predictions": 13,
+      "prediction_groups": 13,
+      "evaluated_candidates": 461
+     },
+     "country": {
+      "precision": 0.873015873015873,
+      "recall": 0.14360313315926893,
+      "true_positives": 55,
+      "false_positives": 8,
+      "false_negatives": 328,
+      "predictions": 63,
+      "prediction_groups": 51,
+      "evaluated_candidates": 695
+     }
+    },
+    "grouping": "connected_artwork_and_target_entities",
+    "thresholds_tuned_inside_outer_training_folds": true,
+    "shuffle_seed": 3
+   },
+   {
+    "fold_count": 5,
+    "true_positives": 35,
+    "false_positives": 5,
+    "true_negatives": 197,
+    "false_negatives": 203,
+    "mislocated_count": 3,
+    "precision": 0.875,
+    "recall": 0.14705882352941177,
+    "f1": 0.2517985611510792,
+    "accuracy": 0.5308924485125858,
+    "artwork_count": 437,
+    "depicted_artwork_count": 238,
+    "train_only_artwork_count": 16,
+    "metrics_by_level": {
+     "exact_place": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "true_positives": 0,
+      "false_positives": 1,
+      "false_negatives": 11,
+      "predictions": 1,
+      "prediction_groups": 1,
+      "evaluated_candidates": 53
+     },
+     "neighborhood": {
+      "precision": 1.0,
+      "recall": 0.10714285714285714,
+      "true_positives": 3,
+      "false_positives": 0,
+      "false_negatives": 25,
+      "predictions": 3,
+      "prediction_groups": 2,
+      "evaluated_candidates": 111
+     },
+     "city": {
+      "precision": 0.6666666666666666,
+      "recall": 0.029197080291970802,
+      "true_positives": 4,
+      "false_positives": 2,
+      "false_negatives": 133,
+      "predictions": 6,
+      "prediction_groups": 6,
+      "evaluated_candidates": 326
+     },
+     "region": {
+      "precision": 0.7142857142857143,
+      "recall": 0.02617801047120419,
+      "true_positives": 5,
+      "false_positives": 2,
+      "false_negatives": 186,
+      "predictions": 7,
+      "prediction_groups": 7,
+      "evaluated_candidates": 372
+     },
+     "country": {
+      "precision": 0.9318181818181818,
+      "recall": 0.10704960835509138,
+      "true_positives": 41,
+      "false_positives": 3,
+      "false_negatives": 342,
+      "predictions": 44,
+      "prediction_groups": 31,
+      "evaluated_candidates": 695
+     }
+    },
+    "grouping": "connected_artwork_and_target_entities",
+    "thresholds_tuned_inside_outer_training_folds": true,
+    "shuffle_seed": 4
+   },
+   {
+    "fold_count": 5,
+    "true_positives": 42,
+    "false_positives": 8,
+    "true_negatives": 195,
+    "false_negatives": 196,
+    "mislocated_count": 4,
+    "precision": 0.84,
+    "recall": 0.17647058823529413,
+    "f1": 0.29166666666666674,
+    "accuracy": 0.5423340961098398,
+    "artwork_count": 437,
+    "depicted_artwork_count": 238,
+    "train_only_artwork_count": 16,
+    "metrics_by_level": {
+     "exact_place": {
+      "precision": null,
+      "recall": null,
+      "true_positives": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "predictions": 0,
+      "prediction_groups": 0,
+      "evaluated_candidates": 0
+     },
+     "neighborhood": {
+      "precision": null,
+      "recall": 0.0,
+      "true_positives": 0,
+      "false_positives": 0,
+      "false_negatives": 17,
+      "predictions": 0,
+      "prediction_groups": 0,
+      "evaluated_candidates": 61
+     },
+     "city": {
+      "precision": 0.7857142857142857,
+      "recall": 0.07913669064748201,
+      "true_positives": 11,
+      "false_positives": 3,
+      "false_negatives": 128,
+      "predictions": 14,
+      "prediction_groups": 14,
+      "evaluated_candidates": 312
+     },
+     "region": {
+      "precision": 0.6666666666666666,
+      "recall": 0.04950495049504951,
+      "true_positives": 10,
+      "false_positives": 5,
+      "false_negatives": 192,
+      "predictions": 15,
+      "prediction_groups": 15,
+      "evaluated_candidates": 387
+     },
+     "country": {
+      "precision": 0.8947368421052632,
+      "recall": 0.13315926892950392,
+      "true_positives": 51,
+      "false_positives": 6,
+      "false_negatives": 332,
+      "predictions": 57,
+      "prediction_groups": 41,
+      "evaluated_candidates": 695
+     }
+    },
+    "grouping": "connected_artwork_and_target_entities",
+    "thresholds_tuned_inside_outer_training_folds": true,
+    "shuffle_seed": 5
+   },
+   {
+    "fold_count": 5,
+    "true_positives": 51,
+    "false_positives": 9,
+    "true_negatives": 195,
+    "false_negatives": 187,
+    "mislocated_count": 5,
+    "precision": 0.85,
+    "recall": 0.21428571428571427,
+    "f1": 0.3422818791946309,
+    "accuracy": 0.562929061784897,
+    "artwork_count": 437,
+    "depicted_artwork_count": 238,
+    "train_only_artwork_count": 16,
+    "metrics_by_level": {
+     "exact_place": {
+      "precision": 0.3333333333333333,
+      "recall": 0.0625,
+      "true_positives": 1,
+      "false_positives": 2,
+      "false_negatives": 15,
+      "predictions": 3,
+      "prediction_groups": 3,
+      "evaluated_candidates": 50
+     },
+     "neighborhood": {
+      "precision": null,
+      "recall": 0.0,
+      "true_positives": 0,
+      "false_positives": 0,
+      "false_negatives": 27,
+      "predictions": 0,
+      "prediction_groups": 0,
+      "evaluated_candidates": 108
+     },
+     "city": {
+      "precision": 0.875,
+      "recall": 0.027559055118110236,
+      "true_positives": 7,
+      "false_positives": 1,
+      "false_negatives": 247,
+      "predictions": 8,
+      "prediction_groups": 8,
+      "evaluated_candidates": 555
+     },
+     "region": {
+      "precision": 0.875,
+      "recall": 0.022727272727272728,
+      "true_positives": 7,
+      "false_positives": 1,
+      "false_negatives": 301,
+      "predictions": 8,
+      "prediction_groups": 8,
+      "evaluated_candidates": 618
+     },
+     "country": {
+      "precision": 0.8939393939393939,
+      "recall": 0.15404699738903394,
+      "true_positives": 59,
+      "false_positives": 7,
+      "false_negatives": 324,
+      "predictions": 66,
+      "prediction_groups": 45,
+      "evaluated_candidates": 695
+     }
+    },
+    "grouping": "connected_artwork_and_target_entities",
+    "thresholds_tuned_inside_outer_training_folds": true,
+    "shuffle_seed": 6
+   },
+   {
+    "fold_count": 5,
+    "true_positives": 38,
+    "false_positives": 9,
+    "true_negatives": 196,
+    "false_negatives": 200,
+    "mislocated_count": 6,
+    "precision": 0.8085106382978723,
+    "recall": 0.15966386554621848,
+    "f1": 0.2666666666666666,
+    "accuracy": 0.5354691075514875,
+    "artwork_count": 437,
+    "depicted_artwork_count": 238,
+    "train_only_artwork_count": 16,
+    "metrics_by_level": {
+     "exact_place": {
+      "precision": 0.5,
+      "recall": 0.15384615384615385,
+      "true_positives": 4,
+      "false_positives": 4,
+      "false_negatives": 22,
+      "predictions": 8,
+      "prediction_groups": 8,
+      "evaluated_candidates": 86
+     },
+     "neighborhood": {
+      "precision": null,
+      "recall": null,
+      "true_positives": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "predictions": 0,
+      "prediction_groups": 0,
+      "evaluated_candidates": 0
+     },
+     "city": {
+      "precision": 0.7142857142857143,
+      "recall": 0.04739336492890995,
+      "true_positives": 10,
+      "false_positives": 4,
+      "false_negatives": 201,
+      "predictions": 14,
+      "prediction_groups": 11,
+      "evaluated_candidates": 444
+     },
+     "region": {
+      "precision": 0.8333333333333334,
+      "recall": 0.032467532467532464,
+      "true_positives": 10,
+      "false_positives": 2,
+      "false_negatives": 298,
+      "predictions": 12,
+      "prediction_groups": 11,
+      "evaluated_candidates": 618
+     },
+     "country": {
+      "precision": 0.8775510204081632,
+      "recall": 0.14144736842105263,
+      "true_positives": 43,
+      "false_positives": 6,
+      "false_negatives": 261,
+      "predictions": 49,
+      "prediction_groups": 35,
+      "evaluated_candidates": 577
+     }
+    },
+    "grouping": "connected_artwork_and_target_entities",
+    "thresholds_tuned_inside_outer_training_folds": true,
+    "shuffle_seed": 7
+   },
+   {
+    "fold_count": 5,
+    "true_positives": 51,
+    "false_positives": 7,
+    "true_negatives": 195,
+    "false_negatives": 187,
+    "mislocated_count": 3,
+    "precision": 0.8793103448275862,
+    "recall": 0.21428571428571427,
+    "f1": 0.34459459459459457,
+    "accuracy": 0.562929061784897,
+    "artwork_count": 437,
+    "depicted_artwork_count": 238,
+    "train_only_artwork_count": 16,
+    "metrics_by_level": {
+     "exact_place": {
+      "precision": 1.0,
+      "recall": 0.058823529411764705,
+      "true_positives": 1,
+      "false_positives": 0,
+      "false_negatives": 16,
+      "predictions": 1,
+      "prediction_groups": 1,
+      "evaluated_candidates": 47
+     },
+     "neighborhood": {
+      "precision": null,
+      "recall": 0.0,
+      "true_positives": 0,
+      "false_positives": 0,
+      "false_negatives": 31,
+      "predictions": 0,
+      "prediction_groups": 0,
+      "evaluated_candidates": 106
+     },
+     "city": {
+      "precision": 0.7692307692307693,
+      "recall": 0.04854368932038835,
+      "true_positives": 10,
+      "false_positives": 3,
+      "false_negatives": 196,
+      "predictions": 13,
+      "prediction_groups": 12,
+      "evaluated_candidates": 442
+     },
+     "region": {
+      "precision": 0.9411764705882353,
+      "recall": 0.05194805194805195,
+      "true_positives": 16,
+      "false_positives": 1,
+      "false_negatives": 292,
+      "predictions": 17,
+      "prediction_groups": 17,
+      "evaluated_candidates": 618
+     },
+     "country": {
+      "precision": 0.9032258064516129,
+      "recall": 0.1462140992167102,
+      "true_positives": 56,
+      "false_positives": 6,
+      "false_negatives": 327,
+      "predictions": 62,
+      "prediction_groups": 48,
+      "evaluated_candidates": 695
+     }
+    },
+    "grouping": "connected_artwork_and_target_entities",
+    "thresholds_tuned_inside_outer_training_folds": true,
+    "shuffle_seed": 8
+   },
+   {
+    "fold_count": 5,
+    "true_positives": 53,
+    "false_positives": 6,
+    "true_negatives": 195,
+    "false_negatives": 185,
+    "mislocated_count": 2,
+    "precision": 0.8983050847457628,
+    "recall": 0.22268907563025211,
+    "f1": 0.3569023569023569,
+    "accuracy": 0.5675057208237986,
+    "artwork_count": 437,
+    "depicted_artwork_count": 238,
+    "train_only_artwork_count": 16,
+    "metrics_by_level": {
+     "exact_place": {
+      "precision": null,
+      "recall": null,
+      "true_positives": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "predictions": 0,
+      "prediction_groups": 0,
+      "evaluated_candidates": 0
+     },
+     "neighborhood": {
+      "precision": null,
+      "recall": null,
+      "true_positives": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "predictions": 0,
+      "prediction_groups": 0,
+      "evaluated_candidates": 0
+     },
+     "city": {
+      "precision": 0.8333333333333334,
+      "recall": 0.04854368932038835,
+      "true_positives": 10,
+      "false_positives": 2,
+      "false_negatives": 196,
+      "predictions": 12,
+      "prediction_groups": 12,
+      "evaluated_candidates": 450
+     },
+     "region": {
+      "precision": 0.8823529411764706,
+      "recall": 0.055970149253731345,
+      "true_positives": 15,
+      "false_positives": 2,
+      "false_negatives": 253,
+      "predictions": 17,
+      "prediction_groups": 17,
+      "evaluated_candidates": 528
+     },
+     "country": {
+      "precision": 0.9104477611940298,
+      "recall": 0.15926892950391644,
+      "true_positives": 61,
+      "false_positives": 6,
+      "false_negatives": 322,
+      "predictions": 67,
+      "prediction_groups": 53,
+      "evaluated_candidates": 695
+     }
+    },
+    "grouping": "connected_artwork_and_target_entities",
+    "thresholds_tuned_inside_outer_training_folds": true,
+    "shuffle_seed": 9
+   }
+  ]
+ },
+ "v12": {
+  "table": "results/feature_table_v12.pkl",
+  "options": {
+   "n_splits": 5,
+   "regularization_values": [
+    0.1,
+    1.0,
+    10.0
+   ],
+   "minimum_recall": 0.5,
+   "minimum_positive_groups": 5,
+   "minimum_prediction_groups": 5,
+   "minimum_predictions": 5,
+   "threshold_margin": 0.05
+  },
+  "summary": {
+   "deployed": [],
+   "published_tp": 0,
+   "published_fp": 0
+  },
+  "runs": [
+   {
+    "fold_count": 5,
+    "true_positives": 44,
+    "false_positives": 7,
+    "true_negatives": 195,
+    "false_negatives": 194,
+    "mislocated_count": 3,
+    "precision": 0.8627450980392157,
+    "recall": 0.18487394957983194,
+    "f1": 0.30449826989619383,
+    "accuracy": 0.5469107551487414,
+    "artwork_count": 437,
+    "depicted_artwork_count": 238,
+    "train_only_artwork_count": 16,
+    "metrics_by_level": {
+     "exact_place": {
+      "precision": null,
+      "recall": null,
+      "true_positives": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "predictions": 0,
+      "prediction_groups": 0,
+      "evaluated_candidates": 0
+     },
+     "neighborhood": {
+      "precision": null,
+      "recall": null,
+      "true_positives": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "predictions": 0,
+      "prediction_groups": 0,
+      "evaluated_candidates": 0
+     },
+     "city": {
+      "precision": 0.5714285714285714,
+      "recall": 0.029411764705882353,
+      "true_positives": 4,
+      "false_positives": 3,
+      "false_negatives": 132,
+      "predictions": 7,
+      "prediction_groups": 7,
+      "evaluated_candidates": 306
+     },
+     "region": {
+      "precision": 0.75,
+      "recall": 0.02903225806451613,
+      "true_positives": 9,
+      "false_positives": 3,
+      "false_negatives": 301,
+      "predictions": 12,
+      "prediction_groups": 12,
+      "evaluated_candidates": 617
+     },
+     "country": {
+      "precision": 0.9074074074074074,
+      "recall": 0.1279373368146214,
+      "true_positives": 49,
+      "false_positives": 5,
+      "false_negatives": 334,
+      "predictions": 54,
+      "prediction_groups": 39,
+      "evaluated_candidates": 694
+     }
+    },
+    "grouping": "connected_artwork_and_target_entities",
+    "thresholds_tuned_inside_outer_training_folds": true,
+    "shuffle_seed": 0
+   },
+   {
+    "fold_count": 5,
+    "true_positives": 46,
+    "false_positives": 7,
+    "true_negatives": 195,
+    "false_negatives": 192,
+    "mislocated_count": 3,
+    "precision": 0.8679245283018868,
+    "recall": 0.19327731092436976,
+    "f1": 0.31615120274914094,
+    "accuracy": 0.551487414187643,
+    "artwork_count": 437,
+    "depicted_artwork_count": 238,
+    "train_only_artwork_count": 16,
+    "metrics_by_level": {
+     "exact_place": {
+      "precision": 0.5,
+      "recall": 0.030303030303030304,
+      "true_positives": 1,
+      "false_positives": 1,
+      "false_negatives": 32,
+      "predictions": 2,
+      "prediction_groups": 2,
+      "evaluated_candidates": 108
+     },
+     "neighborhood": {
+      "precision": null,
+      "recall": 0.0,
+      "true_positives": 0,
+      "false_positives": 0,
+      "false_negatives": 18,
+      "predictions": 0,
+      "prediction_groups": 0,
+      "evaluated_candidates": 64
+     },
+     "city": {
+      "precision": 0.8,
+      "recall": 0.050314465408805034,
+      "true_positives": 8,
+      "false_positives": 2,
+      "false_negatives": 151,
+      "predictions": 10,
+      "prediction_groups": 10,
+      "evaluated_candidates": 353
+     },
+     "region": {
+      "precision": 0.8571428571428571,
+      "recall": 0.03870967741935484,
+      "true_positives": 12,
+      "false_positives": 2,
+      "false_negatives": 298,
+      "predictions": 14,
+      "prediction_groups": 13,
+      "evaluated_candidates": 617
+     },
+     "country": {
+      "precision": 0.9122807017543859,
+      "recall": 0.13577023498694518,
+      "true_positives": 52,
+      "false_positives": 5,
+      "false_negatives": 331,
+      "predictions": 57,
+      "prediction_groups": 46,
+      "evaluated_candidates": 694
+     }
+    },
+    "grouping": "connected_artwork_and_target_entities",
+    "thresholds_tuned_inside_outer_training_folds": true,
+    "shuffle_seed": 1
+   },
+   {
+    "fold_count": 5,
+    "true_positives": 33,
+    "false_positives": 10,
+    "true_negatives": 195,
+    "false_negatives": 205,
+    "mislocated_count": 6,
+    "precision": 0.7674418604651163,
+    "recall": 0.13865546218487396,
+    "f1": 0.2348754448398577,
+    "accuracy": 0.5217391304347826,
+    "artwork_count": 437,
+    "depicted_artwork_count": 238,
+    "train_only_artwork_count": 16,
+    "metrics_by_level": {
+     "exact_place": {
+      "precision": null,
+      "recall": 0.0,
+      "true_positives": 0,
+      "false_positives": 0,
+      "false_negatives": 20,
+      "predictions": 0,
+      "prediction_groups": 0,
+      "evaluated_candidates": 62
+     },
+     "neighborhood": {
+      "precision": 0.8333333333333334,
+      "recall": 0.16129032258064516,
+      "true_positives": 5,
+      "false_positives": 1,
+      "false_negatives": 26,
+      "predictions": 6,
+      "prediction_groups": 6,
+      "evaluated_candidates": 95
+     },
+     "city": {
+      "precision": 0.6363636363636364,
+      "recall": 0.04895104895104895,
+      "true_positives": 7,
+      "false_positives": 4,
+      "false_negatives": 136,
+      "predictions": 11,
+      "prediction_groups": 10,
+      "evaluated_candidates": 341
+     },
+     "region": {
+      "precision": 0.7333333333333333,
+      "recall": 0.08943089430894309,
+      "true_positives": 22,
+      "false_positives": 8,
+      "false_negatives": 224,
+      "predictions": 30,
+      "prediction_groups": 25,
+      "evaluated_candidates": 486
+     },
+     "country": {
+      "precision": 0.8461538461538461,
+      "recall": 0.08616187989556136,
+      "true_positives": 33,
+      "false_positives": 6,
+      "false_negatives": 350,
+      "predictions": 39,
+      "prediction_groups": 27,
+      "evaluated_candidates": 694
+     }
+    },
+    "grouping": "connected_artwork_and_target_entities",
+    "thresholds_tuned_inside_outer_training_folds": true,
+    "shuffle_seed": 2
+   },
+   {
+    "fold_count": 5,
+    "true_positives": 36,
+    "false_positives": 8,
+    "true_negatives": 196,
+    "false_negatives": 202,
+    "mislocated_count": 5,
+    "precision": 0.8181818181818182,
+    "recall": 0.15126050420168066,
+    "f1": 0.2553191489361702,
+    "accuracy": 0.5308924485125858,
+    "artwork_count": 437,
+    "depicted_artwork_count": 238,
+    "train_only_artwork_count": 16,
+    "metrics_by_level": {
+     "exact_place": {
+      "precision": 0.6666666666666666,
+      "recall": 0.14814814814814814,
+      "true_positives": 4,
+      "false_positives": 2,
+      "false_negatives": 23,
+      "predictions": 6,
+      "prediction_groups": 5,
+      "evaluated_candidates": 94
+     },
+     "neighborhood": {
+      "precision": 0.8333333333333334,
+      "recall": 0.18518518518518517,
+      "true_positives": 5,
+      "false_positives": 1,
+      "false_negatives": 22,
+      "predictions": 6,
+      "prediction_groups": 5,
+      "evaluated_candidates": 97
+     },
+     "city": {
+      "precision": 0.7692307692307693,
+      "recall": 0.056179775280898875,
+      "true_positives": 10,
+      "false_positives": 3,
+      "false_negatives": 168,
+      "predictions": 13,
+      "prediction_groups": 13,
+      "evaluated_candidates": 418
+     },
+     "region": {
+      "precision": 0.7857142857142857,
+      "recall": 0.035483870967741936,
+      "true_positives": 11,
+      "false_positives": 3,
+      "false_negatives": 299,
+      "predictions": 14,
+      "prediction_groups": 14,
+      "evaluated_candidates": 617
+     },
+     "country": {
+      "precision": 0.851063829787234,
+      "recall": 0.10443864229765012,
+      "true_positives": 40,
+      "false_positives": 7,
+      "false_negatives": 343,
+      "predictions": 47,
+      "prediction_groups": 34,
+      "evaluated_candidates": 694
+     }
+    },
+    "grouping": "connected_artwork_and_target_entities",
+    "thresholds_tuned_inside_outer_training_folds": true,
+    "shuffle_seed": 3
+   },
+   {
+    "fold_count": 5,
+    "true_positives": 63,
+    "false_positives": 8,
+    "true_negatives": 195,
+    "false_negatives": 175,
+    "mislocated_count": 4,
+    "precision": 0.8873239436619719,
+    "recall": 0.2647058823529412,
+    "f1": 0.4077669902912621,
+    "accuracy": 0.5903890160183066,
+    "artwork_count": 437,
+    "depicted_artwork_count": 238,
+    "train_only_artwork_count": 16,
+    "metrics_by_level": {
+     "exact_place": {
+      "precision": null,
+      "recall": null,
+      "true_positives": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "predictions": 0,
+      "prediction_groups": 0,
+      "evaluated_candidates": 0
+     },
+     "neighborhood": {
+      "precision": 0.8,
+      "recall": 0.08333333333333333,
+      "true_positives": 4,
+      "false_positives": 1,
+      "false_negatives": 44,
+      "predictions": 5,
+      "prediction_groups": 4,
+      "evaluated_candidates": 166
+     },
+     "city": {
+      "precision": 0.7,
+      "recall": 0.051094890510948905,
+      "true_positives": 7,
+      "false_positives": 3,
+      "false_negatives": 130,
+      "predictions": 10,
+      "prediction_groups": 9,
+      "evaluated_candidates": 325
+     },
+     "region": {
+      "precision": 0.8,
+      "recall": 0.03187250996015936,
+      "true_positives": 8,
+      "false_positives": 2,
+      "false_negatives": 243,
+      "predictions": 10,
+      "prediction_groups": 10,
+      "evaluated_candidates": 485
+     },
+     "country": {
+      "precision": 0.8947368421052632,
+      "recall": 0.17754569190600522,
+      "true_positives": 68,
+      "false_positives": 8,
+      "false_negatives": 315,
+      "predictions": 76,
+      "prediction_groups": 59,
+      "evaluated_candidates": 694
+     }
+    },
+    "grouping": "connected_artwork_and_target_entities",
+    "thresholds_tuned_inside_outer_training_folds": true,
+    "shuffle_seed": 4
+   },
+   {
+    "fold_count": 5,
+    "true_positives": 49,
+    "false_positives": 13,
+    "true_negatives": 193,
+    "false_negatives": 189,
+    "mislocated_count": 7,
+    "precision": 0.7903225806451613,
+    "recall": 0.20588235294117646,
+    "f1": 0.32666666666666666,
+    "accuracy": 0.5537757437070938,
+    "artwork_count": 437,
+    "depicted_artwork_count": 238,
+    "train_only_artwork_count": 16,
+    "metrics_by_level": {
+     "exact_place": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "true_positives": 0,
+      "false_positives": 1,
+      "false_negatives": 15,
+      "predictions": 1,
+      "prediction_groups": 1,
+      "evaluated_candidates": 54
+     },
+     "neighborhood": {
+      "precision": 0.5,
+      "recall": 0.05555555555555555,
+      "true_positives": 1,
+      "false_positives": 1,
+      "false_negatives": 17,
+      "predictions": 2,
+      "prediction_groups": 2,
+      "evaluated_candidates": 56
+     },
+     "city": {
+      "precision": 0.7894736842105263,
+      "recall": 0.07211538461538461,
+      "true_positives": 15,
+      "false_positives": 4,
+      "false_negatives": 193,
+      "predictions": 19,
+      "prediction_groups": 18,
+      "evaluated_candidates": 436
+     },
+     "region": {
+      "precision": 0.6666666666666666,
+      "recall": 0.03488372093023256,
+      "true_positives": 6,
+      "false_positives": 3,
+      "false_negatives": 166,
+      "predictions": 9,
+      "prediction_groups": 9,
+      "evaluated_candidates": 352
+     },
+     "country": {
+      "precision": 0.8333333333333334,
+      "recall": 0.1566579634464752,
+      "true_positives": 60,
+      "false_positives": 12,
+      "false_negatives": 323,
+      "predictions": 72,
+      "prediction_groups": 54,
+      "evaluated_candidates": 694
+     }
+    },
+    "grouping": "connected_artwork_and_target_entities",
+    "thresholds_tuned_inside_outer_training_folds": true,
+    "shuffle_seed": 5
+   },
+   {
+    "fold_count": 5,
+    "true_positives": 43,
+    "false_positives": 9,
+    "true_negatives": 197,
+    "false_negatives": 195,
+    "mislocated_count": 7,
+    "precision": 0.8269230769230769,
+    "recall": 0.18067226890756302,
+    "f1": 0.296551724137931,
+    "accuracy": 0.5491990846681922,
+    "artwork_count": 437,
+    "depicted_artwork_count": 238,
+    "train_only_artwork_count": 16,
+    "metrics_by_level": {
+     "exact_place": {
+      "precision": 0.4,
+      "recall": 0.125,
+      "true_positives": 2,
+      "false_positives": 3,
+      "false_negatives": 14,
+      "predictions": 5,
+      "prediction_groups": 5,
+      "evaluated_candidates": 50
+     },
+     "neighborhood": {
+      "precision": 0.6666666666666666,
+      "recall": 0.10256410256410256,
+      "true_positives": 4,
+      "false_positives": 2,
+      "false_negatives": 35,
+      "predictions": 6,
+      "prediction_groups": 5,
+      "evaluated_candidates": 105
+     },
+     "city": {
+      "precision": 0.75,
+      "recall": 0.03515625,
+      "true_positives": 9,
+      "false_positives": 3,
+      "false_negatives": 247,
+      "predictions": 12,
+      "prediction_groups": 12,
+      "evaluated_candidates": 554
+     },
+     "region": {
+      "precision": 0.8888888888888888,
+      "recall": 0.025806451612903226,
+      "true_positives": 8,
+      "false_positives": 1,
+      "false_negatives": 302,
+      "predictions": 9,
+      "prediction_groups": 9,
+      "evaluated_candidates": 617
+     },
+     "country": {
+      "precision": 0.9361702127659575,
+      "recall": 0.11488250652741515,
+      "true_positives": 44,
+      "false_positives": 3,
+      "false_negatives": 339,
+      "predictions": 47,
+      "prediction_groups": 30,
+      "evaluated_candidates": 694
+     }
+    },
+    "grouping": "connected_artwork_and_target_entities",
+    "thresholds_tuned_inside_outer_training_folds": true,
+    "shuffle_seed": 6
+   },
+   {
+    "fold_count": 5,
+    "true_positives": 47,
+    "false_positives": 9,
+    "true_negatives": 194,
+    "false_negatives": 191,
+    "mislocated_count": 4,
+    "precision": 0.8392857142857143,
+    "recall": 0.19747899159663865,
+    "f1": 0.31972789115646255,
+    "accuracy": 0.551487414187643,
+    "artwork_count": 437,
+    "depicted_artwork_count": 238,
+    "train_only_artwork_count": 16,
+    "metrics_by_level": {
+     "exact_place": {
+      "precision": 0.25,
+      "recall": 0.1,
+      "true_positives": 1,
+      "false_positives": 3,
+      "false_negatives": 9,
+      "predictions": 4,
+      "prediction_groups": 4,
+      "evaluated_candidates": 45
+     },
+     "neighborhood": {
+      "precision": 1.0,
+      "recall": 0.027777777777777776,
+      "true_positives": 1,
+      "false_positives": 0,
+      "false_negatives": 35,
+      "predictions": 1,
+      "prediction_groups": 1,
+      "evaluated_candidates": 113
+     },
+     "city": {
+      "precision": 0.8,
+      "recall": 0.03125,
+      "true_positives": 8,
+      "false_positives": 2,
+      "false_negatives": 248,
+      "predictions": 10,
+      "prediction_groups": 10,
+      "evaluated_candidates": 554
+     },
+     "region": {
+      "precision": 1.0,
+      "recall": 0.028,
+      "true_positives": 7,
+      "false_positives": 0,
+      "false_negatives": 243,
+      "predictions": 7,
+      "prediction_groups": 5,
+      "evaluated_candidates": 468
+     },
+     "country": {
+      "precision": 0.8571428571428571,
+      "recall": 0.12532637075718014,
+      "true_positives": 48,
+      "false_positives": 8,
+      "false_negatives": 335,
+      "predictions": 56,
+      "prediction_groups": 44,
+      "evaluated_candidates": 694
+     }
+    },
+    "grouping": "connected_artwork_and_target_entities",
+    "thresholds_tuned_inside_outer_training_folds": true,
+    "shuffle_seed": 7
+   },
+   {
+    "fold_count": 5,
+    "true_positives": 49,
+    "false_positives": 8,
+    "true_negatives": 196,
+    "false_negatives": 189,
+    "mislocated_count": 5,
+    "precision": 0.8596491228070176,
+    "recall": 0.20588235294117646,
+    "f1": 0.33220338983050846,
+    "accuracy": 0.5606407322654462,
+    "artwork_count": 437,
+    "depicted_artwork_count": 238,
+    "train_only_artwork_count": 16,
+    "metrics_by_level": {
+     "exact_place": {
+      "precision": 0.5,
+      "recall": 0.03333333333333333,
+      "true_positives": 1,
+      "false_positives": 1,
+      "false_negatives": 29,
+      "predictions": 2,
+      "prediction_groups": 2,
+      "evaluated_candidates": 101
+     },
+     "neighborhood": {
+      "precision": 0.6,
+      "recall": 0.17647058823529413,
+      "true_positives": 3,
+      "false_positives": 2,
+      "false_negatives": 14,
+      "predictions": 5,
+      "prediction_groups": 5,
+      "evaluated_candidates": 53
+     },
+     "city": {
+      "precision": 0.9,
+      "recall": 0.03515625,
+      "true_positives": 9,
+      "false_positives": 1,
+      "false_negatives": 247,
+      "predictions": 10,
+      "prediction_groups": 10,
+      "evaluated_candidates": 554
+     },
+     "region": {
+      "precision": 0.8571428571428571,
+      "recall": 0.04780876494023904,
+      "true_positives": 12,
+      "false_positives": 2,
+      "false_negatives": 239,
+      "predictions": 14,
+      "prediction_groups": 13,
+      "evaluated_candidates": 490
+     },
+     "country": {
+      "precision": 0.9016393442622951,
+      "recall": 0.14360313315926893,
+      "true_positives": 55,
+      "false_positives": 6,
+      "false_negatives": 328,
+      "predictions": 61,
+      "prediction_groups": 49,
+      "evaluated_candidates": 694
+     }
+    },
+    "grouping": "connected_artwork_and_target_entities",
+    "thresholds_tuned_inside_outer_training_folds": true,
+    "shuffle_seed": 8
+   },
+   {
+    "fold_count": 5,
+    "true_positives": 51,
+    "false_positives": 13,
+    "true_negatives": 195,
+    "false_negatives": 187,
+    "mislocated_count": 9,
+    "precision": 0.796875,
+    "recall": 0.21428571428571427,
+    "f1": 0.337748344370861,
+    "accuracy": 0.562929061784897,
+    "artwork_count": 437,
+    "depicted_artwork_count": 238,
+    "train_only_artwork_count": 16,
+    "metrics_by_level": {
+     "exact_place": {
+      "precision": 0.75,
+      "recall": 0.375,
+      "true_positives": 6,
+      "false_positives": 2,
+      "false_negatives": 10,
+      "predictions": 8,
+      "prediction_groups": 5,
+      "evaluated_candidates": 71
+     },
+     "neighborhood": {
+      "precision": 0.5833333333333334,
+      "recall": 0.3888888888888889,
+      "true_positives": 7,
+      "false_positives": 5,
+      "false_negatives": 11,
+      "predictions": 12,
+      "prediction_groups": 9,
+      "evaluated_candidates": 74
+     },
+     "city": {
+      "precision": 0.7368421052631579,
+      "recall": 0.0546875,
+      "true_positives": 14,
+      "false_positives": 5,
+      "false_negatives": 242,
+      "predictions": 19,
+      "prediction_groups": 18,
+      "evaluated_candidates": 554
+     },
+     "region": {
+      "precision": 0.7894736842105263,
+      "recall": 0.04838709677419355,
+      "true_positives": 15,
+      "false_positives": 4,
+      "false_negatives": 295,
+      "predictions": 19,
+      "prediction_groups": 18,
+      "evaluated_candidates": 617
+     },
+     "country": {
+      "precision": 0.9375,
+      "recall": 0.1566579634464752,
+      "true_positives": 60,
+      "false_positives": 4,
+      "false_negatives": 323,
+      "predictions": 64,
+      "prediction_groups": 47,
+      "evaluated_candidates": 694
+     }
+    },
+    "grouping": "connected_artwork_and_target_entities",
+    "thresholds_tuned_inside_outer_training_folds": true,
+    "shuffle_seed": 9
+   }
+  ]
+ }
+}

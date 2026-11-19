@@ -26,6 +26,7 @@ go with it), still used by `src/main.py` and `run_pipeline.py train-legacy`.
 """
 
 import difflib
+import hashlib
 import re
 import unicodedata
 from collections import Counter, defaultdict
@@ -1457,11 +1458,15 @@ def _threshold_for_precision(
     target_precision,
     minimum_predictions,
     minimum_prediction_groups,
+    wilson_z=None,
 ):
     """Threshold with the best recall whose precision reaches the target.
 
     Only thresholds accepting at least `minimum_predictions` rows from
-    `minimum_prediction_groups` CV groups are considered. Returns the
+    `minimum_prediction_groups` CV groups are considered. With `wilson_z`,
+    the lower bound of the Wilson interval of the precision (not the
+    precision itself) must reach the target: the safety margin is then wide
+    when few rows are accepted and narrow when many are. Returns the
     threshold with its statistics, or None if no threshold qualifies.
     """
     best = None
@@ -1473,7 +1478,10 @@ def _threshold_for_precision(
             continue
         true_positives = int(((labels == 1) & accepted).sum())
         precision = true_positives / prediction_count
-        if precision < target_precision:
+        if wilson_z is not None:
+            if wilson_interval(true_positives, prediction_count, z=wilson_z)[0] < target_precision:
+                continue
+        elif precision < target_precision:
             continue
         candidate = {
             "threshold": threshold,
@@ -1495,25 +1503,57 @@ def _abstaining_level(status, target_precision, **details):
     return {"status": status, "target_precision": target_precision, **details, "model": None, "threshold": None}
 
 
-def _best_regularization(X, labels, groups, n_splits, random_state, regularization_values, threshold_options):
-    """Try each C with grouped CV and keep the one whose precision-constrained threshold has the best recall."""
-    cv = StratifiedGroupKFold(n_splits=n_splits, shuffle=True, random_state=random_state)
+class FoldAverageClassifier:
+    """Average of the classifiers fitted on the inner CV folds.
+
+    The threshold of a level is tuned on the out-of-fold probabilities of
+    these classifiers; predicting with their average keeps new artworks on
+    the same probability scale. A classifier refitted on all rows sees more
+    data and gives sharper probabilities than the ones the threshold was
+    tuned on.
+    """
+
+    def __init__(self, classifiers):
+        self.classifiers = list(classifiers)
+
+    def predict_proba(self, X):
+        """Mean of the fold classifiers' probabilities."""
+        return np.mean([classifier.predict_proba(X) for classifier in self.classifiers], axis=0)
+
+
+def _best_regularization(
+    X, labels, groups, n_splits, random_state, regularization_values, threshold_options, inner_repeats=1
+):
+    """Try each C with grouped CV and keep the one whose precision-constrained threshold has the best recall.
+
+    With `inner_repeats` > 1, the inner CV is repeated with seeds
+    random_state, random_state + 1, ...: each row's out-of-fold probability
+    is the mean over the repeats, which smooths the precision curve the
+    threshold is read from. The fold classifiers are returned with the best C.
+    """
     best = None
     for C in regularization_values:
-        oof = np.full(len(labels), np.nan)
+        oof_sum = np.zeros(len(labels))
+        oof_count = np.zeros(len(labels))
+        classifiers = []
         try:
-            for train_idx, test_idx in cv.split(X, labels, groups):
-                classifier = LogisticRegression(C=C, class_weight="balanced", max_iter=1000)
-                classifier.fit(X[train_idx], labels[train_idx])
-                oof[test_idx] = classifier.predict_proba(X[test_idx])[:, 1]
+            for repeat in range(inner_repeats):
+                cv = StratifiedGroupKFold(n_splits=n_splits, shuffle=True, random_state=random_state + repeat)
+                for train_idx, test_idx in cv.split(X, labels, groups):
+                    classifier = LogisticRegression(C=C, class_weight="balanced", max_iter=1000)
+                    classifier.fit(X[train_idx], labels[train_idx])
+                    oof_sum[test_idx] += classifier.predict_proba(X[test_idx])[:, 1]
+                    oof_count[test_idx] += 1
+                    classifiers.append(classifier)
         except ValueError:
             continue
-        if not np.isfinite(oof).all():
+        if (oof_count == 0).any():
             continue
+        oof = oof_sum / oof_count
         selected = _threshold_for_precision(labels, oof, groups, **threshold_options)
         if selected is None:
             continue
-        candidate = {**selected, "C": C, "oof_probabilities": oof}
+        candidate = {**selected, "C": C, "oof_probabilities": oof, "fold_classifiers": classifiers}
         rank = (candidate["recall"], candidate["precision"], -candidate["false_positives"])
         if best is None or rank > (best["recall"], best["precision"], -best["false_positives"]):
             best = candidate
@@ -1563,7 +1603,9 @@ def _fit_level(level, matrix, statuses, label_levels, groups, target_precision, 
             "target_precision": threshold_target,
             "minimum_predictions": options["minimum_predictions"],
             "minimum_prediction_groups": options["minimum_prediction_groups"],
+            "wilson_z": options.get("wilson_z"),
         },
+        inner_repeats=options.get("inner_repeats", 1),
     )
     if best is None:
         return _abstaining_level(
@@ -1573,8 +1615,11 @@ def _fit_level(level, matrix, statuses, label_levels, groups, target_precision, 
             negative_groups=negative_group_count,
         )
 
-    final_classifier = LogisticRegression(C=best["C"], class_weight="balanced", max_iter=1000)
-    final_classifier.fit(X, level_labels)
+    if options.get("prediction_model", "refit") == "fold_average":
+        final_classifier = FoldAverageClassifier(best["fold_classifiers"])
+    else:
+        final_classifier = LogisticRegression(C=best["C"], class_weight="balanced", max_iter=1000)
+        final_classifier.fit(X, level_labels)
     return {
         "status": "active",
         "model": final_classifier,
@@ -1597,6 +1642,143 @@ def _fit_level(level, matrix, statuses, label_levels, groups, target_precision, 
     }
 
 
+class LevelView:
+    """One level of a pooled classifier: appends the level encoding before predicting."""
+
+    def __init__(self, classifier, level):
+        self.classifier = classifier
+        self.level = level
+
+    def predict_proba(self, X):
+        """Probability that the candidate is right at this level (or a finer one)."""
+        X = np.asarray(X, dtype=float)
+        return self.classifier.predict_proba(_with_level_encoding(X, self.level))
+
+
+def _with_level_encoding(X, level):
+    """Features + one-hot level + features scaled by the level's coarseness (0 exact .. 1 country)."""
+    one_hot = np.zeros((len(X), len(GEOGRAPHIC_LEVELS)))
+    one_hot[:, GEOGRAPHIC_LEVELS.index(level)] = 1.0
+    coarseness = GEOGRAPHIC_LEVELS.index(level) / (len(GEOGRAPHIC_LEVELS) - 1)
+    return np.hstack([X, one_hot, X * coarseness])
+
+
+def _fit_pooled_levels(matrix, statuses, label_levels, groups, target_precisions, options):
+    """Fit one classifier shared by every level, with a threshold per level.
+
+    The rows of every level are stacked, each with its level encoding
+    (_with_level_encoding), so that the fine levels, which have few
+    positives, borrow the weights learnt on the coarse ones. The inner CV
+    keeps all the stacked rows of a CV group in the same fold. Each level
+    then gets its own threshold, read from its out-of-fold probabilities
+    exactly as in _fit_level; the shared C is the one with the most true
+    positives over the levels that reach their target.
+    """
+    per_level = {}
+    blocks = []
+    for level in GEOGRAPHIC_LEVELS:
+        target_precision = float(target_precisions[level])
+        positive_levels = _levels_up_to(level)
+        row_indices = np.flatnonzero((statuses == "negative") | (statuses == "match"))
+        labels = np.asarray([
+            int(statuses[index] == "match" and label_levels[index] in positive_levels) for index in row_indices
+        ])
+        level_groups = groups[row_indices]
+        positive_group_count = len(set(level_groups[labels == 1]))
+        negative_group_count = len(set(level_groups[labels == 0]))
+        if positive_group_count < options["minimum_positive_groups"]:
+            per_level[level] = _abstaining_level(
+                "insufficient_positive_groups", target_precision,
+                positive_groups=positive_group_count, minimum_positive_groups=options["minimum_positive_groups"],
+            )
+            continue
+        if negative_group_count < 2:
+            per_level[level] = _abstaining_level(
+                "insufficient_negative_groups", target_precision, negative_groups=negative_group_count
+            )
+            continue
+        blocks.append({
+            "level": level, "rows": row_indices, "labels": labels, "groups": level_groups,
+            "target_precision": target_precision,
+            "threshold_target": min(0.99, target_precision + options.get("threshold_margin", 0.0)),
+            "positive_groups": positive_group_count, "negative_groups": negative_group_count,
+        })
+    if not blocks:
+        return per_level
+
+    X = np.vstack([_with_level_encoding(matrix[block["rows"]], block["level"]) for block in blocks])
+    y = np.concatenate([block["labels"] for block in blocks])
+    stacked_groups = np.concatenate([block["groups"] for block in blocks])
+    offsets = np.cumsum([0] + [len(block["rows"]) for block in blocks])
+    n_splits = min(options["n_splits"], len(set(stacked_groups[y == 1])), len(set(stacked_groups[y == 0])))
+    best = None
+    for C in options["regularization_values"]:
+        oof_sum = np.zeros(len(y))
+        oof_count = np.zeros(len(y))
+        classifiers = []
+        for repeat in range(options.get("inner_repeats", 1)):
+            cv = StratifiedGroupKFold(n_splits=n_splits, shuffle=True, random_state=options["random_state"] + repeat)
+            for train_idx, test_idx in cv.split(X, y, stacked_groups):
+                classifier = LogisticRegression(C=C, class_weight="balanced", max_iter=2000)
+                classifier.fit(X[train_idx], y[train_idx])
+                oof_sum[test_idx] += classifier.predict_proba(X[test_idx])[:, 1]
+                oof_count[test_idx] += 1
+                classifiers.append(classifier)
+        if (oof_count == 0).any():
+            continue
+        oof = oof_sum / oof_count
+        selections = {}
+        for block, start, stop in zip(blocks, offsets[:-1], offsets[1:]):
+            selections[block["level"]] = _threshold_for_precision(
+                block["labels"], oof[start:stop], block["groups"],
+                target_precision=block["threshold_target"],
+                minimum_predictions=options["minimum_predictions"],
+                minimum_prediction_groups=options["minimum_prediction_groups"],
+                wilson_z=options.get("wilson_z"),
+            )
+        found = [selection for selection in selections.values() if selection]
+        rank = (sum(s["true_positives"] for s in found), -sum(s["false_positives"] for s in found))
+        if best is None or rank > best["rank"]:
+            best = {"rank": rank, "C": C, "oof": oof, "selections": selections, "classifiers": classifiers}
+
+    shared = None
+    if best is not None:
+        if options.get("prediction_model", "refit") == "fold_average":
+            shared = FoldAverageClassifier(best["classifiers"])
+        else:
+            shared = LogisticRegression(C=best["C"], class_weight="balanced", max_iter=2000).fit(X, y)
+    for block, start, stop in zip(blocks, offsets[:-1], offsets[1:]):
+        level = block["level"]
+        selected = best["selections"][level] if best else None
+        if selected is None:
+            per_level[level] = _abstaining_level(
+                "precision_target_unmet", block["target_precision"],
+                positive_groups=block["positive_groups"], negative_groups=block["negative_groups"],
+            )
+            continue
+        per_level[level] = {
+            "status": "active",
+            "model": LevelView(shared, level),
+            "C": best["C"],
+            "threshold": selected["threshold"],
+            "target_precision": block["target_precision"],
+            "threshold_target": block["threshold_target"],
+            "oof_precision": selected["precision"],
+            "oof_recall": selected["recall"],
+            "oof_support": selected["support"],
+            "oof_prediction_groups": selected["prediction_groups"],
+            "positive_groups": block["positive_groups"],
+            "negative_groups": block["negative_groups"],
+            "cv_splits": n_splits,
+            "false_positives": selected["false_positives"],
+            "true_positives": selected["true_positives"],
+            "pooled": True,
+            "oof_row_indices": block["rows"].tolist(),
+            "oof_probabilities": best["oof"][start:stop].tolist(),
+        }
+    return {level: per_level[level] for level in GEOGRAPHIC_LEVELS}
+
+
 def train_hierarchical_model(
     table,
     *,
@@ -1610,6 +1792,10 @@ def train_hierarchical_model(
     minimum_predictions=5,
     feature_columns=None,
     threshold_margin=0.0,
+    prediction_model="refit",
+    inner_repeats=1,
+    wilson_z=None,
+    pooled_levels=False,
 ):
     """Fit one grouped-CV classifier per geographic precision level.
 
@@ -1620,6 +1806,16 @@ def train_hierarchical_model(
 
     `feature_columns` defaults to GEOGRAPHIC_FEATURE_COLUMNS; other lists are
     used to compare feature sets (scripts/compare_feature_sets.py).
+
+    Threshold stability options (scripts/compare_tables.py):
+    - `prediction_model`: "refit" fits a final classifier on all rows;
+      "fold_average" predicts with the mean of the inner fold classifiers,
+      whose out-of-fold probabilities set the threshold (FoldAverageClassifier).
+    - `inner_repeats`: number of inner CV partitions averaged per row.
+    - `wilson_z`: the threshold must bring the lower Wilson bound of the
+      precision (not the precision) to target + threshold_margin.
+    - `pooled_levels`: one classifier shared by all levels, with the level
+      as a feature and a threshold per level (_fit_pooled_levels).
     """
     if table.empty:
         raise ValueError("Geographic label table is empty.")
@@ -1642,13 +1838,19 @@ def train_hierarchical_model(
         "minimum_prediction_groups": minimum_prediction_groups,
         "minimum_predictions": minimum_predictions,
         "threshold_margin": threshold_margin,
+        "prediction_model": prediction_model,
+        "inner_repeats": inner_repeats,
+        "wilson_z": wilson_z,
     }
-    per_level = {
-        level: _fit_level(
-            level, matrix, statuses, label_levels, groups, float(target_precisions[level]), options
-        )
-        for level in GEOGRAPHIC_LEVELS
-    }
+    if pooled_levels:
+        per_level = _fit_pooled_levels(matrix, statuses, label_levels, groups, target_precisions, options)
+    else:
+        per_level = {
+            level: _fit_level(
+                level, matrix, statuses, label_levels, groups, float(target_precisions[level]), options
+            )
+            for level in GEOGRAPHIC_LEVELS
+        }
 
     active_levels = [level for level in GEOGRAPHIC_LEVELS if per_level[level]["status"] == "active"]
     model_bundle = {
@@ -1659,6 +1861,10 @@ def train_hierarchical_model(
         "specificity_order": GEOGRAPHIC_LEVELS,
         "target_precisions": dict(target_precisions),
         "threshold_margin": threshold_margin,
+        "prediction_model": prediction_model,
+        "inner_repeats": inner_repeats,
+        "wilson_z": wilson_z,
+        "pooled_levels": pooled_levels,
         "minimum_work_recall": minimum_recall,
         "minimum_positive_groups": minimum_positive_groups,
         "minimum_prediction_groups": minimum_prediction_groups,
@@ -1844,7 +2050,7 @@ def evaluate_hierarchical_grouped_cv(
     """Evaluate a full level/threshold selection process on outer grouped folds.
 
     Without `shuffle_seed`, the folds come from GroupKFold, which always
-    splits the same way. With a seed, StratifiedGroupKFold shuffles the
+    splits the same way. With a seed, stable_group_folds spreads the
     groups: each seed gives another partition (see evaluate_repeated_grouped_cv).
 
     For each outer fold, `train_hierarchical_model` (thresholds included) is
@@ -1865,19 +2071,16 @@ def evaluate_hierarchical_grouped_cv(
 
     y = np.asarray([int(artwork_statuses[artwork_id] == "depicted") for artwork_id in artwork_ids])
     if shuffle_seed is None:
-        splitter = GroupKFold(n_splits=effective_splits)
+        splits = GroupKFold(n_splits=effective_splits).split(np.zeros(len(artwork_ids)), y, group_values)
     else:
-        splitter = StratifiedGroupKFold(n_splits=effective_splits, shuffle=True, random_state=shuffle_seed)
+        splits = stable_group_folds(artwork_ids, group_values, effective_splits, shuffle_seed)
     totals = Counter()
     level_totals = {level: Counter() for level in GEOGRAPHIC_LEVELS}
     level_prediction_groups = {level: set() for level in GEOGRAPHIC_LEVELS}
     folds = []
     training_options = training_options or {}
 
-    for fold_number, (train_work_idx, test_work_idx) in enumerate(
-        splitter.split(np.zeros(len(artwork_ids)), y, group_values),
-        start=1,
-    ):
+    for fold_number, (train_work_idx, test_work_idx) in enumerate(splits, start=1):
         test_ids = {artwork_ids[index] for index in test_work_idx}
         test_groups = {artwork_groups.get(artwork_id, f"artwork:{artwork_id}") for artwork_id in test_ids}
         added_train_only = {
@@ -1977,6 +2180,31 @@ def evaluate_hierarchical_grouped_cv(
         "shuffle_seed": shuffle_seed,
         "folds": folds,
     }
+
+
+def stable_group_folds(artwork_ids, group_values, n_splits, seed):
+    """Outer folds that depend only on the seed and on each group's members.
+
+    A group goes to the fold given by a hash of the seed and of its smallest
+    artwork id. Unlike a shuffled StratifiedGroupKFold, adding, removing or
+    merging a group (a geocoding fix joining two views of one monument) only
+    moves the artworks of that group: two tables differing by a few labels
+    are evaluated on the same partitions, so their metrics can be paired.
+    Returns (train_indices, test_indices) pairs, one per non-empty fold.
+    """
+    members = {}
+    for artwork_id, group in zip(artwork_ids, group_values):
+        members.setdefault(group, []).append(str(artwork_id))
+    group_fold = {
+        group: int(hashlib.sha1(f"{seed}:{min(ids)}".encode("utf-8")).hexdigest(), 16) % n_splits
+        for group, ids in members.items()
+    }
+    folds = np.asarray([group_fold[group] for group in group_values])
+    return [
+        (np.flatnonzero(folds != fold), np.flatnonzero(folds == fold))
+        for fold in range(n_splits)
+        if (folds == fold).any() and (folds != fold).any()
+    ]
 
 
 def _mean_and_std(values):
