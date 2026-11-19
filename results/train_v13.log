@@ -1,0 +1,49 @@
+[info] 501 œuvres chargées depuis data/raw/gold_standard/gold_dataset.json.
+[info] 396 œuvres enrichies depuis le dump AIC.
+[info] Training hiérarchique: labels issus des coordonnées et de la hiérarchie; validation groupée par œuvre et cible géographique.
+[info] Chargement du modèle NER et extraction des candidats...
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights: 100%|██████████| 199/199 [00:00<00:00, 2065.94it/s]
+[info] 1146 candidats NER bruts.
+[info] Géocodage et scores NLI des candidats...
+[info] 993 candidats avec étiquettes géographiques.
+[info] Niveaux: {'none': 315, 'unevaluable': 192, 'city': 186, 'exact_place': 84, 'country': 77, 'no_match': 72, 'region': 57, 'neighborhood': 10}
+[info] Statuts: {'match': 414, 'negative': 387, 'unevaluable': 192}
+
+=== Seuils par niveau (précision empirique OOF) ===
+  exact_place      abstention: precision_target_unmet (groupes+=57)
+  neighborhood     abstention: precision_target_unmet (groupes+=67)
+  city             seuil=0.976 précision OOF=0.957 rappel OOF=0.079 support=23 groupes+=160
+  region           seuil=0.985 précision OOF=1.000 rappel OOF=0.045 support=15 groupes+=175
+  country          seuil=0.977 précision OOF=0.957 rappel OOF=0.268 support=116 groupes+=197
+
+=== Décision hiérarchique par œuvre (OOF de réglage, indicatif) ===
+  précision=0.950 rappel=0.382 FP=5 FN=155 lieux mal prédits=1
+  rappel minimal 0.50 atteint: False
+  Note: les seuils OOF sont réglés sur ces folds; ces métriques ne sont pas une estimation finale indépendante.
+
+=== Déployabilité par niveau (validation externe) ===
+  exact_place      précision=0.500 [0.09 – 0.91] (1/2) groupes=2 déployé=False
+  neighborhood     précision=n/a  (0/0) groupes=0 déployé=False
+  city             précision=0.667 [0.39 – 0.86] (8/12) groupes=11 déployé=False
+  region           précision=0.889 [0.56 – 0.98] (8/9) groupes=9 déployé=False
+  country          précision=0.922 [0.81 – 0.97] (47/51) groupes=46 déployé=True
+[info] Niveaux activés: ['country']
+
+=== Validation externe groupée par cible (estimation hors-fold) ===
+  œuvres évaluées=437 (+16 utilisées seulement à l'entraînement: precise_keywords)
+  précision=0.845 [0.73 – 0.92] rappel=0.206 FP=9 FN=189 lieux mal prédits=6 folds=5
+[avertissement] Le rappel externe est sous le minimum demandé; les cibles de précision n'ont pas été relâchées.
+
+=== Validation externe répétée (20 découpages mélangés) ===
+  précision=0.890 ± 0.027 rappel=0.242 ± 0.032 TP=57.5 ± 7.6 FP=7.1 ± 2.0
+  exact_place      précision=0.333 ± 0.293 (cumulée 0.438) prédictions=0.8 ± 1.4 découpages avec prédictions=6/20
+  neighborhood     précision=0.650 ± 0.206 (cumulée 0.583) prédictions=0.6 ± 1.4 découpages avec prédictions=4/20
+  city             précision=0.898 ± 0.073 (cumulée 0.883) prédictions=13.2 ± 4.9 découpages avec prédictions=20/20
+  region           précision=0.840 ± 0.080 (cumulée 0.828) prédictions=13.4 ± 4.3 découpages avec prédictions=20/20
+  country          précision=0.915 ± 0.029 (cumulée 0.915) prédictions=63.6 ± 10.6 découpages avec prédictions=20/20
+  Note: avec plusieurs découpages, la déployabilité est décidée ici (règle D): moyenne >= cible et borne basse de Wilson (95 %, prédictions cumulées) >= cible - 0.05.
+[info] Règle de déploiement: mean precision over shuffled partitions >= target and pooled Wilson lower bound >= target - 0.05
+[info] Niveaux activés: ['country']
+
+[ok] Modèle hiérarchique sauvegardé dans results/model_hierarchical_v13.joblib

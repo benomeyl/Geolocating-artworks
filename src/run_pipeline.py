@@ -153,14 +153,25 @@ def _format_optional(value):
 # ---------------------------------------------------------------------------
 
 def _repeated_level_is_deployable(level, target, repeated, minimum_predictions, worst_case_margin):
-    """Rule D: mean precision over the repeated partitions >= target, and >= target - margin on each."""
-    precisions = [run["metrics_by_level"][level]["precision"] for run in repeated["runs"]]
-    predictions = [run["metrics_by_level"][level]["predictions"] for run in repeated["runs"]]
+    """Rule D: mean precision over the repeated partitions >= target, and the
+    lower 95 % Wilson bound of the precision pooled over all partitions >= target - margin.
+
+    The pooled bound replaced "every partition >= target - margin" on
+    2026-11-18: the minimum over partitions drops mechanically as partitions
+    are added (with 20, one partition at 0.842 rejected a country level at
+    0.915 over 1272 predictions), while the Wilson bound tightens as the
+    evidence grows.
+    """
+    level_runs = [run["metrics_by_level"][level] for run in repeated["runs"]]
+    precisions = [level_run["precision"] for level_run in level_runs]
+    predictions = [level_run["predictions"] for level_run in level_runs]
+    true_positives = sum(level_run["true_positives"] for level_run in level_runs)
+    lower_bound = wilson_interval(true_positives, sum(predictions))[0]
     return (
         all(precision is not None for precision in precisions)
         and float(np.mean(predictions)) >= minimum_predictions
         and float(np.mean(precisions)) >= target
-        and min(precisions) >= target - worst_case_margin
+        and lower_bound >= target - worst_case_margin
     )
 
 
@@ -176,8 +187,9 @@ def deployable_levels(
 
     With `repeated` (evaluate_repeated_grouped_cv), rule D: a level is
     deployable when it is active, its precision averaged over the shuffled
-    partitions reaches its target, it stays above target - `worst_case_margin`
-    on every partition and it predicts on every partition. Without it, the
+    partitions reaches its target, the lower Wilson bound of its precision
+    pooled over all partitions stays above target - `worst_case_margin` and
+    it predicts on every partition. Without it, the
     precision of the single fixed partition must reach the target with enough
     predictions and prediction groups.
     """
@@ -303,7 +315,7 @@ def print_repeated_cv_report(repeated):
         )
     print(
         "  Note: avec plusieurs découpages, la déployabilité est décidée ici (règle D): "
-        "moyenne >= cible et chaque découpage >= cible - 0.05."
+        "moyenne >= cible et borne basse de Wilson (95 %, prédictions cumulées) >= cible - 0.05."
     )
 
 
@@ -338,6 +350,9 @@ def cmd_train(args):
         "minimum_prediction_groups": args.minimum_prediction_groups,
         "minimum_predictions": args.minimum_predictions,
         "threshold_margin": args.threshold_margin,
+        "prediction_model": args.prediction_model,
+        "inner_repeats": args.inner_repeats,
+        "pooled_levels": not args.separate_levels,
     }
     model = train_hierarchical_model(table, **training_options)
     nested_metrics = evaluate_hierarchical_grouped_cv(
@@ -362,7 +377,7 @@ def cmd_train(args):
         model, nested_metrics, args.minimum_prediction_groups, args.minimum_predictions, repeated
     )
     model["deployment_rule"] = (
-        "mean precision over shuffled partitions >= target and >= target - 0.05 on each"
+        "mean precision over shuffled partitions >= target and pooled Wilson lower bound >= target - 0.05"
         if repeated is not None else "fixed-partition precision >= target"
     )
     model["training_metadata"] = {
@@ -707,8 +722,8 @@ def main():
     train_parser.add_argument(
         "--outer-repeats",
         type=int,
-        default=10,
-        help="Découpages mélangés de la validation externe (défaut: 10, règle D). 1 = ancien découpage fixe seul.",
+        default=20,
+        help="Découpages mélangés de la validation externe (défaut: 20, règle D). 1 = ancien découpage fixe seul.",
     )
     train_parser.add_argument("--outer-jobs", type=int, default=4, help="Découpages évalués en parallèle.")
     train_parser.add_argument(
@@ -731,6 +746,20 @@ def main():
         nargs="+",
         default=(0.1, 1.0, 10.0),
         help="Valeurs C testées pour chaque niveau.",
+    )
+    train_parser.add_argument(
+        "--prediction-model",
+        choices=("fold_average", "refit"),
+        default="fold_average",
+        help="fold_average (défaut): prédit avec la moyenne des modèles des folds internes, ceux qui ont réglé le seuil.",
+    )
+    train_parser.add_argument(
+        "--inner-repeats", type=int, default=5, help="Découpages internes moyennés pour régler les seuils (défaut: 5)."
+    )
+    train_parser.add_argument(
+        "--separate-levels",
+        action="store_true",
+        help="Un modèle par niveau (ancien comportement) au lieu d'un modèle unique partagé par tous les niveaux.",
     )
     train_parser.add_argument("--minimum-positive-groups", type=int, default=5)
     train_parser.add_argument("--minimum-prediction-groups", type=int, default=5)

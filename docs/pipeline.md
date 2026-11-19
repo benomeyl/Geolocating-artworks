@@ -1,4 +1,4 @@
-# Pipeline de géolocalisation des œuvres — état au 13/11/2026
+# Pipeline de géolocalisation des œuvres — état au 19/11/2026
 
 ## 1. Objectif
 
@@ -26,8 +26,8 @@ l'artiste, de provenance ou d'exposition.
    ├─ 4. géocodage : GeoNames puis Nominatim ........... src/geolocation/gazetter.py
    │       → coordonnées, hiérarchie (ville/région/pays), niveau du candidat
    │
-   ├─ 5. un classifieur par niveau géographique ......... train_hierarchical_model
-   │       exact_place, neighborhood, city, region, country
+   ├─ 5. un classifieur partagé par tous les niveaux .... train_hierarchical_model
+   │       un seuil par niveau : exact_place, neighborhood, city, region, country
    │
    └─ 6. décision : le niveau le plus précis dont le seuil est franchi
            et qui est « déployable », sinon abstention . predict_with_hierarchical_model
@@ -177,10 +177,19 @@ depuis le 05/11/2026) : les lieux d'une œuvre sont géocodés ensemble.
    `countrycodes` + `viewbox` borné), puis « lieu, ancre » ; le résultat doit
    contenir tous les mots de la mention (« Cardiff Castle » ≠ « Cardiff
    Avenue »).
+   **« X, Ville »** (depuis le 17/11/2026) : une ancre suivie directement
+   d'une ancre plus importante dont elle est hors de la zone (« Notre Dame,
+   Paris » → Notre Dame, Indiana ; « Saint Sulpice, Paris » → la commune de
+   Saint-Sulpice) est traitée comme un lieu précis et cherchée dans cette
+   ancre ; si elle n'y est pas trouvée, elle garde sa résolution d'ancre
+   (« Takehara, Hiroshima »).
 3. **Échec** : si une ancre est juste à côté (≤ 80 caractères, « Le Nys,
    Amsterdam »), la mention n'a **pas de lieu** (sauf lieu célèbre, gardé et
    marqué `context_conflict`) : l'œuvre est placée par son ancre plutôt que
-   par un homonyme. Avec une ancre lointaine, le premier résultat est gardé
+   par un homonyme. Un lieu célèbre situé dans un autre pays que l'ancre
+   n'est gardé que s'il partage un mot distinctif avec la mention
+   (« Clock Tower, Venice » n'est plus la Ghanta Ghar de Dehradun ;
+   « Eiffel Tower » → « Tour Eiffel » reste accepté). Avec une ancre lointaine, le premier résultat est gardé
    et marqué `context_conflict`.
 4. **Sans ancre** : premier résultat, sauf pour un nom générique (aucun
    lieu).
@@ -224,35 +233,55 @@ cible annotée et on note **le niveau le plus précis qui correspond** :
 
 ### 4.6 Entraînement (`train_hierarchical_model`)
 
-- **Une régression logistique par niveau**, avec des étiquettes
-  cumulatives : le modèle « ville » compte comme positif tout candidat
-  juste au niveau ville ou plus précis.
+- **Étiquettes cumulatives** : au niveau « ville », est positif tout
+  candidat juste au niveau ville ou plus précis.
+- **Un modèle unique pour tous les niveaux** (`_fit_pooled_levels`, par
+  défaut depuis le 18/11/2026) : les lignes des cinq niveaux sont empilées,
+  chacune avec son niveau en feature (indicatrice du niveau + features
+  multipliées par la « largeur » du niveau, de 0 pour le lieu exact à 1
+  pour le pays). Les niveaux fins, qui ont peu d'exemples, profitent des
+  poids appris sur les niveaux larges. `--separate-levels` rétablit une
+  régression logistique par niveau.
 - **Validation croisée groupée** : les œuvres qui partagent une même cible
-  (ex. plusieurs vues de la Tour Eiffel) restent dans le même fold, pour
-  ne pas surestimer les performances.
+  (ex. plusieurs vues de la Tour Eiffel) restent dans le même fold.
 - **Seuil par niveau** : le plus permissif qui garde la précision
   hors-fold au-dessus de la cible **+ une marge** (`--threshold-margin`,
-  0,05 par défaut ; cible 0,90 à tous les niveaux depuis le 05/11/2026),
-  avec au moins 5 prédictions et 5 groupes. Sinon le niveau s'abstient
-  (`precision_target_unmet`, `insufficient_positive_groups`…). La marge
-  compense l'optimisme des seuils réglés sur les folds d'entraînement
-  (≈ 0,05 de précision perdue sur des œuvres nouvelles).
-- **Validation externe** (`evaluate_hierarchical_grouped_cv`) : on refait
-  tout l'entraînement, seuils compris, sur 5 folds externes ; les œuvres
-  des strates `TRAIN_ONLY_STRATA` sont ajoutées à l'entraînement de chaque
-  fold mais jamais testées. Les métriques « OOF » affichées avant ont servi
-  à choisir les seuils et sont optimistes.
+  0,05 ; cible 0,90 à tous les niveaux), avec au moins 5 prédictions et
+  5 groupes. Sinon le niveau s'abstient (`precision_target_unmet`,
+  `insufficient_positive_groups`…).
+- **Probabilités hors-fold moyennées sur 5 découpages internes**
+  (`--inner-repeats 5`) : la courbe de précision où l'on lit le seuil est
+  moins irrégulière.
+- **Prédiction par les modèles qui ont réglé le seuil**
+  (`--prediction-model fold_average`, `FoldAverageClassifier`) : le score
+  d'une nouvelle œuvre est la moyenne des modèles des folds internes. Un
+  modèle réentraîné sur toutes les données (`refit`, ancien comportement)
+  donnait des probabilités plus tranchées que celles du réglage du seuil et
+  le franchissait trop facilement.
+- **Validation externe** (`evaluate_hierarchical_grouped_cv`) : tout
+  l'entraînement, seuils compris, est refait sur 5 folds externes ; les
+  œuvres des strates `TRAIN_ONLY_STRATA` servent à l'entraînement de chaque
+  fold mais ne sont jamais testées. Les métriques « OOF » affichées avant
+  ont servi à régler les seuils et sont optimistes.
 - **Validation répétée** (`evaluate_repeated_grouped_cv`, `--outer-repeats
-  10`, `--outer-jobs 4`) : la même validation sur 10 découpages mélangés
-  (`StratifiedGroupKFold`, seeds 0 à 9) ; moyenne ± écart-type. Deux
-  versions évaluées sur le même gold partagent les mêmes découpages : on les
-  compare découpage par découpage.
+  20`) : 20 découpages, moyenne ± écart-type. Les folds sont **stables**
+  (`stable_group_folds`, depuis le 18/11/2026) : un groupe va dans le fold
+  donné par un hash de la seed et de sa plus petite œuvre. Une correction
+  du géocodage qui fusionne deux groupes ne déplace que les œuvres de ces
+  groupes ; avant, `StratifiedGroupKFold` redistribuait tout et deux
+  versions n'étaient plus comparables (fausse baisse de v12a).
+  `scripts/compare_tables.py` compare deux tables ou réglages découpage par
+  découpage, faux positifs d'abord.
 - **Règle de déploiement D** (`deployable_levels`) : un niveau est activé
-  si sa précision moyenne sur les découpages atteint la cible, qu'elle
-  reste ≥ cible − 0,05 sur chacun et qu'il prédit sur chacun. Avec
+  si sa précision moyenne sur les découpages atteint la cible **et** si la
+  borne basse de Wilson à 95 % de sa précision, sur toutes les prédictions
+  des découpages réunies, atteint cible − 0,05. Ce second critère remplace
+  depuis le 18/11/2026 « chaque découpage ≥ cible − 0,05 », qui devenait
+  plus sévère à mesure qu'on ajoutait des découpages (avec 20, un seul
+  découpage à 0,842 refusait un pays à 0,915 sur 1 272 prédictions). Avec
   `--outer-repeats 1`, l'ancienne règle (découpage fixe) s'applique.
-- **Intervalles de Wilson à 95 %** (`wilson_interval`) affichés à côté de
-  chaque précision du découpage fixe.
+- **Option non retenue** : `wilson_z` règle le seuil sur la borne basse de
+  Wilson plutôt que sur la précision (voir §6).
 
 ### 4.7 Prédiction (`predict_with_hierarchical_model`)
 
@@ -279,7 +308,8 @@ l'œuvre est `uncertain`.
 | `python scripts/integrate_identified_csvs.py [--write]` | Ajoute les CSV Dresde/Venise au gold |
 | `python scripts/audit_geographic_annotations.py` | Liste les champs manquants des annotations |
 | `python scripts/compare_feature_sets.py [--reuse-table] --output results/….json` | Compare des jeux de features sur la même table (validation externe, 10 découpages appariés, précision moyenne hors-fold par niveau) |
-| `python -m pytest -q` | Tests (111) |
+| `python scripts/compare_tables.py --variant NOM TABLE.pkl ['{options}'] … [--repeats 20]` | Compare des tables de features ou des options d'entraînement sur les mêmes découpages : faux positifs, précision par niveau, ce qui serait publié |
+| `python -m pytest -q` | Tests (123) |
 
 Lancer avec `.venv/bin/python` : l'interpréteur Anaconda de base n'a pas
 `transformers`.
@@ -354,6 +384,42 @@ précision moyenne de ce niveau.
   annotés, 60 seulement ont un candidat juste au niveau exact (45 lieux
   distincts) ; les autres sont perdus au NER ou au géocodage.
 
+### Stabilité des seuils et modèle unique (18/11/2026)
+
+501 œuvres annotées (437 testées), géocodage v12. Comparaisons appariées
+avec `scripts/compare_tables.py` sur les mêmes découpages ; « FP » =
+fausses réponses par découpage.
+
+| Étape | Précision | Rappel | FP | Effet apparié | Décision |
+|---|---|---|---|---|---|
+| v12 (référence, 10 découpages) | 0,832 | 0,194 | 9,2 | — | — |
+| 1. prédiction par les modèles des folds | 0,844 | 0,163 | 7,1 | FP −2,1 (mieux 9/10) | gardée |
+| 2. + 5 découpages internes | 0,853 | 0,186 | 7,6 | FP +0,5 (bruit), TP +5,4 | gardée |
+| 3. seuil sur la borne de Wilson, z = 1,0 | 0,857 | 0,326 | 12,9 | FP +5,3 (pire 10/10) | rejetée |
+| 3. seuil sur la borne de Wilson, z = 1,645 | 0,874 | 0,095 | 3,3 | TP −21,7, pays 0,856 | rejetée |
+| 5. + modèle unique (20 découpages) | 0,890 | 0,242 | 7,1 | précision +0,035 (16/20), TP +14,4 (17/20), FP −0,2 | gardée |
+
+- Avant, entre v11 et v12 (11 candidats différents sur 993), la précision
+  variait de ± 0,05 d'un découpage à l'autre : l'instabilité venait du
+  choix des seuils, pas des découpages.
+- Un seuil plus strict ne retire pas les fausses réponses du pays
+  (z = 1,645 : précision 0,856 au lieu de 0,900) : ce sont des erreurs
+  sûres d'elles (portraits ou objets titrés « X, ville »), qu'il faudra
+  traiter par de nouvelles informations, pas par le seuil.
+
+**v13** (`model_hierarchical_v13.joblib`, `results/train_v13.log`) =
+géocodage v12 + étapes 1, 2, 5 + nouvelle règle D, 20 découpages :
+
+| Niveau | Précision moyenne | Toutes prédictions réunies | Prédictions par découpage | Activé |
+|---|---|---|---|---|
+| pays | 0,915 ± 0,029 | 0,915 (1 164 / 1 272), Wilson 0,898 – 0,929 | 63,6 | **oui** |
+| ville | 0,898 ± 0,073 | 0,883 (234 / 265), Wilson 0,839 – 0,916 | 13,2 | non (cible 0,90) |
+| région | 0,840 ± 0,080 | 0,828 | 13,4 | non |
+| lieu exact / quartier | — | — | < 1 | non |
+
+Toutes prédictions confondues : précision 0,890 ± 0,027, rappel
+0,242 ± 0,032 (v11 : 0,858 / 0,197).
+
 ## 7. Fichiers de code
 
 | Fichier | Rôle |
@@ -380,7 +446,14 @@ précision moyenne de ce niveau.
 - **Calcul** : NLI sur CPU, ≈ 3 h 15 pour prédire 582 œuvres ; Nominatim
   limité à une requête par seconde.
 - **Descriptions longues** tronquées à 512 tokens par le NER.
+- **Entraînement plus lent** depuis le modèle unique : ≈ 60 s par
+  entraînement, 45 min à 1 h pour `train` avec 20 découpages (8 cœurs).
+- **Wikidata et Nominatim** : Nominatim n'utilise Wikidata/Wikipédia que
+  pour classer les résultats (importance), pas pour trouver un lieu par
+  son nom ; les noms cherchables sont ceux d'OpenStreetMap. Les noms
+  anglais descriptifs absents d'OSM (« St. Ouen, Rouen ») sont donc perdus :
+  une recherche dans les labels et alias Wikidata est la piste suivante.
 - Pistes et tâches détaillées dans `docs/feuille_de_route_2026-11-13.html` :
-  finir l'annotation de l'échantillon diversifié, récupérer les lieux
-  exacts perdus, dictionnaire de monuments, labels Wikidata, modèle unique
-  calibré, comparaison avec un LLM, accélération du NLI.
+  finir l'annotation de l'échantillon diversifié (51 œuvres restantes),
+  récupérer les lieux exacts perdus, dictionnaire de monuments, labels
+  Wikidata, comparaison avec un LLM, accélération du NLI.
