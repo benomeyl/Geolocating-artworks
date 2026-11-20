@@ -1,0 +1,34 @@
+
+=== v13-sans-wikidata ===
+  precision          0.890 ± 0.027  (min 0.847, max 0.947)
+  recall             0.242 ± 0.032  (min 0.197, max 0.307)
+  true_positives    57.500 ± 7.553  (min 47.000, max 73.000)
+  false_positives    7.100 ± 2.022  (min 3.000, max 12.000)
+  niveau          précision moy. (min)   prédictions/découpage   FP total
+  exact_place     0.333 (0.000)            0.8                    9
+  neighborhood    0.650 (0.500)            0.6                    5
+  city            0.898 (0.750)           13.2                   31
+  region          0.840 (0.720)           13.4                   46
+  country         0.915 (0.842)           63.6                  108  déployé
+  publié (niveaux country): 1164 TP / 108 FP sur 20 découpages, précision 0.915 [0.90 – 0.93]
+
+=== v14-wikidata ===
+  precision          0.887 ± 0.027  (min 0.818, max 0.932)
+  recall             0.247 ± 0.026  (min 0.202, max 0.290)
+  true_positives    58.700 ± 6.254  (min 48.000, max 69.000)
+  false_positives    7.450 ± 2.085  (min 5.000, max 14.000)
+  niveau          précision moy. (min)   prédictions/découpage   FP total
+  exact_place     0.221 (0.000)            1.0                    9
+  neighborhood    0.238 (0.000)            0.5                    4
+  city            0.873 (0.700)           17.2                   44
+  region          0.832 (0.636)           14.2                   48
+  country         0.915 (0.864)           65.1                  110  déployé
+  publié (niveaux country): 1192 TP / 110 FP sur 20 découpages, précision 0.916 [0.90 – 0.93]
+
+--- v14-wikidata − v13-sans-wikidata (apparié, 20 découpages) ---
+  false_positives   +0.350 ± 1.740   mieux 7/20, moins bien 8/20
+  precision         -0.003 ± 0.028   mieux 10/20, moins bien 9/20
+  true_positives    +1.200 ± 7.366   mieux 9/20, moins bien 8/20
+  recall            +0.005 ± 0.031   mieux 9/20, moins bien 8/20
+
+[ok] Métriques par découpage dans results/compare_v13_v14_wikidata.json

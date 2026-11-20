@@ -42,6 +42,9 @@ TRAINING_OPTIONS = {
     "minimum_prediction_groups": 5,
     "minimum_predictions": 5,
     "threshold_margin": 0.05,
+    "prediction_model": "fold_average",
+    "inner_repeats": 5,
+    "pooled_levels": True,
 }
 WORST_CASE_MARGIN = 0.05
 
@@ -113,7 +116,7 @@ def main():
     )
     parser.add_argument("--records", default="data/raw/gold_standard/gold_dataset.json")
     parser.add_argument("--aic-dump-dir", default=None)
-    parser.add_argument("--repeats", type=int, default=10)
+    parser.add_argument("--repeats", type=int, default=20)
     parser.add_argument("--jobs", type=int, default=8)
     parser.add_argument("--output", type=Path, default=None, help="JSON des métriques par découpage.")
     args = parser.parse_args()

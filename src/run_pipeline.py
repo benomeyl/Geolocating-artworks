@@ -32,6 +32,7 @@ import numpy as np
 
 from api.aic import enrich_records_from_dump
 from geolocation.gazetter import NominatimClient, geocode_candidates
+from geolocation.wikidata import WikidataClient
 from data.filtering_logreg import (
     TRAIN_ONLY_STRATA,
     extract_all_candidates,
@@ -103,13 +104,21 @@ def load_ner_pipeline():
 
 
 def make_nominatim_client(args):
-    """Build the Nominatim client from the geocoder command-line options."""
-    return NominatimClient(
+    """Build the Nominatim client from the geocoder command-line options.
+
+    With --wikidata, a WikidataClient is attached to it: resolve_artwork_places
+    then searches Wikidata labels and aliases for precise places that
+    Nominatim does not find inside the anchors' areas.
+    """
+    client = NominatimClient(
         endpoint=args.nominatim_url,
         reverse_endpoint=args.nominatim_reverse_url,
         user_agent=args.nominatim_user_agent,
         cache_path=args.nominatim_cache,
     )
+    if getattr(args, "wikidata", False):
+        client.wikidata_client = WikidataClient(cache_path=args.wikidata_cache)
+    return client
 
 
 @contextmanager
@@ -685,6 +694,12 @@ def add_geocoder_arguments(parser):
     parser.add_argument("--nominatim-reverse-url", default=None, help="Endpoint reverse Nominatim (déduit de --nominatim-url par défaut).")
     parser.add_argument("--nominatim-user-agent", default=None, help="User-Agent identifiant l'application; configurer un contact pour l'usage réel.")
     parser.add_argument("--nominatim-cache", default=None, help="Cache SQLite persistant (défaut: data/processed/nominatim_cache.sqlite).")
+    parser.add_argument(
+        "--wikidata",
+        action="store_true",
+        help="Cherche dans Wikidata (labels, alias) les lieux précis que Nominatim ne trouve pas dans la zone d'une ancre.",
+    )
+    parser.add_argument("--wikidata-cache", default=None, help="Cache SQLite Wikidata (défaut: data/processed/wikidata_cache.sqlite).")
     parser.add_argument(
         "--nli-cache",
         default=DEFAULT_NLI_CACHE,

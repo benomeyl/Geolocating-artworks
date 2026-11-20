@@ -183,6 +183,15 @@ depuis le 05/11/2026) : les lieux d'une œuvre sont géocodés ensemble.
    Saint-Sulpice) est traitée comme un lieu précis et cherchée dans cette
    ancre ; si elle n'y est pas trouvée, elle garde sa résolution d'ancre
    (« Takehara, Hiroshima »).
+   **Wikidata** (option `--wikidata`, désactivée par défaut, 20/11/2026) :
+   en dernier recours, un lieu précis introuvable dans la zone d'une ancre
+   est cherché dans les labels et alias Wikidata (anglais, français,
+   allemand, puis plein texte) ; seules les entités situées dans la zone,
+   qui ne sont ni des localités ni des œuvres et dont un nom contient les
+   mots distinctifs de la mention (abréviations et mots génériques
+   traduits : « St. Ouen » → « Abbatiale Saint-Ouen ») sont gardées
+   (`geolocation/wikidata.py`, `_wikidata_search`). Nominatim n'utilise
+   Wikidata que pour classer ses résultats, pas pour chercher un nom.
 3. **Échec** : si une ancre est juste à côté (≤ 80 caractères, « Le Nys,
    Amsterdam »), la mention n'a **pas de lieu** (sauf lieu célèbre, gardé et
    marqué `context_conflict`) : l'œuvre est placée par son ancre plutôt que
@@ -419,6 +428,17 @@ géocodage v12 + étapes 1, 2, 5 + nouvelle règle D, 20 découpages :
 
 Toutes prédictions confondues : précision 0,890 ± 0,027, rappel
 0,242 ± 0,032 (v11 : 0,858 / 0,197).
+
+### Wikidata en dernier recours (20/11/2026)
+
+Sur les 64 œuvres dont le lieu exact annoté n'arrive pas comme candidat
+exact, Wikidata contient la bonne entité pour 39. La version prudente
+(`--wikidata`, table `feature_table_v14_wikidata.pkl`) résout 27
+candidats, dont 5 nouveaux lieux exacts justes ; comparée à v13 sur les
+mêmes 20 découpages : FP +0,35 (bruit), TP +1,2, pays 0,915 → 0,916,
+ville 0,898 → 0,873. Non adoptée. La plupart des monuments perdus
+n'atteignent pas Wikidata : pas d'ancre, ville dans le nom du monument
+(« Cathedral of Mainz »), monument non extrait par le NER, ancre fausse.
 
 ## 7. Fichiers de code
 

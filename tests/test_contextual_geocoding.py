@@ -516,3 +516,61 @@ def test_a_famous_place_sharing_a_distinctive_word_is_kept_abroad():
     resolved = resolve_artwork_places([_mention(text, "Vienna"), _mention(text, "Eiffel Tower")], None, nominatim)
 
     assert resolved["Eiffel Tower"]["name"] == "Tour Eiffel"
+
+
+def _wikidata_place(name, names, latitude, longitude, country_code="FR"):
+    return {
+        "name": name, "names": names, "country_code": country_code, "latitude": latitude, "longitude": longitude,
+        "feature_code": "wikidata_item", "place_class": "wikidata", "place_rank": 30, "importance": None,
+        "source": "Wikidata", "hierarchy": None,
+    }
+
+
+def test_wikidata_name_score_handles_abbreviations_and_translated_generic_words():
+    from src.geolocation.gazetter import _wikidata_name_score
+
+    saint_ouen = _wikidata_place("Abbey-Church of Saint-Ouen, Rouen", ["Abbey-Church of Saint-Ouen, Rouen"], 49.44, 1.10)
+    etienne = _wikidata_place("Saint-Étienne-du-Mont", ["Saint-Étienne-du-Mont", "église Saint-Étienne-du-Mont"], 48.85, 2.35)
+    station = _wikidata_place("Mainz Central Station", ["Mainz Central Station", "Mainz Hauptbahnhof"], 50.0, 8.26, "DE")
+    assert _wikidata_name_score("St. Ouen", saint_ouen) > 0
+    assert _wikidata_name_score("Church of St. Etienne du Mont", etienne) > 0
+    assert _wikidata_name_score("Cathedral of Mainz", station) == 0  # the generic word must match too
+    assert _wikidata_name_score("Clock Tower", station) == 0  # generic names are never searched
+
+
+def test_wikidata_is_the_last_resort_inside_the_anchor_and_prefers_the_closest_name():
+    from src.geolocation.gazetter import resolve_artwork_places
+
+    rouen = {
+        "name": "Rouen", "country_code": "FR", "latitude": 49.44, "longitude": 1.10, "feature_code": "city",
+        "addresstype": "city", "place_rank": 16, "importance": 0.7, "source": "Nominatim",
+    }
+
+    class Nominatim:
+        def search(self, query):
+            return [rouen] if query == "Rouen" else []
+
+        def search_within(self, query, country_code, viewbox=None):
+            return []
+
+        def reverse(self, latitude, longitude):
+            return None
+
+    class Wikidata:
+        def search_places(self, name):
+            return [
+                _wikidata_place("Saint-Ouen", ["Saint-Ouen", "Saint-Ouen-sur-Seine"], 48.91, 2.33),  # outside Rouen
+                _wikidata_place("Saint-Ouen Street", ["rue Saint-Ouen"], 49.441, 1.101),
+                _wikidata_place("Abbey-Church of Saint-Ouen", ["Abbey-Church of Saint-Ouen", "Saint-Ouen"], 49.443, 1.099),
+            ]
+
+    client = Nominatim()
+    client.wikidata_client = Wikidata()
+    text = "St. Ouen, Rouen"
+    mentions = [
+        ("St. Ouen", [{"field": "title", "start": 0, "end": 8, "source_text": text}]),
+        ("Rouen", [{"field": "title", "start": 10, "end": 15, "source_text": text}]),
+    ]
+    resolved = resolve_artwork_places(mentions, None, client)
+    assert resolved["St. Ouen"]["resolution"] == "wikidata"
+    assert resolved["St. Ouen"]["name"] == "Abbey-Church of Saint-Ouen"

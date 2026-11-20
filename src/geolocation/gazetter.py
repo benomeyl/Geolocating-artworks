@@ -514,8 +514,8 @@ def location_alternatives(name, conn, nominatim_client=None):
 
 
 def _with_hierarchy(location, nominatim_client):
-    """Give a GeoNames location its city/region/country from a Nominatim reverse lookup."""
-    if location.get("source") != "GeoNames" or nominatim_client is None:
+    """Give a GeoNames or Wikidata location its city/region/country from a Nominatim reverse lookup."""
+    if location.get("source") not in ("GeoNames", "Wikidata") or nominatim_client is None:
         return location
     reverse_result = nominatim_client.reverse(location["latitude"], location["longitude"])
     if not reverse_result:
@@ -691,6 +691,77 @@ def _shares_distinctive_word(name, location):
     return bool(distinctive & _name_tokens(location.get("name")))
 
 
+# Abbreviations and translations of generic words, so that "St. Ouen" names
+# "Saint-Ouen" and "Church of St. Etienne du Mont" names "église
+# Saint-Étienne-du-Mont" (Wikidata labels are often in the local language).
+_TOKEN_EQUIVALENTS = {
+    "st": "saint", "ste": "sainte", "s": "saint", "mt": "mount", "ft": "fort",
+    "eglise": "church", "kirche": "church", "chiesa": "church", "iglesia": "church", "kerk": "church",
+    "cathedrale": "cathedral", "dom": "cathedral", "duomo": "cathedral", "catedral": "cathedral",
+    "kathedrale": "cathedral", "munster": "cathedral", "minster": "cathedral",
+    "pont": "bridge", "brucke": "bridge", "ponte": "bridge", "puente": "bridge", "brug": "bridge", "most": "bridge",
+    "chateau": "castle", "schloss": "castle", "burg": "castle", "castello": "castle", "castillo": "castle",
+    "palais": "palace", "palast": "palace", "palazzo": "palace", "palacio": "palace",
+    "rue": "street", "strasse": "street", "via": "street", "calle": "street",
+    "platz": "square", "piazza": "square", "plaza": "square", "plein": "square",
+    "lac": "lake", "see": "lake", "lago": "lake",
+    "tour": "tower", "turm": "tower", "torre": "tower",
+    "abbaye": "abbey", "abtei": "abbey", "abbazia": "abbey", "abbatiale": "abbey",
+    "chapelle": "chapel", "kapelle": "chapel", "cappella": "chapel",
+    "porte": "gate", "tor": "gate", "porta": "gate", "puerta": "gate", "poort": "gate",
+    "temple": "temple", "tempel": "temple", "tempio": "temple",
+    "theatre": "theater", "teatro": "theater",
+}
+
+
+def _equivalent_tokens(name):
+    """Name tokens with abbreviations and generic words mapped to one English form."""
+    return {_TOKEN_EQUIVALENTS.get(token, token) for token in _name_tokens(name)}
+
+
+def _wikidata_name_score(name, location):
+    """How well a Wikidata item's labels and aliases name the mention: 0 (no) to 1 (same words).
+
+    The mention's distinctive words (not generic, not articles) must all be in
+    one of the item's names, and one of its generic words too if it has any
+    ("Cathedral of Mainz" is not "Mainz Central Station"). The score is the
+    best Jaccard similarity of the words, used to prefer "Madison Square"
+    over "Madison Square Garden".
+    """
+    mention = _equivalent_tokens(name) - _ARTICLES
+    distinctive = mention - GENERIC_PLACE_WORDS
+    generic = mention & GENERIC_PLACE_WORDS
+    if not distinctive:
+        return 0.0
+    best = 0.0
+    for candidate_name in location.get("names") or [location.get("name")]:
+        tokens = _equivalent_tokens(candidate_name) - _ARTICLES
+        if not distinctive <= tokens or (generic and not generic & tokens):
+            continue
+        best = max(best, len(mention & tokens) / len(mention | tokens))
+    return best
+
+
+def _wikidata_search(name, anchor_locations, wikidata_client):
+    """Best Wikidata item for a precise mention inside an anchor's area, or None.
+
+    Last resort for monuments whose name OpenStreetMap does not hold
+    (Nominatim only searches OSM names): items found by label, alias or
+    full-text search that lie in an anchor's area (`_fits_anchor`) and name
+    the mention (`_wikidata_name_score` > 0); the best score wins, then the
+    search order.
+    """
+    if wikidata_client is None or _is_generic_name(name):
+        return None
+    scored = [
+        (_wikidata_name_score(name, location), -index, location)
+        for index, location in enumerate(wikidata_client.search_places(name))
+        if any(_fits_anchor(location, anchor) for anchor in anchor_locations)
+    ]
+    scored = [item for item in scored if item[0] > 0]
+    return max(scored, key=lambda item: item[:2])[2] if scored else None
+
+
 def _is_generic_name(name):
     """True if every word of `name` is a GENERIC_PLACE_WORDS ("Town Hall", "Grove of Trees")."""
     tokens = _name_tokens(name)
@@ -826,7 +897,9 @@ def resolve_artwork_places(mentions, conn, nominatim_client=None, alternatives_c
        anchor in the text first); otherwise the name is searched inside the
        anchors' areas (`NominatimClient.search_within`), then as "name,
        anchor", keeping only results that carry the mention's words
-       (`_names_the_mention`). If all fail and an anchor is right next to the
+       (`_names_the_mention`), then, if the Nominatim client carries a
+       `wikidata_client`, in Wikidata labels and aliases inside the anchors'
+       areas (`_wikidata_search`). If all fail and an anchor is right next to the
        mention ("Le Nys, Amsterdam"), the mention gets no location unless its
        first alternative is prominent and, when it lies in another country,
        shares a distinctive word with the mention ("Clock Tower, Venice" is
@@ -913,6 +986,9 @@ def resolve_artwork_places(mentions, conn, nominatim_client=None, alternatives_c
         anchor_names -= demoted
 
     search_within = getattr(nominatim_client, "search_within", None)
+    # Optional Wikidata fallback (geolocation/wikidata.py), attached to the
+    # Nominatim client by run_pipeline --wikidata.
+    wikidata_client = getattr(nominatim_client, "wikidata_client", None)
     for name, occurrences in mentions:
         if name in anchor_names:
             continue
@@ -963,6 +1039,12 @@ def resolve_artwork_places(mentions, conn, nominatim_client=None, alternatives_c
         )
         if contextual is not None and _names_the_mention(name, contextual):
             resolved[name] = _resolved(contextual, [contextual, *options], nominatim_client, False, "name_and_anchor")
+            continue
+        # Last resort: Wikidata labels and aliases ("St. Ouen, Rouen" ->
+        # Abbey-Church of Saint-Ouen), inside the anchors' areas only.
+        from_wikidata = _wikidata_search(name, anchor_locations, wikidata_client)
+        if from_wikidata is not None:
+            resolved[name] = _resolved(from_wikidata, [from_wikidata, *options], nominatim_client, False, "wikidata")
             continue
         # Not found in the anchors' areas. An anchor right next to the mention
         # ("Le Nys, Amsterdam") says where it is: no location rather than a

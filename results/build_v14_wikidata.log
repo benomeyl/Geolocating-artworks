@@ -1,0 +1,5 @@
+[info] 501 œuvres chargées depuis /home/benoitmeylan/Documents/EPFL/Geolocating-artworks/data/raw/gold_standard/gold_dataset.json.
+[info] 396 œuvres enrichies depuis le dump AIC.
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights:  74%|███████▍  | 147/199 [00:00<00:00, 1422.98it/s]Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1462.82it/s]
+993 {'match': 432, 'negative': 385, 'unevaluable': 176}
