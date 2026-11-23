@@ -12,6 +12,7 @@ import argparse
 import csv
 import json
 import math
+import re
 from collections import Counter
 from datetime import date
 from pathlib import Path
@@ -127,13 +128,29 @@ PRECISE_REVIEW_COLUMNS = {
 }
 
 
+# "lat, lon" pasted in the latitude cell (e.g. copied from a map), longitude left empty.
+_COORDINATE_PAIR = re.compile(r"^\s*(-?\d+(?:\.\d+)?)\s*[,;]\s*(-?\d+(?:\.\d+)?)\s*$")
+
+
+def _split_coordinate_pair(row):
+    """Row with a "lat, lon" pair in review_latitude split into the two columns."""
+    match = _COORDINATE_PAIR.match(row.get("review_latitude") or "")
+    if match and not (row.get("review_longitude") or "").strip():
+        return {**row, "review_latitude": match.group(1), "review_longitude": match.group(2)}
+    return row
+
+
 def precise_review_row(row):
     """Convert a row of export_precise_places.py (review_* columns) to the actual_* format.
 
     Rows without a sample_stratum column come from the first export, sorted
     by p_exact and annotated from the top: they are tagged "precise_keywords"
     so that they can be kept out of an unbiased precision estimate.
+    Coordinates typed by the annotator win over the geocoded candidate, even
+    when `review_candidate_correct` is set ("good prediction but the
+    building was destroyed": the typed coordinates are the reference).
     """
+    row = _split_coordinate_pair(row)
     converted = {
         **row,
         "review_id": f"P{(row.get('rank') or '').strip()}",
@@ -142,7 +159,10 @@ def precise_review_row(row):
         "actual_precision": row.get("review_precision") or "",
     }
     candidate_correct = (row.get("review_candidate_correct") or "").strip().casefold() in TRUE_VALUES
-    source_columns = PRECISE_CANDIDATE_COLUMNS if candidate_correct else PRECISE_REVIEW_COLUMNS
+    typed_coordinates = bool((row.get("review_latitude") or "").strip() and (row.get("review_longitude") or "").strip())
+    source_columns = (
+        PRECISE_CANDIDATE_COLUMNS if candidate_correct and not typed_coordinates else PRECISE_REVIEW_COLUMNS
+    )
     for actual_column, source_column in source_columns.items():
         converted[actual_column] = row.get(source_column) or ""
     return converted

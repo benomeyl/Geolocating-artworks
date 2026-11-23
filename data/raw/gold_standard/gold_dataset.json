@@ -20367,6 +20367,2054 @@
         "annotator": "manual_review",
         "date": "2026-11-16"
       }
+    },
+    {
+      "artwork": {
+        "id": 207527,
+        "title": "Buffet Toyota, 1 Tsunohazu, Shinjuku-ku (Toshi-e / Tokyo-jin)",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "fe0713f3-037d-2400-a93b-7f27c363b8a0",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Tsunohazu Shyokudo",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 35.6866770576013,
+          "longitude": 139.692835854808,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P99",
+          "sample_stratum": "precise_diverse",
+          "review_notes": "almost right but small missplacing of the exact_place",
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 129676,
+        "title": "Huastecs of the State of San Luis Potosi, from Mexican Costume",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [
+          "Latin American"
+        ],
+        "style_titles": [],
+        "image_id": "572359d9-1bcf-d1f1-1082-ed0dc813fda0",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "none",
+        "place_type": null,
+        "depicted_place": null,
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P100",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 199026,
+        "title": "Lake Superior Scenery, North Shore",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [
+          "19th century"
+        ],
+        "image_id": "575ea086-7cfa-4670-7910-9803239372b7",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "North Shore",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 46.8712196470304,
+          "longitude": -91.9531377024761,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P101",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 80342,
+        "title": "Shanghai; Two White Russian Refugees",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "636aa3a1-0567-ffd8-9120-482422b4a75b",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Shanghai",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 31.2227542126836,
+          "longitude": 121.457476386664,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P102",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 48585,
+        "title": "View of the Village and Bay of Yalta, Crimea, August 15, 1837",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "9a486a30-e241-707a-f721-63d892f7086b",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Yalta",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 44.4914287896676,
+          "longitude": 34.1527493483503,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P103",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 94353,
+        "title": "Fort Vaux (near Verdun)",
+        "description": "<p><a href=\"http://archive.artic.edu/steichen/index.html\">Edward Steichen</a> was one of the most influential photographers of the 20th century—a pioneering champion of art photography and an innovator in fashion and commercial photography. Lesser known, however, is his important role in World War I, as chief of the Photographic Section of the American Expeditionary Forces (AEF) from 1917 to 1919. Steichen, who had come to regard France as a second homeland after living there from 1906 to 1914, was quick to enlist once the United Statesa officially entered the war in 1917. Though at 38 he was eight years older than the Signal Corps age limit, his experience as a photographer made him a valuable recruit, and he entered active duty in July 1917 as a first lieutenant.</p>\n<p>World War I, sometimes called the first “modern” war, was marked by groundbreaking advances in technology, including photography. Steichen intended to be “a photographic reporter, as Mathew Brady had been in the Civil War,” but he quickly abandoned this romantic notion to help implement one of the newest weapons—aerial photography. Taking images from airplanes made it possible not only to observe a wide swath of the battlefield but also to track daily changes on the front lines.</p>\n<p>Steichen was assigned to the newly formed Photographic Section, led by Major James Barnes, and together they oversaw the training and outfitting of aerial-photography and surveillance units that proved their usefulness over the course of the war. Steichen also worked to standardize cameras, materials, and formats across the various national armies in order to simplify cooperation among the Allied forces.</p>\n<p>This album was assembled by Steichen in 1919 from prints he kept after his military discharge. Many such pictures entered public and private collections; in some cases, they were assembled into albums that chronicled aerial photography during the war. Steichen’s pride in his work for the AEF is made clear in this unique compilation, which he personally captioned and dedicated to a member of a prominent family of art patrons.</p>\n<p>To learn more about this album, visit <a href=\"http://archive.artic.edu/steichen/index.html\">http://archive.artic.edu/steichen/index.html</a>.</p>\n",
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "81533d2f-4ef1-769d-84f6-accdb6fa1116",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Fort de Vaux",
+          "city": "Damloup",
+          "region": "Grand Est",
+          "country": "France",
+          "latitude": 49.2004911,
+          "longitude": 5.4701354,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P104",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 44522,
+        "title": "Desembarco de 42 trabajadores mexicanos que enloquecieron por hambre en el sur de los estados unidos-Puerto de Manzanillo-1937 (Disembarkation of 42 Mexican Workers Madden by Hunger in the Southern United States-Port of Manzanillo-1947)",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [
+          "Latin American"
+        ],
+        "style_titles": [],
+        "image_id": "6ad85538-def1-903f-28a5-c67556867dcb",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Puerto de Manzanillo",
+          "city": "Manzanillo",
+          "region": "Colima",
+          "country": "México",
+          "latitude": 19.0711242,
+          "longitude": -104.2895786,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P106",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 94027,
+        "title": "Nile River at Aswan, Egypt",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [
+          "Chicago"
+        ],
+        "theme_titles": [
+          "Chicago Artists",
+          "SAIC Alumni and Faculty"
+        ],
+        "style_titles": [],
+        "image_id": "e574c432-72be-3c35-64db-921cb9311459",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Aswan",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 24.0906752364678,
+          "longitude": 32.8931397103353,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P107",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 244933,
+        "title": "City of Hyderabad",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "c6a43f11-1152-b28c-e697-cd1e0818b11a",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Hyderabad",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 17.4076946958896,
+          "longitude": 78.472576121421,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P108",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 63960,
+        "title": "Rue des Toiles, Bourges",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "68070b13-f25d-8077-75ad-723564cd8463",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Rue Pelvoysin",
+          "city": "Bourges",
+          "region": "Centre-Val de Loire",
+          "country": "France",
+          "latitude": 47.086185,
+          "longitude": 2.3937853,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P109",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 126544,
+        "title": "Garden Party, Berlin, Germany",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [
+          "Collected by Hugh Edwards"
+        ],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "dd71eba1-eded-ac6a-30eb-4bf625e07cdc",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Berlin",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 52.517627257114,
+          "longitude": 13.3959056486724,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P110",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 53205,
+        "title": "Statue of Ferdinand I, Grand Duke of Tuscany, from Views of the Port of Livorno",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "5a3744e3-c5c8-a456-d42e-c013bddd053f",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Monumento dei Quattro Mori",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 43.5495556493497,
+          "longitude": 10.3047526974486,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P111",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 268347,
+        "title": "De Wittevrouwen-Poort in Utrecht",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "a59f1fc1-7d18-4d15-ebae-d676d274c457",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Wittevrouwenpoort",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 52.0950478016175,
+          "longitude": 5.12626632466044,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P112",
+          "sample_stratum": "precise_diverse",
+          "review_notes": "good prediction but the building was destruct",
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 120587,
+        "title": "Rannoch Moor, Perth",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "50f7c14d-0051-420b-385c-613dd8293c67",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Rannoch Moor",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 56.654112,
+          "longitude": -4.593734,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "region",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P113",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 34794,
+        "title": "Early morning - Clay Hill, Goddard College, Plainfield",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "64f6667e-e944-bb76-2622-d511c95a8ed3",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Goddard College",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 44.2790710262247,
+          "longitude": -72.43873597640635,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P114",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 186140,
+        "title": "Ruins of Drop City, Trinidad, Colorado, from the series \"Sweet Earth: Experimental Utopias in America\"",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [
+          "landscapes"
+        ],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "20e0e481-ef26-f689-4003-8290a6a16de4",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Drop City",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 37.2237588568839,
+          "longitude": -104.466416051588,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P115",
+          "sample_stratum": "precise_diverse",
+          "review_notes": "Small miss in GPS coordinates",
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 151512,
+        "title": "Beer Garden in Rosenheim",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [
+          "gardens"
+        ],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "ff1f84a4-fa89-0782-0b2b-e1e1d6b0aeb4",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Rosenhem",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 47.8565748082244,
+          "longitude": 12.1166455441948,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P116",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 50363,
+        "title": "The Old Town Bridge Tower in Prague",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "51ad5f31-ed00-6cd3-cc8d-caf23985b728",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Staroměstská mostecká věž",
+          "city": "Praha",
+          "region": null,
+          "country": "Česko",
+          "latitude": 50.0861752,
+          "longitude": 14.4136092,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P117",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 111964,
+        "title": "Little Market Place, Tours",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "834e62c0-ae45-e047-0f02-76b474609178",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Tours",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 47.3935671707806,
+          "longitude": 0.680491495042084,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P118",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 262856,
+        "title": "Mami in her Room, Los Kilometros, Santo Domingo, R.D.",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [
+          "homes",
+          "neon signs",
+          "mother",
+          "latin america",
+          "dominican republic",
+          "domestic scenes",
+          "domestic space",
+          "caribbean",
+          "room",
+          "family photography"
+        ],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "579f3928-dd3f-7760-1070-f342652e9f0a",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Santo Domingo",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 18.4845508819056,
+          "longitude": -69.9360297473956,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P119",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 122029,
+        "title": "Kelp, Santa Cruz",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [
+          "Collected by Hugh Edwards"
+        ],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "b86c1c73-d325-550c-d6d2-1a544c065a62",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "none",
+        "place_type": null,
+        "depicted_place": null,
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P120",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 65626,
+        "title": "The Heath, Newmarket, England",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [
+          "Collected by Hugh Edwards"
+        ],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "62f577c8-07b1-375a-d9cb-d95f2ca05e33",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Newmarket",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 52.246294083149,
+          "longitude": 0.403777262263246,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P121",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 115878,
+        "title": "Entrance Hall, Christchurch, Oxford",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "9bba1c7a-2db2-4ab0-c7a4-d73a1380f219",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Christ Church",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 51.749909542373516,
+          "longitude": -1.2558311728205032,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P122",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 52254,
+        "title": "The Street Gazette: Grand Inauguration of the New Racetrack Situated on Peñón Hill in Mexico City",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [
+          "Latin American"
+        ],
+        "style_titles": [],
+        "image_id": "2722ebe0-0867-1f1c-bf55-d0363c6469fe",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Mexico City",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 19.4374657792012,
+          "longitude": -99.0839930705998,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P123",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 267107,
+        "title": "Hallowed Ground: variously shaped stones mark tombs in the Jewish burial ground of the Kidron Valley, to the southwest Jerusalem. The Jewish tradition has it that the Last Judgment will take place here. In the background, the silvery dome of Al-Aqsa Mosque is visible over the wall surrounding the Haram Sharif, or Noble Sanctuary, a holy site of Islam, in East Jerusalem",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "056ac94e-a8ce-ba98-769f-6bb5ea377cb2",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Kidron Valley",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 31.7766584603457,
+          "longitude": 35.238856834265,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P124",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 196764,
+        "title": "Shalimar Garden, Lahore",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [
+          "Japanese (culture or style)"
+        ],
+        "image_id": "3503ff6a-5659-f65d-7d42-9c64a83803f5",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "شالا مار باغ اسٹیشن",
+          "city": "لاہور",
+          "region": "پنجاب",
+          "country": "پاکستان",
+          "latitude": 31.5834744,
+          "longitude": 74.3797505,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P125",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 47587,
+        "title": "Place Terre-au-Duc, Quimper",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "5492ec11-786c-dc35-79e6-4628de42e033",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Place Terre au Duc",
+          "city": "Quimper",
+          "region": "Bretagne",
+          "country": "France",
+          "latitude": 47.9959207,
+          "longitude": -4.1062728,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P126",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 14736,
+        "title": "The Harbor, Puerto Plata",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [
+          "Century of Progress",
+          "world's fairs",
+          "Chicago World's Fairs"
+        ],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "279020bf-841e-340c-480d-63f1f68771d5",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Puerto Plata",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 19.7863375893992,
+          "longitude": -70.6879797671927,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P127",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 39023,
+        "title": "Gate of Christchurch, Oxford",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [
+          "19th century"
+        ],
+        "image_id": "5c791bb4-e974-7cb9-472c-c999cd5fea99",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Tom Tower",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 51.7502386485111,
+          "longitude": -1.25656189623443,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P128",
+          "sample_stratum": "precise_diverse",
+          "review_notes": "Impossible to know without looking the picture",
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 218909,
+        "title": "Untitled (Museu de Serralves, Porto, Portugal, 2006)",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [
+          "21st Century"
+        ],
+        "image_id": "032e58ca-fafa-1cb9-664b-afaada399347",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "none",
+        "place_type": null,
+        "depicted_place": null,
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P129",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 267120,
+        "title": "Argentina, Buenos Aires: \"Dal Piemonte al Rio de la Plata\" (Portrait of men around table)",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "dd559871-ebeb-09eb-9cc7-306f66f399b5",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Buenos Aires",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": -34.6064714516585,
+          "longitude": -58.3859229153813,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P130",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 22801,
+        "title": "Fazenda de Gado, Camaquà, Rio Grande do Sul",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [
+          "Collected by Hugh Edwards"
+        ],
+        "theme_titles": [
+          "SAIC Alumni and Faculty"
+        ],
+        "style_titles": [],
+        "image_id": "22d69db5-7ba2-e97a-3181-e1f47b32b4f4",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Camaquà",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": -30.84876334534339,
+          "longitude": -51.808305322239,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P131",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 14733,
+        "title": "Along the Beach, Puerto Plata",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "1bb92d80-6d5f-ad6b-a267-0918298041a2",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Puerto Plata",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 19.7863375893992,
+          "longitude": -70.6879797671927,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P132",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 240779,
+        "title": "Street Vendors, Warsaw",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "955ead5b-884d-da6b-2fd3-2ee04117b9f1",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Warsaw",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 52.2320460133165,
+          "longitude": 21.0085392971172,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P133",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 73561,
+        "title": "Dry Docks, Southampton",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "60f90394-2980-c18d-57d8-0afe52d25315",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Southampton",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 50.8978313782484,
+          "longitude": -1.40332846478949,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P134",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 139443,
+        "title": "The Terrace, Luxembourg",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "b30986e0-1d91-7076-e9ca-503a597ec621",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Luxembourg",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 49.6089030943187,
+          "longitude": 6.12430043485871,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P135",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 122349,
+        "title": "Church of the Grand Palace, Petrodvorets",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "aa793512-9c5c-d7be-2642-11e213b07aac",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Royal Church Museum",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 59.8842882695685,
+          "longitude": 29.911010356506,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P136",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 118087,
+        "title": "Terni: Marble Falls, plate twenty from Italie Monumentale et Pittoresque",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "1ed8dda5-d9a3-751b-e81a-ab559f2af70c",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Cascata delle Marmore",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 42.5511212056055,
+          "longitude": 12.715196596858,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P137",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 157944,
+        "title": "Entrance to the Great Temple, Luxor",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [
+          "Collected by Hugh Edwards",
+          "Egypt and Palestine"
+        ],
+        "theme_titles": [],
+        "style_titles": [
+          "19th century"
+        ],
+        "image_id": "16d52f90-3bda-102a-2fab-928235f9ee5f",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Temple d'Amon",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 25.7006983033841,
+          "longitude": 32.6385899055388,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P138",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 24674,
+        "title": "The Oude Kerk, Delft",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [
+          "interior",
+          "windows",
+          "window",
+          "coat of arms",
+          "decoration",
+          "wood",
+          "white (color)",
+          "architecture",
+          "architecture",
+          "architechture",
+          "buildings",
+          "building",
+          "church",
+          "column",
+          "fences",
+          "candelabra",
+          "babies",
+          "children",
+          "woman with children",
+          "women",
+          "men",
+          "people"
+        ],
+        "theme_titles": [],
+        "style_titles": [
+          "17th Century"
+        ],
+        "image_id": "c68a078e-b4c1-7ea8-d37a-a30c7c28f94e",
+        "is_public_domain": true
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Oude Kerk",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 52.0126445753989,
+          "longitude": 4.3560606266748,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P139",
+          "sample_stratum": "precise_diverse",
+          "review_notes": "right name, wrong city, weird to not fin Delft as a city",
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 184637,
+        "title": "Buddha, after an image at the Mogao Caves, Dunhuang",
+        "description": "<p>In the early 1940s, the renowned painter, connoisseur, and art historian Xie Zhiliu devoted more than a year to close research of the Mogao caves in Dunhuang, China’s grandest repository of Buddhist art. During his study, Xie copied several wall paintings to create his own images, including the one shown here. This deity’s finely rendered outline and fully rounded proportions evoke a style that is distinctive to Dunhuang murals datable to the 7th century. However, Xie clearly enhanced this figure with original artistic elements: naturalistic skin tones, carefully graded shading, and decorative scrollwork along the borders of the Buddha’s drapery folds.</p>\n",
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [
+          "Chinese (culture or style)"
+        ],
+        "image_id": "854e8be6-3737-38a8-8c57-7ab4180546b8",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "none",
+        "place_type": null,
+        "depicted_place": null,
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P140",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 151878,
+        "title": "Crawford Market, Mumbai, Maharashtra",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [],
+        "style_titles": [],
+        "image_id": "d3c55f2d-0148-05c2-ea7f-e4dd314948a5",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Crawford Market",
+          "city": null,
+          "region": "Maharashtra",
+          "country": "India",
+          "latitude": 18.9473499,
+          "longitude": 72.8345108,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "exact_place",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P141",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 221830,
+        "title": "Lumber Workers (Cuidad del Carmen, State of Campeche), from Mexican People",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [
+          "Latin American"
+        ],
+        "style_titles": [],
+        "image_id": "40ea6fad-c74d-49c6-f852-aa5d39389b93",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Cuidad del Carmen",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": 18.6505812559591,
+          "longitude": -91.806821241909,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P142",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 69085,
+        "title": "De las Entranas, Cusco, Peru (Woven Within)",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [
+          "Women artists"
+        ],
+        "style_titles": [],
+        "image_id": "771c3d54-782c-fc5c-9baf-f09f1ea850e2",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "depicted",
+        "place_type": "real",
+        "depicted_place": {
+          "name": "Cusco",
+          "city": null,
+          "region": null,
+          "country": null,
+          "latitude": -13.5333033057596,
+          "longitude": -71.968792442465,
+          "geonameid": null,
+          "geonameid_match": "none",
+          "precision": "city",
+          "coordinate_source": "manual_review"
+        },
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P143",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 129686,
+        "title": "Totonacs of the State of Veracruz, from Mexican Costume",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [],
+        "theme_titles": [
+          "Latin American"
+        ],
+        "style_titles": [],
+        "image_id": "0b81e083-0ed8-82e6-e066-3e28d73eca65",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "none",
+        "place_type": null,
+        "depicted_place": null,
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P144",
+          "sample_stratum": "precise_diverse",
+          "review_notes": null,
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
+    },
+    {
+      "artwork": {
+        "id": 125506,
+        "title": "\"El\", Sixth Avenue Line, Twenty-Eighth Street Station, Manhattan",
+        "description": null,
+        "short_description": null,
+        "subject_titles": [
+          "cityscapes"
+        ],
+        "theme_titles": [
+          "Women artists"
+        ],
+        "style_titles": [],
+        "image_id": "d8468cef-de63-a89a-a043-fee63c9c1a77",
+        "is_public_domain": false
+      },
+      "matched_queries": [],
+      "annotations": {
+        "place_status": "undeterminable",
+        "place_type": null,
+        "depicted_place": null,
+        "mentioned_places": [],
+        "annotation_basis": "manual_review",
+        "ground_truth_source": {
+          "dataset": "manual_review",
+          "csv_file": "annotation_precise_diverse.csv",
+          "review_id": "P145",
+          "sample_stratum": "precise_diverse",
+          "review_notes": "can’t find the exact place",
+          "used_suggestion": false
+        },
+        "confidence": null,
+        "status": "verified",
+        "annotator": "manual_review",
+        "date": "2026-11-23"
+      }
     }
   ]
 }

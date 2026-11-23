@@ -207,3 +207,28 @@ def test_precise_rows_keep_their_sample_stratum(tmp_path):
     imported, _, _ = load_review_records(csv_path, records_path, "2026-11-05", dump_dir=tmp_path)
 
     assert imported[0]["annotations"]["ground_truth_source"]["sample_stratum"] == "precise_diverse"
+
+
+def test_precise_review_splits_a_pasted_coordinate_pair_and_prefers_typed_coordinates():
+    from scripts.integrate_manual_review import precise_review_row
+
+    pasted = precise_review_row({
+        "rank": "114", "review_place_status": "d", "review_precision": "exact_place",
+        "review_candidate_correct": "no", "review_place_name": "Goddard College",
+        "review_latitude": "44.2790710262247, -72.43873597640635", "review_longitude": "",
+    })
+    assert (pasted["actual_latitude"], pasted["actual_longitude"]) == ("44.2790710262247", "-72.43873597640635")
+
+    typed = precise_review_row({
+        "rank": "112", "review_place_status": "d", "review_precision": "exact_place",
+        "review_candidate_correct": "yes", "review_place_name": "Wittevrouwenpoort",
+        "review_latitude": "52.095", "review_longitude": "5.126",
+        "resolved_name": "Poortstraat", "latitude": "52.1", "longitude": "5.13",
+    })
+    assert typed["actual_place_name"] == "Wittevrouwenpoort" and typed["actual_latitude"] == "52.095"
+
+    candidate = precise_review_row({
+        "rank": "104", "review_place_status": "d", "review_candidate_correct": "yes",
+        "resolved_name": "Fort de Vaux", "latitude": "49.2", "longitude": "5.47",
+    })
+    assert candidate["actual_place_name"] == "Fort de Vaux" and candidate["actual_latitude"] == "49.2"
