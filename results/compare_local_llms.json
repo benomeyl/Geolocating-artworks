@@ -1,0 +1,28 @@
+{
+ "gemma3:4b": {
+  "secondes_par_oeuvre": 39.6,
+  "json_invalide": 0,
+  "exact_perdu_oeuvres": 77,
+  "exact_perdu_lieu_represente": 69,
+  "exact_perdu_monument_retrouve": 23,
+  "exact_perdu_monument_retrouve_AIC": "12/52",
+  "exact_perdu_monument_nomme_tout_role": 26,
+  "exact_perdu_lieux_precis_faux": 4,
+  "sans_lieu_oeuvres": 60,
+  "sans_lieu_dit_represente": 13,
+  "sans_lieu_lieu_precis_verifie": 4
+ },
+ "qwen3:4b": {
+  "secondes_par_oeuvre": 29.7,
+  "json_invalide": 0,
+  "exact_perdu_oeuvres": 77,
+  "exact_perdu_lieu_represente": 10,
+  "exact_perdu_monument_retrouve": 4,
+  "exact_perdu_monument_retrouve_AIC": "1/52",
+  "exact_perdu_monument_nomme_tout_role": 7,
+  "exact_perdu_lieux_precis_faux": 0,
+  "sans_lieu_oeuvres": 60,
+  "sans_lieu_dit_represente": 0,
+  "sans_lieu_lieu_precis_verifie": 0
+ }
+}

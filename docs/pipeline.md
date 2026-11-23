@@ -318,7 +318,9 @@ l'œuvre est `uncertain`.
 | `python scripts/audit_geographic_annotations.py` | Liste les champs manquants des annotations |
 | `python scripts/compare_feature_sets.py [--reuse-table] --output results/….json` | Compare des jeux de features sur la même table (validation externe, 10 découpages appariés, précision moyenne hors-fold par niveau) |
 | `python scripts/compare_tables.py --variant NOM TABLE.pkl ['{options}'] … [--repeats 20]` | Compare des tables de features ou des options d'entraînement sur les mêmes découpages : faux positifs, précision par niveau, ce qui serait publié |
-| `python -m pytest -q` | Tests (123) |
+| `python scripts/compare_local_llms.py --models gemma3:4b qwen3:4b [--per-group 20]` | Compare des LLM locaux (Ollama) sur les lieux exacts perdus et les œuvres sans lieu |
+| `python scripts/run_llm_places.py export / infer / import` | Inférence LLM sur une autre machine (prompts exportés, réponses rapatriées dans le cache) |
+| `python -m pytest -q` | Tests (131) |
 
 Lancer avec `.venv/bin/python` : l'interpréteur Anaconda de base n'a pas
 `transformers`.
@@ -439,6 +441,40 @@ mêmes 20 découpages : FP +0,35 (bruit), TP +1,2, pays 0,915 → 0,916,
 ville 0,898 → 0,873. Non adoptée. La plupart des monuments perdus
 n'atteignent pas Wikidata : pas d'ancre, ville dans le nom du monument
 (« Cathedral of Mainz »), monument non extrait par le NER, ancre fausse.
+
+### v15 : configuration v13 sur 547 œuvres (23/11/2026)
+
+46 annotations de l'échantillon diversifié en plus (gold 547). Précision
+0,865 ± 0,029, rappel 0,175, 7,7 FP par découpage ; pays activé à 0,908
+(0,906 cumulé) ; ville 0,759, région 0,822. Les œuvres diversifiées, plus
+difficiles, rendent les seuils plus stricts (comparaison non appariée avec
+v13, les données ont changé).
+
+### LLM local pour lire les lieux (23/11/2026)
+
+`src/data/llm_places.py` : un LLM servi par Ollama lit les métadonnées et
+renvoie en JSON les lieux nommés (nom usuel, type, ville, pays, rôle
+représenté / origine / mentionné) ; chaque lieu n'est gardé que si
+Wikidata ou Nominatim le confirme dans la ville ou la région indiquée (le
+LLM ne donne jamais de coordonnées). Comparaison
+(`scripts/compare_local_llms.py`, 77 lieux exacts perdus + 60 œuvres sans
+lieu, CPU) :
+
+| | Gemma3-4B | Qwen3-4B sans réflexion |
+|---|---|---|
+| Temps par œuvre (CPU) | 40 s | 30 s |
+| Monuments retrouvés et confirmés | 23 / 77 (AIC 12 / 52) | 4 / 77 |
+| Monuments nommés, tous rôles | 26 / 77 | 7 / 77 |
+| Lieux précis faux | 4 | 0 |
+| Œuvres sans lieu jugées « représentées » | 13 / 60 | 0 / 60 |
+
+Qwen3 classe presque tout en « mentionné » ; avec réflexion il dépasse
+1 500 tokens par œuvre (plus de 10 min sur CPU). L'inférence sur tout le
+gold est déportée sur une machine GPU (`scripts/run_llm_places.py`,
+`docs/llm_inference_gpu.md`). Trouvé au passage : Nominatim donne aux
+villes-arrondissements allemandes (Dresde, Nuremberg) le rang d'une région
+(12) ; corrigé dans `llm_places`, encore présent dans
+`gazetter._anchor_scale`.
 
 ## 7. Fichiers de code
 
