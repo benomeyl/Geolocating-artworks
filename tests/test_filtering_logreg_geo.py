@@ -891,3 +891,23 @@ def test_pooled_levels_share_one_classifier_with_a_threshold_per_level():
     assert len(shared) == 1
     exact = model["levels"]["exact_place"]
     assert exact["oof_precision"] >= exact["target_precision"]
+
+
+def test_hybrid_model_gives_the_extra_columns_only_to_the_chosen_levels():
+    from src.data.filtering_logreg import _score_rows
+
+    table = _separable_table()
+    table["llm_flag"] = table["field_title"]
+    model = train_hierarchical_model(
+        table,
+        regularization_values=(1.0,),
+        prediction_model="fold_average",
+        pooled_levels=True,
+        extra_feature_columns=["llm_flag"],
+        extra_feature_levels=["exact_place", "city"],
+    )
+    assert model["feature_columns"][-1] == "llm_flag"
+    assert model["levels"]["exact_place"]["feature_columns"][-1] == "llm_flag"
+    assert "llm_flag" not in model["levels"]["country"]["feature_columns"]
+    scores = _score_rows(model, table)
+    assert scores and all(0.0 <= value <= 1.0 for row in scores.values() for value in row.values())

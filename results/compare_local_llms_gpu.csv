@@ -1,0 +1,275 @@
+model,group,artwork_id,title,seconds,verify_seconds,places_checked,json_error,depicts_place,depicted,verified,verified_precise_count,target,nearest_km,exact_found,precise_wrong,exact_found_any_role
+gemma3:4b,exact_perdu,Q65643590,Photographie de l'intérieur de la nef de la cathédrale de Gap,3.2,0.06,1,False,True,"Cathédrale de Gap [religious building; Gap, France]",Gap Cathedral (wikidata),1,Gap Cathedral,0.0,True,0.0,True
+gemma3:4b,exact_perdu,Q56464031,Estudo detalhado do corte na formacąō glacial do Portão Vermelho mostrando o bloques erraticos,3.7,0.13,2,False,True,"Portão Vermelho [natural site; , Brazil] | glacial formation [natural site; , Brazil]",,0,Portão Vermelho,,False,0.0,False
+gemma3:4b,exact_perdu,Q523974,View of Delft,3.1,0.0,1,False,True,"Delft [city; Delft, Netherlands]",Delft (nominatim_area),0,Schiedamse poort,,False,0.0,False
+gemma3:4b,exact_perdu,Q65643586,Photographie du côté de la façade occidentale en cours de construction de la cathédrale de Gap,3.1,7.54,1,False,True,"Facade occidentale [building; Gap, France]",,0,Gap Cathedral,,False,0.0,False
+gemma3:4b,exact_perdu,Q65643671,Photographie de l'intérieur de la nef de la cathédrale de Gap sans toiture,3.2,0.01,1,False,True,"Cathédrale de Gap [religious building; Gap, France]",Gap Cathedral (wikidata),1,Gap Cathedral,0.0,True,0.0,True
+gemma3:4b,exact_perdu,Q65643587,Photographie du côté de la façade occidentale en cours de construction de la cathédrale de Gap,3.1,0.02,1,False,True,"Facade occidentale [building; Gap, France]",,0,Gap Cathedral,,False,0.0,False
+gemma3:4b,exact_perdu,Q47525297,"Seminário Episcopal, 1887",3.0,0.0,1,False,True,"São Paulo [city; São Paulo, Brazil]",São Paulo (nominatim_area),0,Avenida Tiradentes,,False,0.0,False
+gemma3:4b,exact_perdu,Q20180920,Houses on the Achterzaan,3.1,0.0,1,False,True,"Achterzaan [country; , Netherlands]",,0,Houses on the Achterzaan,,False,0.0,False
+gemma3:4b,exact_perdu,Q65643589,Photographie de l'intérieur de la nef de la cathédrale de Gap,3.2,0.02,1,False,True,"Cathédrale de Gap [religious building; Gap, France]",Gap Cathedral (wikidata),1,Gap Cathedral,0.0,True,0.0,True
+gemma3:4b,exact_perdu,Q47525226,"Igreja de N. S. dos Remedios e Pateo da Cadeia, 1862",3.9,0.01,2,False,True,"Igreja de N. S. dos Remedios [religious building; São Paulo, Brazil] | Pateo da Cadeia [square; São Paulo, Brazil]",,0,Doctor João Mendes Square,,False,0.0,False
+gemma3:4b,exact_perdu,Q65008433,Cathédrale de Blois,3.1,0.01,1,False,True,"Cathédrale de Blois [religious building; Blois, France]",Saint Louis Cathedral of Blois (wikidata),1,Blois Cathedral,0.0,True,0.0,True
+gemma3:4b,exact_perdu,Q65643654,Photographie de la restauration de la tour de la cathédrale d'Aix-en-Provence,3.4,0.01,1,False,True,"Tour de la cathédrale d'Aix-en-Provence [building; Aix-en-Provence, France]",,0,Cathedral of the Holy Saviour,,False,0.0,False
+gemma3:4b,exact_perdu,27047,"""A Scene in York"" - York Minster from Lop Lane",3.6,0.09,2,False,True,"York Minster [building; York, England] | Lop Lane [street; York, England]",York Minster (wikidata),1,York minster,0.42,True,0.0,True
+gemma3:4b,exact_perdu,212391,Greetings from Amarillo: Tall in Texas,3.5,0.0,2,False,True,"Amarillo [city; Amarillo, United States] | Texas [region; , United States]",Amarillo (nominatim_area) | Texas (nominatim_area),0,Paramount Theatre Sign,,False,0.0,False
+gemma3:4b,exact_perdu,identified-csv:dresden:440item_ODPFF25NY24TCWQV7UGOCHZ3VR43MXH3.jpg,königliches schloss,3.1,5.86,1,False,False,,,0,königliches schloss,,False,0.0,False
+gemma3:4b,exact_perdu,identified-csv:dresden:437item_GZWLKQPOILJPBGN4VK7S27GEHSDXMRSQ.jpg,hofkirche,3.5,18.54,2,False,True,"Hofkirche [religious building; Dresden, Germany] | Elbe River Bridge [bridge; Dresden, Germany]",Dresden Cathedral (wikidata) | Stadtbrücke Pirna (wikidata),2,hofkirche,0.0,True,0.0,True
+gemma3:4b,exact_perdu,identified-csv:dresden:188item_B3YLDDMMNBVCHUDRUM5DFYMFXYG33EIV.jpg,augustus bridge,3.1,0.0,1,False,True,"Dresden [city; Dresden, Germany]",Dresden (nominatim_area),0,augustus bridge,,False,0.0,False
+gemma3:4b,exact_perdu,identified-csv:dresden:440item_QLOI7TG256I4K4P4URGDISRAF624LS3I.jpg,semperoper,3.1,0.02,1,False,True,"Semperoper [building; Dresden, Germany]",Semperoper (wikidata),1,semperoper,0.0,True,0.0,True
+gemma3:4b,exact_perdu,identified-csv:dresden:437item_EVBC3UU464M27YXEQ4BMZHVFH5MUMRON.jpg,pillnitz castle,3.6,0.03,2,False,True,"Pillnitz Castle [castle or palace; Pillnitz, Germany] | Wettin [other; Pillnitz, Germany]",Pillnitz Castle (wikidata) | Wettin Crypt (wikidata),2,pillnitz castle,0.0,True,0.0,True
+gemma3:4b,exact_perdu,identified-csv:dresden:188item_3W6MGGS4XVPSW5JUDIQKZGKHQ3YGV2VN.jpg,rathaus,3.1,0.03,1,False,True,"Rathaus Dresden [building; Dresden, Germany]",Neues Rathaus (wikidata),1,rathaus,0.01,True,0.0,True
+gemma3:4b,exact_perdu,identified-csv:dresden:188item_4KNGBOLJZXAQSCDXONV7QHM7CPW3MZZL.jpg,blaues wunder,3.5,0.0,2,False,True,"Loschwitz [neighborhood; Dresden, Germany] | Dresden [city; Dresden, Germany]",Loschwitz (nominatim_area) | Dresden (nominatim_area),1,blaues wunder,0.39,True,0.0,True
+gemma3:4b,exact_perdu,identified-csv:dresden:463item_UZEQKG75XB4S7XJQFEKDDVWCIGIRBVYB.jpg,stallhof,3.0,0.01,1,False,False,,,0,stallhof,,False,0.0,True
+gemma3:4b,exact_perdu,identified-csv:dresden:463item_YTCRIY56AQ2U7MHFCGJFPLQUNKL64ZQN.jpg,dreikönigskirche,3.2,0.04,1,False,True,"Dreikönigskirche [religious building; Dresden, Germany]",Dreikönigskirche (wikidata),1,dreikönigskirche,0.0,True,0.0,True
+gemma3:4b,exact_perdu,identified-csv:dresden:440item_O7H2R25HIC5OOYQOLXWXUURTZOPPKOUS.jpg,ruhende löwen,3.1,0.0,1,False,True,"Dresden [city; Dresden, Germany]",Dresden (nominatim_area),0,ruhende löwen,,False,0.0,False
+gemma3:4b,exact_perdu,identified-csv:dresden:437item_DAYS75QDGFS5SKFMSFCOE7OWV5YOXNE6.jpg,kasernen albertstadt,3.6,0.01,2,False,True,"Kasernen Albertstadt [building; Dresden, Germany] | Sachsenplatz [square; Dresden, Germany]",Sachsenplatz (wikidata),1,kasernen albertstadt,2.78,False,0.0,False
+gemma3:4b,exact_perdu,identified-csv:dresden:188item_A5TMI2BOJHA6GUPSSCMKYFBNAQRILRMN.jpg,postplatz,3.0,0.04,1,False,True,"Postplatz [square; Dresden, Germany]",Postplatz (wikidata),1,postplatz,0.0,True,0.0,True
+gemma3:4b,exact_perdu,identified-csv:dresden:437item_MARI6FP7JQZ444ZHESX5DOJL7VOFDVP6.jpg,albrechtschlösser,3.1,0.0,1,False,True,"Dresden [city; Dresden, Germany]",Dresden (nominatim_area),0,albrechtschlösser,,False,0.0,False
+gemma3:4b,exact_perdu,203601,"Peoples Savings Bank, Cedar Rapids, Iowa, Section",3.4,0.0,2,False,False,,,0,Cedar Rapids Bank & Trust,,False,0.0,False
+gemma3:4b,exact_perdu,272029,"All nations and races meet at the Maison Internationale de la Cite Universitaire de Paris, France",3.7,0.17,2,False,False,,,0,Maison Internationale,,False,0.0,True
+gemma3:4b,exact_perdu,110517,"State Theatre (Stadthalle), Nuremberg, Germany, Perspective",3.2,0.02,1,False,True,"Stadthalle [building; Nuremberg, Germany]",Stadthalle metro station (wikidata),1,Nuremberg State Theater,7.82,False,0.0,False
+gemma3:4b,exact_perdu,11858,"St. Ouen, Rouen",3.0,0.0,1,False,False,,,0,Abbatiale Saint-Ouen,,False,0.0,False
+gemma3:4b,exact_perdu,107308,200 South Wacker Building,3.1,0.01,1,False,True,"200 South Wacker Building [building; Chicago, United States]",,0,South Wacker Building,,False,0.0,False
+gemma3:4b,exact_perdu,115604,Conway Castle,3.1,0.04,1,False,True,"Conway Castle [castle or palace; Conway, Wales]",Conwy Castle (wikidata),1,Conwy Castle,0.03,True,0.0,True
+gemma3:4b,exact_perdu,125527,Forsyth and East Houston Street,3.5,0.0,2,False,True,"Forsyth [street; , United States] | East Houston Street [street; New York City, United States]",Houston Street (wikidata),1,Forsyth Street and East Houston Street,0.4,True,0.0,True
+gemma3:4b,exact_perdu,121022,"Surf, Point Lobos",3.3,0.01,1,False,True,"Point Lobos State Natural Reserve [natural site; Carmel-by-the-Sea, United States]",Point Lobos State Natural Reserve (wikidata),1,Point Lobos,1.05,False,0.0,False
+gemma3:4b,exact_perdu,125544,Manhattan Bridge Looking Up,3.1,0.01,1,False,True,"Manhattan Bridge [bridge; New York City, United States]",Manhattan Bridge (wikidata),1,Manhattan Bridge,0.05,True,0.0,True
+gemma3:4b,exact_perdu,109654,"New York City Interior, West End Ave. and 101st",3.7,0.03,2,False,True,"West End Avenue [street; New York City, United States] | 101st Street [street; New York City, United States]",510 West End Avenue (wikidata) | 329 West 101st Street (wikidata),2,West End Avenue and West 101st Street,0.12,True,0.0,True
+gemma3:4b,exact_perdu,120854,Point Lobos,3.2,0.01,1,False,True,"Point Lobos State Natural Reserve [natural site; Carmel-by-the-Sea, United States]",Point Lobos State Natural Reserve (wikidata),1,Point Lobos,1.01,False,0.0,False
+gemma3:4b,exact_perdu,120982,"Juniper, Lake Tenaya",3.7,0.05,2,False,True,"Lake Tenaya [natural site; , United States] | Juniper [natural site; , United States]",Tenaya Lake (wikidata) | Juniper (wikidata),2,Lake Tenaya,0.2,True,1.0,True
+gemma3:4b,exact_perdu,111005,"Sukiya Bridge, from the series Recollections of Tokyo",3.0,0.0,1,False,True,"Sukiya Bridge [bridge; Tokyo, Japan]",,0,Sukiyabashi,,False,0.0,False
+gemma3:4b,exact_perdu,117249,"Church of St. Etienne du Mont, Paris",3.2,0.01,1,False,True,"Église Saint-Étienne-du-Mont [religious building; Paris, France]",Saint-Étienne-du-Mont (wikidata),1,Church of St. Etienne du Mont,0.01,True,0.0,True
+gemma3:4b,exact_perdu,120980,"Juniper, Lake Tenaya",3.7,0.05,2,False,True,"Lake Tenaya [natural site; , United States] | Juniper [natural site; , United States]",Tenaya Lake (wikidata) | Juniper (wikidata),2,Lake Tenaya,0.2,True,1.0,True
+gemma3:4b,exact_perdu,122351,Annunciation Bridge in St. Petersburg,3.1,0.01,1,False,True,"Annunciation Bridge [bridge; St. Petersburg, Russia]",,0,Annunciation Bridge,,False,0.0,False
+gemma3:4b,exact_perdu,8925,Madison Square,3.1,0.02,1,False,True,"Madison Square [square; New York City, United States]",Madison Square Garden (wikidata),1,Madison square,1.01,False,0.0,False
+gemma3:4b,exact_perdu,15833,"The Mechouar, Palace of the Sultan at Marrakesh",3.2,0.06,1,False,True,"Mechouar [building; Marrakesh, Morocco]",Pachalik de Méchouar Kasba (nominatim_bounded),1,Palace El Mechouar,720.24,False,1.0,False
+gemma3:4b,exact_perdu,84846,"New Colonnade, Central Terminus, Newcastle-on-Tyne",4.2,0.14,3,False,False,,,0,Central Station,,False,0.0,False
+gemma3:4b,exact_perdu,149184,"Exhibition Stadium, Toronto",3.1,0.04,1,False,True,"Exhibition Stadium [street; Toronto, Canada]",Exhibition Stadium (wikidata),1,Exhibition Stadium,0.0,True,0.0,True
+gemma3:4b,exact_perdu,118094,"View of the Cloister of the Cathedral of Mainz, plate two from Allemande",3.3,0.0,1,False,True,"Cloister of the Cathedral of Mainz [religious building; Mainz, Germany]",,0,Mainz Cathedral,,False,0.0,False
+gemma3:4b,exact_perdu,181379,"The Church of San Miguel, the Oldest in Santa Fe, N.M.",3.3,4.25,1,False,True,"Church of San Miguel [religious building; Santa Fe, United States]",,0,San Miguel Chapel,,False,0.0,False
+gemma3:4b,exact_perdu,12185,"The Carrière, or Rue Neuve, at Nancy (The New Street)",3.5,0.12,2,False,True,"Carrière [other; Nancy, France] | Rue Neuve [street; Nancy, France]",place de la Carrière (wikidata) | Rue Neuve (nominatim_bounded),2,The carrière,0.03,True,0.0,True
+gemma3:4b,exact_perdu,50200,"Elevation Perspective of l'Hôtel de Ville, Rennes",3.2,0.04,1,False,True,"Hôtel de Ville de Rennes [building; Rennes, France]",Rennes City Hall (wikidata),1,Hôtel de ville,0.02,True,0.0,True
+gemma3:4b,exact_perdu,242511,Chandigarh (Capitol Complex 4),3.0,0.0,1,False,True,"Chandigarh [city; Chandigarh, India]",Chandigarh (nominatim_area),0,Palace of Assembly,,False,0.0,False
+gemma3:4b,exact_perdu,87395,"Mountain Temple at Sendai (Sendai yamanodera), from the series ""Collection of Scenic Views of Japan, Eastern Japan Edition (Nihon fukei shu higashi Nihon hen)""",3.6,4.66,2,False,True,"Yamanodera [religious building; Sendai, Japan] | Sendai [city; Sendai, Japan]",仙台市 (nominatim_area),0,Yama-dera temple,,False,0.0,False
+gemma3:4b,exact_perdu,147578,"Palais du Prince, Liege, from Facsimiles of Sketches made in Flanders and Germany",3.6,0.05,2,False,True,"Palais du Prince [building; Liège, Belgium] | Liège [city; Liège, Belgium]",Liège (nominatim_area),0,Palais des Princes-Évêques,,False,0.0,False
+gemma3:4b,exact_perdu,87274,Kiso River at Inuyama (Kisogawa [Inuyama]),3.6,0.03,2,False,True,"Kiso River [natural site; Inuyama, Japan] | Inuyama [city; Inuyama, Japan]",Kiso River (wikidata) | 犬山市 (nominatim_area),1,Inuyama’s castle,3.96,False,0.0,False
+gemma3:4b,exact_perdu,74944,"View of Metro West Building with Canadian Geese, Naperville, Illinois",3.6,0.0,2,False,True,"Metro West Building [building; Naperville, United States] | Naperville [city; Naperville, United States]",Naperville (nominatim_area),0,Metro west,,False,0.0,False
+gemma3:4b,exact_perdu,181951,"Temple of Amon, Luxor, Egypt",3.6,0.04,2,False,True,"Temple of Amon [religious building; Luxor, Egypt] | Luxor [city; Luxor, Egypt]",Temple of Amon (wikidata) | الأقصر (nominatim_area),1,Temple of Amon,4.3,False,0.0,False
+gemma3:4b,exact_perdu,46624,"The Clock Tower, Venice",3.0,0.02,1,False,True,"Clock Tower [building; Venice, Italy]",,0,St Mark's Clocktower,,False,0.0,False
+gemma3:4b,exact_perdu,123648,"Notre Dame de Poitiers (Vienne), West Facade",3.7,0.01,2,False,True,"Notre-Dame de Poitiers [religious building; Poitiers, France]",chapelle des Filles de Notre-Dame de Poitiers (wikidata),1,Notre-Dame-la-Grande,0.56,False,0.0,False
+gemma3:4b,exact_perdu,147592,"Hotel de Ville, Utrecht, from Facsimiles of Sketches made in Flanders and Germany",3.1,0.03,1,False,True,"Hotel de Ville [building; Utrecht, Netherlands]",,0,Stadhuis Utrecht,,False,0.0,False
+gemma3:4b,exact_perdu,236166,"Castle Rock, Green River Valley",3.7,2.43,2,False,True,"Castle Rock [castle or palace; Castle Rock, United States] | Green River Valley [region; , United States]",Castle Rock (nominatim_bounded) | Green River Gorge (nominatim_area),1,Castle rock,459.37,False,1.0,False
+gemma3:4b,exact_perdu,223529,Advancing across the Ansong River at the Battle of Asan (Gazan gekisen Anjo no watashi shingeki no zu),3.6,1.29,2,False,True,"Ansong River [natural site; , Korea] | Asan [city; Asan, Korea]",아산시 (nominatim_area),0,Ansong River,,False,0.0,False
+gemma3:4b,exact_perdu,46505,"Rue des Halles, Vannes, Brittany",3.5,0.01,2,False,True,"Rue des Halles [street; Vannes, France] | Vannes [city; Vannes, France]","Maison, 23 rue des Halles (wikidata) | Vannes (nominatim_area)",1,Rue des Halles (Vannes),0.03,True,0.0,True
+gemma3:4b,exact_perdu,199758,Abbotsford - The Hall,3.1,0.0,1,False,True,"Abbotsford [country; , Scotland]",Abbotsford (nominatim_area),0,Abbotsford House,,False,0.0,False
+gemma3:4b,exact_perdu,207527,"Buffet Toyota, 1 Tsunohazu, Shinjuku-ku (Toshi-e / Tokyo-jin)",4.2,0.01,3,False,False,,,0,Tsunohazu Shyokudo,,False,0.0,False
+gemma3:4b,exact_perdu,199026,"Lake Superior Scenery, North Shore",3.7,0.03,2,False,True,"Lake Superior [natural site; Duluth, USA] | North Shore [natural site; Duluth, USA]",Lake Superior Railroad Museum (wikidata) | North Shore (nominatim_bounded),2,North Shore,3.1,False,0.0,False
+gemma3:4b,exact_perdu,53205,"Statue of Ferdinand I, Grand Duke of Tuscany, from Views of the Port of Livorno",3.0,0.0,1,False,True,"Livorno [city; Livorno, Italy]",Livorno (nominatim_area),0,Monumento dei Quattro Mori,,False,0.0,False
+gemma3:4b,exact_perdu,268347,De Wittevrouwen-Poort in Utrecht,3.2,0.0,1,False,True,"De Wittevrouwen-Poort in Utrecht [city; Utrecht, Netherlands]",,0,Wittevrouwenpoort,,False,0.0,False
+gemma3:4b,exact_perdu,34794,"Early morning - Clay Hill, Goddard College, Plainfield",3.8,0.01,2,False,True,"Clay Hill [natural site; Plainfield, United States] | Goddard College [building; Plainfield, United States]",,0,Goddard College,,False,0.0,False
+gemma3:4b,exact_perdu,186140,"Ruins of Drop City, Trinidad, Colorado, from the series ""Sweet Earth: Experimental Utopias in America""",3.6,0.0,2,False,True,"Drop City [city; Drop City, United States] | Trinidad [city; Trinidad, United States]",Drop City (nominatim_area) | Trinidad (nominatim_area),0,Drop City,,False,0.0,False
+gemma3:4b,exact_perdu,115878,"Entrance Hall, Christchurch, Oxford",3.6,0.03,2,False,True,"Entrance Hall [building; Christchurch, England] | Christchurch [city; Christchurch, England]",Christchurch (nominatim_area),0,Christ Church,,False,0.0,False
+gemma3:4b,exact_perdu,267107,"Hallowed Ground: variously shaped stones mark tombs in the Jewish burial ground of the Kidron Valley, to the southwest Jerusalem. The Jewish tradition has it that the Last Judgment will take place here. In the background, the silvery dome of Al-Aqsa Mosque is visible over the wall surrounding the Haram Sharif, or Noble Sanctuary, a holy site of Islam, in East Jerusalem",4.8,0.04,4,False,True,"Kidron Valley [country; Jerusalem, Israel] | Jerusalem [city; Jerusalem, Israel] | Al-Aqsa Mosque [building; Jerusalem, Israel] | Haram Sharif [religious building; Jerusalem, Israel]",נחל קידר (nominatim_area) | ירושלים | القدس (nominatim_area),0,Kidron Valley,,False,0.0,False
+gemma3:4b,exact_perdu,196764,"Shalimar Garden, Lahore",3.2,0.03,1,False,True,"Shalimar Garden [park or garden; Lahore, Pakistan]",,0,شالا مار باغ اسٹیشن,,False,0.0,False
+gemma3:4b,exact_perdu,39023,"Gate of Christchurch, Oxford",3.1,0.0,1,False,True,"Gate of Christchurch, Oxford [building; Oxford, England]",,0,Tom Tower,,False,0.0,False
+gemma3:4b,exact_perdu,122349,"Church of the Grand Palace, Petrodvorets",3.1,0.0,1,False,True,"Church of the Grand Palace [religious building; Petrodvorets, Russia]",Grand Church of the Winter Palace (wikidata),1,Royal Church Museum,23.41,False,0.0,False
+gemma3:4b,exact_perdu,118087,"Terni: Marble Falls, plate twenty from Italie Monumentale et Pittoresque",3.6,0.01,2,False,True,"Terni [city; Terni, Italy] | Marble Falls [natural site; Terni, Italy]",Terni (nominatim_area),0,Cascata delle Marmore,,False,0.0,False
+gemma3:4b,exact_perdu,157944,"Entrance to the Great Temple, Luxor",3.6,0.05,2,False,True,"Great Temple [religious building; Luxor, Egypt] | Luxor [city; Luxor, Egypt]",الأقصر (nominatim_area),0,Temple d'Amon,,False,0.0,False
+gemma3:4b,sans_lieu,183,Kantharos (Wine Cup),3.6,0.0,2,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,238014,"More Brilliant than the Sun, from Human_3.0 Reading List",3.1,0.0,1,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,118889,Split,2.6,0.0,0,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,123672,"""Baby Urr"" of Chicago, Evanston",3.5,0.0,2,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,229496,Wu Street,3.0,0.0,1,False,True,"Wu Street [street; Beijing, China]",,0,,,,,
+gemma3:4b,sans_lieu,8624,Portrait of Pablo Picasso,3.6,0.0,2,False,True,"Paris [city; Paris, France]",Paris (nominatim_area),0,,,,,
+gemma3:4b,sans_lieu,270584,Passport Dominican Republic (Pasaporte Republica Dominica [Red]),3.5,0.0,2,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,124155,Italian Landscape with Ruins,3.5,0.0,2,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,40897,Kantharos (Wine Cup) in the Shape of a Female Head,3.1,0.0,1,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,107249,A la pintura: Blue 1-3,4.1,0.04,3,False,True,"Prado Museum [building; Madrid, Spain] | Madrid [city; Madrid, Spain] | Prado Museum [building; Madrid, Spain]",Museo del Prado (wikidata) | Madrid (nominatim_area) | Museo del Prado (wikidata),2,,,,,
+gemma3:4b,sans_lieu,111861,Saint Paul and Saint Peter,3.7,0.01,2,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,102528,Brussel Sprout,2.6,0.0,0,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,89403,Untitled #12,2.7,0.0,0,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,129676,"Huastecs of the State of San Luis Potosi, from Mexican Costume",3.3,0.0,1,False,True,"Huastecs of the State of San Luis Potosi [region; San Luis Potosi, Mexico]",,0,,,,,
+gemma3:4b,sans_lieu,9648,Stater (Coin) Depicting a Land Tortoise,3.6,0.0,2,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,129906,Pair of Protomes Depicting the Forepart of a Griffin,3.8,5.23,2,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,237996,"The Black Interior, from Human_3.0 Reading List",3.1,0.0,1,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,221070,Braxton McKinney and Lavon Thomas,4.1,0.05,3,False,False,"16th Street Baptist Church [religious building; Birmingham, United States] | Bethel Baptist Church [religious building; Birmingham, United States]",16th Street Baptist Church (wikidata) | Bethel Baptist Church (wikidata),2,,,,,
+gemma3:4b,sans_lieu,79307,Bathers by a River,3.5,0.0,2,False,True,,,0,,,,,
+gemma3:4b,sans_lieu,236548,Mogadibo,3.1,0.0,1,False,True,"Mogadishu [city; Mogadishu, Somalia]",Muqdisho مقديشو (nominatim_area),0,,,,,
+gemma3:4b,sans_lieu,102719,Nestlings,4.1,0.0,3,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,31816,After the Bullfight,3.5,0.0,2,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,238030,"Black Women in White America, from Human_3.0 Reading List",3.1,0.0,1,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,238001,"Blacks, from Human_3.0 Reading List",3.1,0.0,1,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,47141,Nude Seated in a Bathtub,2.6,0.0,0,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,102983,Vase,2.9,0.0,1,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,48365,"Odessa, U.S.S.R.",3.0,0.0,1,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,118770,"Four Courts, Dublin-A",3.1,0.02,1,False,True,"Four Courts [bridge; Dublin, Ireland]",Four Courts (wikidata),1,,,,,
+gemma3:4b,sans_lieu,129686,"Totonacs of the State of Veracruz, from Mexican Costume",3.5,0.0,2,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,270890,Mind in the Machine (Relaxed State),3.3,0.0,2,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,118594,"Untitled (Subway Portrait, New York)",3.6,0.0,2,False,True,"New York [city; New York, United States] | New York [city; New York, United States]",New York (nominatim_area) | New York (nominatim_area),0,,,,,
+gemma3:4b,sans_lieu,238016,"The Wretched of the Earth, from Human_3.0 Reading List",3.1,0.0,1,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,111541,Oval Tray,3.0,0.0,1,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,109090,The Entrance to the Forest by the Little Wooden Bridge,3.5,0.0,2,False,True,"Little Wooden Bridge [bridge; , Unknown] | Forest [natural site; , Unknown]",,0,,,,,
+gemma3:4b,sans_lieu,31599,Saint Catherine of Alexandria,3.7,0.0,2,False,True,"Jesuit church in Antwerp [religious building; Antwerp, Belgium]",Carolus Borromeuskerk (wikidata),1,,,,,
+gemma3:4b,sans_lieu,238002,"Gender Trouble, from Human_3.0 Reading List",3.1,0.0,1,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,112100,Burgonet,3.0,0.0,1,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,113568,"Sketches of the Emperor John VIII Palaeologus, a Monk, and a Scabbard",5.3,0.0,4,False,True,"Ferrara [city; Ferrara, Italy] | Florence [city; Florence, Italy]",Ferrara (nominatim_area) | Firenze (nominatim_area),0,,,,,
+gemma3:4b,sans_lieu,135708,Tureen,3.1,0.0,1,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,116305,Halberd,2.5,0.0,0,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,11441,Working Model for UNESCO Reclining Figure,4.2,0.06,3,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,77615,Painting (Figures with Stars),2.7,0.0,0,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,109443,Oeuf au Plat,2.6,0.0,0,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,11486,"The Servant, plate two from The Ranks and Conditions of Men",2.6,0.0,0,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,120705,Chicago 13A,3.0,0.0,1,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,111091,La Main,3.0,0.0,1,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,216950,Saint Francis of Assisi; Base with Putti,3.5,0.0,2,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,21576,Vase,2.9,0.0,1,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,116632,Pair of Cuisses with Poleyns,2.6,0.0,0,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,152001,"Toltecs of the State of Puebla, from Mexican Costume",3.2,0.0,1,False,True,"State of Puebla [region; Puebla, Mexico]",Carretera México - Puebla (Libre) (nominatim_area),0,,,,,
+gemma3:4b,sans_lieu,136651,Overseer Shabti of Isetemkheb,2.6,0.0,0,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,101953,"New York, New York 1945-49, page eleven from Recollection",3.1,0.0,1,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,107030,Fourteenth Stone,3.1,0.0,1,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,238039,"Playing in the Dark, from Human_3.0 Reading List",3.1,0.0,1,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,248927,Casket,3.5,0.0,2,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,100865,Bowl,2.9,0.0,1,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,116313,Halberd,2.9,0.0,1,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,102067,"Berlin Development Project, Friedrichstadt District, Site Plan",3.5,0.0,2,False,True,"Berlin [city; Berlin, Germany] | Friedrichstadt [city; Friedrichstadt, Germany]",Berlin (nominatim_area) | Friedrichstadt (nominatim_area),0,,,,,
+gemma3:4b,sans_lieu,136120,Miss Expanding Universe,3.5,0.0,2,False,True,,,0,,,,,
+gemma3:4b,sans_lieu,238032,"Sister Outsider, from Human_3.0 Reading List",3.1,0.0,1,False,False,,,0,,,,,
+qwen3:4b,exact_perdu,Q65643590,Photographie de l'intérieur de la nef de la cathédrale de Gap,62.7,0.0,1,False,False,"Gap [city; Gap, France]",Gap (nominatim_area),0,Gap Cathedral,,False,0.0,False
+qwen3:4b,exact_perdu,Q56464031,Estudo detalhado do corte na formacąō glacial do Portão Vermelho mostrando o bloques erraticos,17.9,0.0,1,False,False,,,0,Portão Vermelho,,False,0.0,False
+qwen3:4b,exact_perdu,Q523974,View of Delft,17.1,0.0,1,False,False,,,0,Schiedamse poort,,False,0.0,False
+qwen3:4b,exact_perdu,Q65643586,Photographie du côté de la façade occidentale en cours de construction de la cathédrale de Gap,18.3,0.0,1,False,False,,,0,Gap Cathedral,,False,0.0,False
+qwen3:4b,exact_perdu,Q65643671,Photographie de l'intérieur de la nef de la cathédrale de Gap sans toiture,18.5,0.01,1,False,False,"Cathédrale de Gap [building; Gap, France]",Gap Cathedral (wikidata),1,Gap Cathedral,0.0,True,0.0,True
+qwen3:4b,exact_perdu,Q65643587,Photographie du côté de la façade occidentale en cours de construction de la cathédrale de Gap,18.3,0.0,1,False,False,,,0,Gap Cathedral,,False,0.0,False
+qwen3:4b,exact_perdu,Q47525297,"Seminário Episcopal, 1887",31.0,0.0,2,False,False,,,0,Avenida Tiradentes,,False,0.0,False
+qwen3:4b,exact_perdu,Q20180920,Houses on the Achterzaan,16.9,0.0,1,False,False,,,0,Houses on the Achterzaan,,False,0.0,False
+qwen3:4b,exact_perdu,Q65643589,Photographie de l'intérieur de la nef de la cathédrale de Gap,62.7,0.0,1,False,False,"Gap [city; Gap, France]",Gap (nominatim_area),0,Gap Cathedral,,False,0.0,False
+qwen3:4b,exact_perdu,Q47525226,"Igreja de N. S. dos Remedios e Pateo da Cadeia, 1862",55.9,0.01,3,False,False,,,0,Doctor João Mendes Square,,False,0.0,False
+qwen3:4b,exact_perdu,Q65008433,Cathédrale de Blois,17.0,0.0,1,False,False,,,0,Blois Cathedral,,False,0.0,False
+qwen3:4b,exact_perdu,Q65643654,Photographie de la restauration de la tour de la cathédrale d'Aix-en-Provence,24.2,0.0,1,False,False,,,0,Cathedral of the Holy Saviour,,False,0.0,False
+qwen3:4b,exact_perdu,27047,"""A Scene in York"" - York Minster from Lop Lane",47.9,0.02,3,False,True,"York [city; York, United Kingdom] | York Minster [building; York, United Kingdom] | Lop Lane [street; York, United Kingdom]",York (nominatim_area) | York Minster (wikidata),1,York minster,0.42,True,0.0,True
+qwen3:4b,exact_perdu,212391,Greetings from Amarillo: Tall in Texas,22.9,0.0,1,False,False,,,0,Paramount Theatre Sign,,False,0.0,False
+qwen3:4b,exact_perdu,identified-csv:dresden:440item_ODPFF25NY24TCWQV7UGOCHZ3VR43MXH3.jpg,königliches schloss,28.1,0.16,2,False,False,,,0,königliches schloss,,False,0.0,False
+qwen3:4b,exact_perdu,identified-csv:dresden:437item_GZWLKQPOILJPBGN4VK7S27GEHSDXMRSQ.jpg,hofkirche,32.3,0.02,2,False,False,,,0,hofkirche,,False,0.0,False
+qwen3:4b,exact_perdu,identified-csv:dresden:188item_B3YLDDMMNBVCHUDRUM5DFYMFXYG33EIV.jpg,augustus bridge,19.8,0.0,1,False,False,,,0,augustus bridge,,False,0.0,False
+qwen3:4b,exact_perdu,identified-csv:dresden:440item_QLOI7TG256I4K4P4URGDISRAF624LS3I.jpg,semperoper,18.5,0.0,1,False,False,,,0,semperoper,,False,0.0,False
+qwen3:4b,exact_perdu,identified-csv:dresden:437item_EVBC3UU464M27YXEQ4BMZHVFH5MUMRON.jpg,pillnitz castle,30.6,0.01,2,False,False,"Pillnitz Castle [castle or palace; Dresden, Germany]",Pillnitz Castle (wikidata),1,pillnitz castle,0.0,True,0.0,True
+qwen3:4b,exact_perdu,identified-csv:dresden:188item_3W6MGGS4XVPSW5JUDIQKZGKHQ3YGV2VN.jpg,rathaus,29.2,0.02,2,False,False,,,0,rathaus,,False,0.0,False
+qwen3:4b,exact_perdu,identified-csv:dresden:188item_4KNGBOLJZXAQSCDXONV7QHM7CPW3MZZL.jpg,blaues wunder,30.0,0.0,2,False,True,"Dresden [city; Dresden, Germany] | Loschwitz [neighborhood; Dresden, Germany]",Dresden (nominatim_area) | Loschwitz (nominatim_area),1,blaues wunder,0.39,True,0.0,True
+qwen3:4b,exact_perdu,identified-csv:dresden:463item_UZEQKG75XB4S7XJQFEKDDVWCIGIRBVYB.jpg,stallhof,16.7,0.0,1,False,False,,,0,stallhof,,False,0.0,False
+qwen3:4b,exact_perdu,identified-csv:dresden:463item_YTCRIY56AQ2U7MHFCGJFPLQUNKL64ZQN.jpg,dreikönigskirche,31.6,0.01,2,False,False,,,0,dreikönigskirche,,False,0.0,True
+qwen3:4b,exact_perdu,identified-csv:dresden:440item_O7H2R25HIC5OOYQOLXWXUURTZOPPKOUS.jpg,ruhende löwen,17.6,0.0,1,False,False,,,0,ruhende löwen,,False,0.0,False
+qwen3:4b,exact_perdu,identified-csv:dresden:437item_DAYS75QDGFS5SKFMSFCOE7OWV5YOXNE6.jpg,kasernen albertstadt,32.9,0.01,2,False,False,,,0,kasernen albertstadt,,False,0.0,False
+qwen3:4b,exact_perdu,identified-csv:dresden:188item_A5TMI2BOJHA6GUPSSCMKYFBNAQRILRMN.jpg,postplatz,17.9,0.0,1,False,False,,,0,postplatz,,False,0.0,False
+qwen3:4b,exact_perdu,identified-csv:dresden:437item_MARI6FP7JQZ444ZHESX5DOJL7VOFDVP6.jpg,albrechtschlösser,32.3,0.01,2,False,False,,,0,albrechtschlösser,,False,0.0,False
+qwen3:4b,exact_perdu,203601,"Peoples Savings Bank, Cedar Rapids, Iowa, Section",20.7,0.0,1,False,False,,,0,Cedar Rapids Bank & Trust,,False,0.0,False
+qwen3:4b,exact_perdu,272029,"All nations and races meet at the Maison Internationale de la Cite Universitaire de Paris, France",49.8,0.01,3,False,False,,,0,Maison Internationale,,False,0.0,False
+qwen3:4b,exact_perdu,110517,"State Theatre (Stadthalle), Nuremberg, Germany, Perspective",21.7,0.0,1,False,False,,,0,Nuremberg State Theater,,False,0.0,False
+qwen3:4b,exact_perdu,11858,"St. Ouen, Rouen",23.1,0.0,1,False,False,,,0,Abbatiale Saint-Ouen,,False,0.0,False
+qwen3:4b,exact_perdu,107308,200 South Wacker Building,19.0,0.0,1,False,False,,,0,South Wacker Building,,False,0.0,False
+qwen3:4b,exact_perdu,115604,Conway Castle,18.6,0.0,1,False,False,,,0,Conwy Castle,,False,0.0,False
+qwen3:4b,exact_perdu,125527,Forsyth and East Houston Street,22.1,0.0,1,False,False,,,0,Forsyth Street and East Houston Street,,False,0.0,False
+qwen3:4b,exact_perdu,121022,"Surf, Point Lobos",26.2,0.01,1,False,False,,,0,Point Lobos,,False,0.0,False
+qwen3:4b,exact_perdu,125544,Manhattan Bridge Looking Up,17.5,0.0,1,False,False,,,0,Manhattan Bridge,,False,0.0,False
+qwen3:4b,exact_perdu,109654,"New York City Interior, West End Ave. and 101st",44.3,0.03,3,False,False,,,0,West End Avenue and West 101st Street,,False,0.0,True
+qwen3:4b,exact_perdu,120854,Point Lobos,19.2,0.01,1,False,False,,,0,Point Lobos,,False,0.0,False
+qwen3:4b,exact_perdu,120982,"Juniper, Lake Tenaya",19.6,0.0,1,False,False,,,0,Lake Tenaya,,False,0.0,False
+qwen3:4b,exact_perdu,111005,"Sukiya Bridge, from the series Recollections of Tokyo",31.7,0.0,2,False,False,,,0,Sukiyabashi,,False,0.0,False
+qwen3:4b,exact_perdu,117249,"Church of St. Etienne du Mont, Paris",19.0,0.0,1,False,False,,,0,Church of St. Etienne du Mont,,False,0.0,False
+qwen3:4b,exact_perdu,120980,"Juniper, Lake Tenaya",19.6,0.0,1,False,False,,,0,Lake Tenaya,,False,0.0,False
+qwen3:4b,exact_perdu,122351,Annunciation Bridge in St. Petersburg,20.5,0.0,1,False,False,,,0,Annunciation Bridge,,False,0.0,False
+qwen3:4b,exact_perdu,8925,Madison Square,17.2,0.0,1,False,False,,,0,Madison square,,False,0.0,False
+qwen3:4b,exact_perdu,15833,"The Mechouar, Palace of the Sultan at Marrakesh",51.4,0.16,3,False,True,"The Mechouar [building; Marrakesh, Morocco] | Palace of the Sultan [building; Marrakesh, Morocco] | Marrakesh [city; Marrakesh, Morocco]",Marrakech ⵎⵕⵕⴰⴽⵯⵛ مراكش (nominatim_area),0,Palace El Mechouar,,False,0.0,False
+qwen3:4b,exact_perdu,84846,"New Colonnade, Central Terminus, Newcastle-on-Tyne",19.7,0.0,1,False,False,,,0,Central Station,,False,0.0,False
+qwen3:4b,exact_perdu,149184,"Exhibition Stadium, Toronto",17.3,0.0,1,False,False,,,0,Exhibition Stadium,,False,0.0,False
+qwen3:4b,exact_perdu,118094,"View of the Cloister of the Cathedral of Mainz, plate two from Allemande",32.9,0.0,2,False,False,,,0,Mainz Cathedral,,False,0.0,False
+qwen3:4b,exact_perdu,181379,"The Church of San Miguel, the Oldest in Santa Fe, N.M.",30.9,0.0,2,False,False,,,0,San Miguel Chapel,,False,0.0,False
+qwen3:4b,exact_perdu,12185,"The Carrière, or Rue Neuve, at Nancy (The New Street)",31.6,0.01,2,False,True,"Rue Neuve [street; Nancy, France] | Nancy [city; Nancy, France]",Rue Neuve (nominatim_bounded) | Nancy (nominatim_area),1,The carrière,6.65,False,0.0,False
+qwen3:4b,exact_perdu,50200,"Elevation Perspective of l'Hôtel de Ville, Rennes",30.7,0.03,2,False,True,"Hôtel de Ville [building; Rennes, France] | Rennes [city; Rennes, France]",Rue de l'Hôtel de Ville (nominatim_bounded) | Rennes (nominatim_area),1,Hôtel de ville,5.73,False,0.0,False
+qwen3:4b,exact_perdu,242511,Chandigarh (Capitol Complex 4),20.4,0.0,1,False,False,,,0,Palace of Assembly,,False,0.0,False
+qwen3:4b,exact_perdu,87395,"Mountain Temple at Sendai (Sendai yamanodera), from the series ""Collection of Scenic Views of Japan, Eastern Japan Edition (Nihon fukei shu higashi Nihon hen)""",38.2,0.0,2,False,True,"Sendai [city; Sendai, Japan] | Yamanodera Temple [monument; Sendai, Japan]",仙台市 (nominatim_area),0,Yama-dera temple,,False,0.0,False
+qwen3:4b,exact_perdu,147578,"Palais du Prince, Liege, from Facsimiles of Sketches made in Flanders and Germany",57.4,0.01,4,False,False,,,0,Palais des Princes-Évêques,,False,0.0,False
+qwen3:4b,exact_perdu,87274,Kiso River at Inuyama (Kisogawa [Inuyama]),46.7,0.0,3,False,True,"Kiso River [natural site; , ] | Inuyama [city; Inuyama, ]",犬山市 (nominatim_area),0,Inuyama’s castle,,False,0.0,False
+qwen3:4b,exact_perdu,74944,"View of Metro West Building with Canadian Geese, Naperville, Illinois",47.6,0.01,3,False,True,"Metro West Building [building; Naperville, United States] | Naperville [city; Naperville, United States] | Illinois [region; , United States]",Naperville (nominatim_area) | Illinois (nominatim_area),0,Metro west,,False,0.0,False
+qwen3:4b,exact_perdu,181951,"Temple of Amon, Luxor, Egypt",28.8,0.0,2,False,False,,,0,Temple of Amon,,False,0.0,False
+qwen3:4b,exact_perdu,46624,"The Clock Tower, Venice",28.5,0.0,2,False,False,,,0,St Mark's Clocktower,,False,0.0,False
+qwen3:4b,exact_perdu,123648,"Notre Dame de Poitiers (Vienne), West Facade",21.7,0.0,1,False,False,,,0,Notre-Dame-la-Grande,,False,0.0,False
+qwen3:4b,exact_perdu,147592,"Hotel de Ville, Utrecht, from Facsimiles of Sketches made in Flanders and Germany",40.8,0.0,3,False,False,,,0,Stadhuis Utrecht,,False,0.0,False
+qwen3:4b,exact_perdu,236166,"Castle Rock, Green River Valley",27.8,0.0,2,False,False,,,0,Castle rock,,False,0.0,False
+qwen3:4b,exact_perdu,223529,Advancing across the Ansong River at the Battle of Asan (Gazan gekisen Anjo no watashi shingeki no zu),29.1,0.0,2,False,False,,,0,Ansong River,,False,0.0,False
+qwen3:4b,exact_perdu,46505,"Rue des Halles, Vannes, Brittany",47.2,0.0,3,False,False,,,0,Rue des Halles (Vannes),,False,0.0,True
+qwen3:4b,exact_perdu,199758,Abbotsford - The Hall,18.2,0.02,1,False,False,,,0,Abbotsford House,,False,0.0,False
+qwen3:4b,exact_perdu,207527,"Buffet Toyota, 1 Tsunohazu, Shinjuku-ku (Toshi-e / Tokyo-jin)",34.2,0.0,2,False,False,,,0,Tsunohazu Shyokudo,,False,0.0,False
+qwen3:4b,exact_perdu,199026,"Lake Superior Scenery, North Shore",27.7,0.0,2,False,True,"Lake Superior [natural site; , Canada] | North Shore [country; , Canada]",North Shore (nominatim_area),0,North Shore,,False,0.0,False
+qwen3:4b,exact_perdu,53205,"Statue of Ferdinand I, Grand Duke of Tuscany, from Views of the Port of Livorno",19.1,0.0,1,False,False,,,0,Monumento dei Quattro Mori,,False,0.0,False
+qwen3:4b,exact_perdu,268347,De Wittevrouwen-Poort in Utrecht,19.8,0.0,1,False,False,,,0,Wittevrouwenpoort,,False,0.0,False
+qwen3:4b,exact_perdu,34794,"Early morning - Clay Hill, Goddard College, Plainfield",41.2,0.0,3,False,False,,,0,Goddard College,,False,0.0,False
+qwen3:4b,exact_perdu,186140,"Ruins of Drop City, Trinidad, Colorado, from the series ""Sweet Earth: Experimental Utopias in America""",20.8,0.0,1,False,False,,,0,Drop City,,False,0.0,False
+qwen3:4b,exact_perdu,115878,"Entrance Hall, Christchurch, Oxford",21.3,0.0,1,False,False,,,0,Christ Church,,False,0.0,False
+qwen3:4b,exact_perdu,267107,"Hallowed Ground: variously shaped stones mark tombs in the Jewish burial ground of the Kidron Valley, to the southwest Jerusalem. The Jewish tradition has it that the Last Judgment will take place here. In the background, the silvery dome of Al-Aqsa Mosque is visible over the wall surrounding the Haram Sharif, or Noble Sanctuary, a holy site of Islam, in East Jerusalem",63.5,0.04,4,False,True,"Kidron Valley [natural site; , ] | Jerusalem [city; Jerusalem, Palestine] | Al-Aqsa Mosque [building; Jerusalem, Palestine] | Haram Sharif [religious building; Jerusalem, Palestine]",Palestine Cemetery (nominatim_area),0,Kidron Valley,,False,0.0,False
+qwen3:4b,exact_perdu,196764,"Shalimar Garden, Lahore",29.7,0.0,2,False,False,,,0,شالا مار باغ اسٹیشن,,False,0.0,False
+qwen3:4b,exact_perdu,39023,"Gate of Christchurch, Oxford",20.7,0.01,1,False,False,,,0,Tom Tower,,False,0.0,False
+qwen3:4b,exact_perdu,122349,"Church of the Grand Palace, Petrodvorets",22.9,0.0,1,False,False,,,0,Royal Church Museum,,False,0.0,False
+qwen3:4b,exact_perdu,118087,"Terni: Marble Falls, plate twenty from Italie Monumentale et Pittoresque",45.0,0.0,3,False,False,,,0,Cascata delle Marmore,,False,0.0,False
+qwen3:4b,exact_perdu,157944,"Entrance to the Great Temple, Luxor",18.6,0.0,1,False,False,,,0,Temple d'Amon,,False,0.0,False
+qwen3:4b,sans_lieu,183,Kantharos (Wine Cup),54.1,0.0,3,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,238014,"More Brilliant than the Sun, from Human_3.0 Reading List",43.0,0.0,2,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,118889,Split,20.7,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,123672,"""Baby Urr"" of Chicago, Evanston",32.8,0.0,2,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,229496,Wu Street,17.4,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,8624,Portrait of Pablo Picasso,35.3,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,270584,Passport Dominican Republic (Pasaporte Republica Dominica [Red]),31.6,0.0,2,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,124155,Italian Landscape with Ruins,29.7,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,40897,Kantharos (Wine Cup) in the Shape of a Female Head,29.8,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,107249,A la pintura: Blue 1-3,77.8,0.06,4,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,111861,Saint Paul and Saint Peter,48.9,0.06,2,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,102528,Brussel Sprout,16.3,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,89403,Untitled #12,31.9,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,129676,"Huastecs of the State of San Luis Potosi, from Mexican Costume",22.2,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,9648,Stater (Coin) Depicting a Land Tortoise,31.5,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,129906,Pair of Protomes Depicting the Forepart of a Griffin,40.8,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,237996,"The Black Interior, from Human_3.0 Reading List",45.5,0.0,2,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,221070,Braxton McKinney and Lavon Thomas,62.6,0.0,4,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,79307,Bathers by a River,45.6,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,236548,Mogadibo,20.3,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,102719,Nestlings,21.1,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,31816,After the Bullfight,32.7,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,238030,"Black Women in White America, from Human_3.0 Reading List",29.3,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,238001,"Blacks, from Human_3.0 Reading List",32.5,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,47141,Nude Seated in a Bathtub,18.6,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,102983,Vase,15.5,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,48365,"Odessa, U.S.S.R.",29.4,0.0,2,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,118770,"Four Courts, Dublin-A",16.8,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,129686,"Totonacs of the State of Veracruz, from Mexican Costume",19.1,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,270890,Mind in the Machine (Relaxed State),30.3,0.0,2,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,118594,"Untitled (Subway Portrait, New York)",20.0,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,238016,"The Wretched of the Earth, from Human_3.0 Reading List",47.0,0.0,2,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,111541,Oval Tray,19.6,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,109090,The Entrance to the Forest by the Little Wooden Bridge,20.6,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,31599,Saint Catherine of Alexandria,36.4,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,238002,"Gender Trouble, from Human_3.0 Reading List",46.8,0.0,2,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,112100,Burgonet,16.2,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,113568,"Sketches of the Emperor John VIII Palaeologus, a Monk, and a Scabbard",55.6,0.0,2,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,135708,Tureen,19.7,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,116305,Halberd,15.5,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,11441,Working Model for UNESCO Reclining Figure,71.7,0.0,4,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,77615,Painting (Figures with Stars),38.1,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,109443,Oeuf au Plat,20.3,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,11486,"The Servant, plate two from The Ranks and Conditions of Men",27.6,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,120705,Chicago 13A,18.3,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,111091,La Main,16.3,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,216950,Saint Francis of Assisi; Base with Putti,26.6,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,21576,Vase,14.9,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,116632,Pair of Cuisses with Poleyns,16.7,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,152001,"Toltecs of the State of Puebla, from Mexican Costume",22.1,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,136651,Overseer Shabti of Isetemkheb,34.6,0.01,2,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,101953,"New York, New York 1945-49, page eleven from Recollection",33.4,0.0,2,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,107030,Fourteenth Stone,28.1,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,238039,"Playing in the Dark, from Human_3.0 Reading List",28.7,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,248927,Casket,36.0,0.0,2,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,100865,Bowl,17.6,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,116313,Halberd,14.6,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,102067,"Berlin Development Project, Friedrichstadt District, Site Plan",28.8,0.0,2,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,136120,Miss Expanding Universe,32.4,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,238032,"Sister Outsider, from Human_3.0 Reading List",28.6,0.0,1,False,False,,,0,,,,,

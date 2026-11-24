@@ -1,0 +1,139 @@
+[info] 547 œuvres chargées depuis data/raw/gold_standard/gold_dataset.json.
+[info] 442 œuvres enrichies depuis le dump AIC.
+[info] 40 œuvres : 20 exact_perdu, 20 sans_lieu
+  [gemma3:4b] 1/40 exact_perdu   3.5 s  The Carrière, or Rue Neuve, at Nancy (The New Stre
+  [gemma3:4b] 2/40 exact_perdu   3.6 s  Palais du Prince, Liege, from Facsimiles of Sketch
+  [gemma3:4b] 3/40 exact_perdu   3.1 s  Photographie du côté de la façade occidentale en c
+  [gemma3:4b] 4/40 exact_perdu   3.5 s  Forsyth and East Houston Street
+  [gemma3:4b] 5/40 exact_perdu   3.7 s  Lake Superior Scenery, North Shore
+  [gemma3:4b] 6/40 exact_perdu   3.5 s  Rue des Halles, Vannes, Brittany
+  [gemma3:4b] 7/40 exact_perdu   3.0 s  Chandigarh (Capitol Complex 4)
+  [gemma3:4b] 8/40 exact_perdu   3.7 s  Juniper, Lake Tenaya
+  [gemma3:4b] 9/40 exact_perdu   3.6 s  Advancing across the Ansong River at the Battle of
+  [gemma3:4b] 10/40 exact_perdu   4.2 s  New Colonnade, Central Terminus, Newcastle-on-Tyne
+  [gemma3:4b] 11/40 exact_perdu   3.4 s  Peoples Savings Bank, Cedar Rapids, Iowa, Section
+  [gemma3:4b] 12/40 exact_perdu   4.2 s  Buffet Toyota, 1 Tsunohazu, Shinjuku-ku (Toshi-e /
+  [gemma3:4b] 13/40 exact_perdu   3.1 s  semperoper
+  [gemma3:4b] 14/40 exact_perdu   3.7 s  New York City Interior, West End Ave. and 101st
+  [gemma3:4b] 15/40 exact_perdu   3.2 s  Photographie de l'intérieur de la nef de la cathéd
+  [gemma3:4b] 16/40 exact_perdu   3.3 s  The Church of San Miguel, the Oldest in Santa Fe, 
+  [gemma3:4b] 17/40 exact_perdu   3.0 s  Seminário Episcopal, 1887
+  [gemma3:4b] 18/40 exact_perdu   3.0 s  Sukiya Bridge, from the series Recollections of To
+  [gemma3:4b] 19/40 exact_perdu   3.6 s  Entrance Hall, Christchurch, Oxford
+  [gemma3:4b] 20/40 exact_perdu   3.1 s  augustus bridge
+  [gemma3:4b] 21/40 sans_lieu     3.5 s  Miss Expanding Universe
+  [gemma3:4b] 22/40 sans_lieu     3.7 s  Saint Catherine of Alexandria
+  [gemma3:4b] 23/40 sans_lieu     3.0 s  La Main
+  [gemma3:4b] 24/40 sans_lieu     3.1 s  New York, New York 1945-49, page eleven from Recol
+  [gemma3:4b] 25/40 sans_lieu     3.1 s  Tureen
+  [gemma3:4b] 26/40 sans_lieu     4.1 s  A la pintura: Blue 1-3
+  [gemma3:4b] 27/40 sans_lieu     3.1 s  Mogadibo
+  [gemma3:4b] 28/40 sans_lieu     3.5 s  Passport Dominican Republic (Pasaporte Republica D
+  [gemma3:4b] 29/40 sans_lieu     3.5 s  Saint Francis of Assisi; Base with Putti
+  [gemma3:4b] 30/40 sans_lieu     3.0 s  Wu Street
+  [gemma3:4b] 31/40 sans_lieu     2.6 s  The Servant, plate two from The Ranks and Conditio
+  [gemma3:4b] 32/40 sans_lieu     3.5 s  After the Bullfight
+  [gemma3:4b] 33/40 sans_lieu     3.6 s  Untitled (Subway Portrait, New York)
+  [gemma3:4b] 34/40 sans_lieu     3.1 s  Gender Trouble, from Human_3.0 Reading List
+  [gemma3:4b] 35/40 sans_lieu     3.1 s  Fourteenth Stone
+  [gemma3:4b] 36/40 sans_lieu     3.1 s  Black Women in White America, from Human_3.0 Readi
+  [gemma3:4b] 37/40 sans_lieu     3.1 s  Four Courts, Dublin-A
+  [gemma3:4b] 38/40 sans_lieu     4.1 s  Nestlings
+  [gemma3:4b] 39/40 sans_lieu     2.5 s  Halberd
+  [gemma3:4b] 40/40 sans_lieu     4.2 s  Working Model for UNESCO Reclining Figure
+  [qwen3:4b] 1/40 exact_perdu  31.6 s  The Carrière, or Rue Neuve, at Nancy (The New Stre
+  [qwen3:4b] 2/40 exact_perdu  57.4 s  Palais du Prince, Liege, from Facsimiles of Sketch
+  [qwen3:4b] 3/40 exact_perdu  18.3 s  Photographie du côté de la façade occidentale en c
+  [qwen3:4b] 4/40 exact_perdu  22.1 s  Forsyth and East Houston Street
+  [qwen3:4b] 5/40 exact_perdu  27.7 s  Lake Superior Scenery, North Shore
+  [qwen3:4b] 6/40 exact_perdu  47.2 s  Rue des Halles, Vannes, Brittany
+  [qwen3:4b] 7/40 exact_perdu  20.4 s  Chandigarh (Capitol Complex 4)
+  [qwen3:4b] 8/40 exact_perdu  19.6 s  Juniper, Lake Tenaya
+  [qwen3:4b] 9/40 exact_perdu  29.1 s  Advancing across the Ansong River at the Battle of
+  [qwen3:4b] 10/40 exact_perdu  19.7 s  New Colonnade, Central Terminus, Newcastle-on-Tyne
+  [qwen3:4b] 11/40 exact_perdu  20.7 s  Peoples Savings Bank, Cedar Rapids, Iowa, Section
+  [qwen3:4b] 12/40 exact_perdu  34.2 s  Buffet Toyota, 1 Tsunohazu, Shinjuku-ku (Toshi-e /
+  [qwen3:4b] 13/40 exact_perdu  18.5 s  semperoper
+  [qwen3:4b] 14/40 exact_perdu  44.3 s  New York City Interior, West End Ave. and 101st
+  [qwen3:4b] 15/40 exact_perdu  62.7 s  Photographie de l'intérieur de la nef de la cathéd
+  [qwen3:4b] 16/40 exact_perdu  30.9 s  The Church of San Miguel, the Oldest in Santa Fe, 
+  [qwen3:4b] 17/40 exact_perdu  31.0 s  Seminário Episcopal, 1887
+  [qwen3:4b] 18/40 exact_perdu  31.7 s  Sukiya Bridge, from the series Recollections of To
+  [qwen3:4b] 19/40 exact_perdu  21.3 s  Entrance Hall, Christchurch, Oxford
+  [qwen3:4b] 20/40 exact_perdu  19.8 s  augustus bridge
+  [qwen3:4b] 21/40 sans_lieu    32.4 s  Miss Expanding Universe
+  [qwen3:4b] 22/40 sans_lieu    36.4 s  Saint Catherine of Alexandria
+  [qwen3:4b] 23/40 sans_lieu    16.3 s  La Main
+  [qwen3:4b] 24/40 sans_lieu    33.4 s  New York, New York 1945-49, page eleven from Recol
+  [qwen3:4b] 25/40 sans_lieu    19.7 s  Tureen
+  [qwen3:4b] 26/40 sans_lieu    77.8 s  A la pintura: Blue 1-3
+  [qwen3:4b] 27/40 sans_lieu    20.3 s  Mogadibo
+  [qwen3:4b] 28/40 sans_lieu    31.6 s  Passport Dominican Republic (Pasaporte Republica D
+  [qwen3:4b] 29/40 sans_lieu    26.6 s  Saint Francis of Assisi; Base with Putti
+  [qwen3:4b] 30/40 sans_lieu    17.4 s  Wu Street
+  [qwen3:4b] 31/40 sans_lieu    27.6 s  The Servant, plate two from The Ranks and Conditio
+  [qwen3:4b] 32/40 sans_lieu    32.7 s  After the Bullfight
+  [qwen3:4b] 33/40 sans_lieu    20.0 s  Untitled (Subway Portrait, New York)
+  [qwen3:4b] 34/40 sans_lieu    46.8 s  Gender Trouble, from Human_3.0 Reading List
+  [qwen3:4b] 35/40 sans_lieu    28.1 s  Fourteenth Stone
+  [qwen3:4b] 36/40 sans_lieu    29.3 s  Black Women in White America, from Human_3.0 Readi
+  [qwen3:4b] 37/40 sans_lieu    16.8 s  Four Courts, Dublin-A
+  [qwen3:4b] 38/40 sans_lieu    21.1 s  Nestlings
+  [qwen3:4b] 39/40 sans_lieu    15.5 s  Halberd
+  [qwen3:4b] 40/40 sans_lieu    71.7 s  Working Model for UNESCO Reclining Figure
+  [qwen3:4b+think] 1/40 exact_perdu  96.9 s  The Carrière, or Rue Neuve, at Nancy (The New Stre
+  [qwen3:4b+think] 2/40 exact_perdu  99.2 s  Palais du Prince, Liege, from Facsimiles of Sketch
+  [qwen3:4b+think] 3/40 exact_perdu  60.5 s  Photographie du côté de la façade occidentale en c
+  [qwen3:4b+think] 4/40 exact_perdu  47.1 s  Forsyth and East Houston Street
+  [qwen3:4b+think] 5/40 exact_perdu  70.7 s  Lake Superior Scenery, North Shore
+  [qwen3:4b+think] 6/40 exact_perdu  53.3 s  Rue des Halles, Vannes, Brittany
+  [qwen3:4b+think] 7/40 exact_perdu  93.5 s  Chandigarh (Capitol Complex 4)
+  [qwen3:4b+think] 8/40 exact_perdu  54.5 s  Juniper, Lake Tenaya
+  [qwen3:4b+think] 9/40 exact_perdu  79.6 s  Advancing across the Ansong River at the Battle of
+  [qwen3:4b+think] 10/40 exact_perdu  76.5 s  New Colonnade, Central Terminus, Newcastle-on-Tyne
+  [qwen3:4b+think] 11/40 exact_perdu  92.4 s  Peoples Savings Bank, Cedar Rapids, Iowa, Section
+  [qwen3:4b+think] 12/40 exact_perdu  85.0 s  Buffet Toyota, 1 Tsunohazu, Shinjuku-ku (Toshi-e /
+  [qwen3:4b+think] 13/40 exact_perdu  88.6 s  semperoper
+  [qwen3:4b+think] 14/40 exact_perdu  89.3 s  New York City Interior, West End Ave. and 101st
+  [qwen3:4b+think] 15/40 exact_perdu  49.6 s  Photographie de l'intérieur de la nef de la cathéd
+  [qwen3:4b+think] 16/40 exact_perdu  88.2 s  The Church of San Miguel, the Oldest in Santa Fe, 
+  [qwen3:4b+think] 17/40 exact_perdu  82.5 s  Seminário Episcopal, 1887
+  [qwen3:4b+think] 18/40 exact_perdu  65.5 s  Sukiya Bridge, from the series Recollections of To
+  [qwen3:4b+think] 19/40 exact_perdu  83.5 s  Entrance Hall, Christchurch, Oxford
+  [qwen3:4b+think] 20/40 exact_perdu  77.7 s  augustus bridge
+  [qwen3:4b+think] 21/40 sans_lieu    50.7 s  Miss Expanding Universe
+  [qwen3:4b+think] 22/40 sans_lieu    84.6 s  Saint Catherine of Alexandria
+  [qwen3:4b+think] 23/40 sans_lieu    34.9 s  La Main
+  [qwen3:4b+think] 24/40 sans_lieu    64.0 s  New York, New York 1945-49, page eleven from Recol
+  [qwen3:4b+think] 25/40 sans_lieu    73.3 s  Tureen
+  [qwen3:4b+think] 26/40 sans_lieu    80.9 s  A la pintura: Blue 1-3
+  [qwen3:4b+think] 27/40 sans_lieu    76.2 s  Mogadibo
+  [qwen3:4b+think] 28/40 sans_lieu    88.6 s  Passport Dominican Republic (Pasaporte Republica D
+  [qwen3:4b+think] 29/40 sans_lieu    87.6 s  Saint Francis of Assisi; Base with Putti
+  [qwen3:4b+think] 30/40 sans_lieu    37.8 s  Wu Street
+  [qwen3:4b+think] 31/40 sans_lieu    41.8 s  The Servant, plate two from The Ranks and Conditio
+  [qwen3:4b+think] 32/40 sans_lieu   102.9 s  After the Bullfight
+  [qwen3:4b+think] 33/40 sans_lieu    82.0 s  Untitled (Subway Portrait, New York)
+  [qwen3:4b+think] 34/40 sans_lieu    39.0 s  Gender Trouble, from Human_3.0 Reading List
+  [qwen3:4b+think] 35/40 sans_lieu    62.5 s  Fourteenth Stone
+  [qwen3:4b+think] 36/40 sans_lieu    47.7 s  Black Women in White America, from Human_3.0 Readi
+  [qwen3:4b+think] 37/40 sans_lieu    58.5 s  Four Courts, Dublin-A
+  [qwen3:4b+think] 38/40 sans_lieu    97.8 s  Nestlings
+  [qwen3:4b+think] 39/40 sans_lieu    37.1 s  Halberd
+  [qwen3:4b+think] 40/40 sans_lieu    94.3 s  Working Model for UNESCO Reclining Figure
+
+                                     gemma3:4b qwen3:4b qwen3:4b+think
+secondes_par_oeuvre                        3.4     30.7           71.9
+verification_secondes_par_oeuvre          0.03      0.0           0.93
+json_invalide                                0        0              0
+exact_perdu_oeuvres                         20       20             20
+exact_perdu_lieu_represente                 17        2             18
+exact_perdu_monument_retrouve                7        0              5
+exact_perdu_monument_retrouve_AIC         5/15     0/15           3/15
+exact_perdu_monument_nomme_tout_role         7        2              5
+exact_perdu_lieux_precis_faux                1        0              0
+sans_lieu_oeuvres                           20       20             20
+sans_lieu_dit_represente                     7        0              3
+sans_lieu_lieu_precis_verifie                3        0              1
+
+[ok] Détail par œuvre : results/compare_local_llms_think.csv

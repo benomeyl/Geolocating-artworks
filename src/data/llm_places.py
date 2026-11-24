@@ -39,7 +39,9 @@ import requests
 
 try:
     from src.geolocation.gazetter import (
+        _ARTICLES,
         _CITY_BOX_DEGREES,
+        _name_tokens,
         _REGION_BOX_DEGREES,
         CITY_RADIUS_KM,
         REGION_RADIUS_KM,
@@ -50,7 +52,9 @@ try:
     )
 except ImportError:  # pragma: no cover - when run with src/ on sys.path
     from geolocation.gazetter import (
+        _ARTICLES,
         _CITY_BOX_DEGREES,
+        _name_tokens,
         _REGION_BOX_DEGREES,
         CITY_RADIUS_KM,
         REGION_RADIUS_KM,
@@ -343,3 +347,53 @@ def verify_place(place, nominatim_client, wikidata_client=None):
 def distance_km(location, latitude, longitude):
     """Distance from a location to a point, in km."""
     return haversine_distance_km(location["latitude"], location["longitude"], latitude, longitude)
+
+
+# ---------------------------------------------------------------------------
+# Features of the hierarchical model taken from the model's answer
+# ---------------------------------------------------------------------------
+
+LLM_FEATURE_COLUMNS = [
+    "llm_depicts_place",      # the LLM says the artwork shows a place
+    "llm_role_depicted",      # the candidate is a place the LLM calls depicted
+    "llm_role_origin",        # ... a place of origin (made in, artist from)
+    "llm_role_mentioned",     # ... a place only mentioned
+    "llm_in_depicted_place",  # the candidate is the city/region/country of a depicted place
+]
+
+
+def _tokens(text):
+    """Name tokens without articles."""
+    return _name_tokens(text) - _ARTICLES
+
+
+def _same_name(candidate_tokens, text):
+    """True if a candidate and a name of the answer share their words (one inside the other)."""
+    tokens = _tokens(text)
+    return bool(candidate_tokens) and bool(tokens) and (candidate_tokens <= tokens or tokens <= candidate_tokens)
+
+
+def candidate_llm_features(candidate_name, answer):
+    """LLM_FEATURE_COLUMNS of one NER candidate, from the LLM answer of its artwork (all 0 without answer).
+
+    A candidate matches a place of the answer when its words and those of
+    the place's mention or usual name are one inside the other ("Cathedral
+    of Mainz" ~ "Mainz Cathedral" does not match, "St. Ouen" ~ "St. Ouen"
+    does); city-level candidates also get `llm_in_depicted_place` when they
+    name the city, region or country of a depicted place.
+    """
+    features = dict.fromkeys(LLM_FEATURE_COLUMNS, 0)
+    if not answer:
+        return features
+    features["llm_depicts_place"] = int(bool(answer.get("depicts_place")))
+    candidate_tokens = _tokens(candidate_name)
+    for place in answer.get("places", []):
+        if _same_name(candidate_tokens, place.get("mention")) or _same_name(candidate_tokens, place.get("name")):
+            role = place.get("role")
+            if role in PLACE_ROLES:
+                features[f"llm_role_{role}"] = 1
+        if place.get("role") == "depicted" and any(
+            _same_name(candidate_tokens, place.get(field)) for field in ("city", "region", "country")
+        ):
+            features["llm_in_depicted_place"] = 1
+    return features

@@ -97,3 +97,21 @@ def test_a_city_with_a_region_rank_keeps_a_city_radius():
     place = {"mention": "rathaus", "name": "Rathaus", "type": "building", "city": "Dresden",
              "region": "Saxony", "country": "Germany", "role": "depicted"}
     assert verify_place(place, Nominatim(), Wikidata()) is None
+
+
+def test_candidate_features_follow_the_role_given_by_the_model():
+    from src.data.llm_places import candidate_llm_features
+
+    answer = {"depicts_place": True, "places": [
+        {"mention": "St. Ouen", "name": "Abbatiale Saint-Ouen", "type": "religious building",
+         "city": "Rouen", "region": "Normandy", "country": "France", "role": "depicted"},
+        {"mention": "United States", "name": "United States", "type": "country",
+         "city": "", "region": "", "country": "United States", "role": "origin"},
+    ]}
+    monument = candidate_llm_features("St. Ouen", answer)
+    city = candidate_llm_features("Rouen", answer)
+    origin = candidate_llm_features("United States", answer)
+    assert monument["llm_role_depicted"] == 1 and monument["llm_depicts_place"] == 1
+    assert city["llm_in_depicted_place"] == 1 and city["llm_role_depicted"] == 0
+    assert origin["llm_role_origin"] == 1 and origin["llm_role_depicted"] == 0
+    assert candidate_llm_features("Paris", None) == dict.fromkeys(monument, 0)

@@ -1796,6 +1796,8 @@ def train_hierarchical_model(
     inner_repeats=1,
     wilson_z=None,
     pooled_levels=False,
+    extra_feature_columns=None,
+    extra_feature_levels=None,
 ):
     """Fit one grouped-CV classifier per geographic precision level.
 
@@ -1816,7 +1818,41 @@ def train_hierarchical_model(
       precision (not the precision) to target + threshold_margin.
     - `pooled_levels`: one classifier shared by all levels, with the level
       as a feature and a threshold per level (_fit_pooled_levels).
+
+    Hybrid model (`extra_feature_columns` + `extra_feature_levels`): two
+    models are trained, one on `feature_columns` and one on `feature_columns`
+    + `extra_feature_columns`; the levels of `extra_feature_levels` take the
+    second, the others the first. Used for the LLM features
+    (data/llm_places.LLM_FEATURE_COLUMNS), which help the city and exact
+    levels but lower the country level. Each level records the columns it
+    reads in `feature_columns` (see _level_columns).
     """
+    if extra_feature_columns:
+        options = dict(
+            n_splits=n_splits, random_state=random_state, regularization_values=regularization_values,
+            target_precisions=target_precisions, minimum_recall=minimum_recall,
+            minimum_positive_groups=minimum_positive_groups, minimum_prediction_groups=minimum_prediction_groups,
+            minimum_predictions=minimum_predictions, threshold_margin=threshold_margin,
+            prediction_model=prediction_model, inner_repeats=inner_repeats, wilson_z=wilson_z,
+            pooled_levels=pooled_levels,
+        )
+        base_columns = list(feature_columns or GEOGRAPHIC_FEATURE_COLUMNS)
+        extended_columns = base_columns + [column for column in extra_feature_columns if column not in base_columns]
+        hybrid_levels = set(extra_feature_levels or GEOGRAPHIC_LEVELS)
+        model = train_hierarchical_model(table, feature_columns=base_columns, **options)
+        extended = train_hierarchical_model(table, feature_columns=extended_columns, **options)
+        for level in GEOGRAPHIC_LEVELS:
+            if level in hybrid_levels:
+                model["levels"][level] = {**extended["levels"][level], "feature_columns": extended_columns}
+            else:
+                model["levels"][level]["feature_columns"] = base_columns
+        model["feature_columns"] = extended_columns
+        model["extra_feature_levels"] = [level for level in GEOGRAPHIC_LEVELS if level in hybrid_levels]
+        model["active_levels"] = [
+            level for level in GEOGRAPHIC_LEVELS if model["levels"][level]["status"] == "active"
+        ]
+        # threshold_tuning_work_metrics stays the base model's (indicative only).
+        return model
     if table.empty:
         raise ValueError("Geographic label table is empty.")
     target_precisions = target_precisions or GEOGRAPHIC_TARGET_PRECISION
@@ -1996,6 +2032,19 @@ def evaluate_hierarchical_work_predictions(
     }
 
 
+def _level_columns(model, level_model):
+    """Indices, in model["feature_columns"], of the columns a level reads (all of them by default).
+
+    Hybrid models (train_hierarchical_model extra_feature_columns) give
+    some levels fewer columns than the model's full list.
+    """
+    model_columns = list(model.get("feature_columns", GEOGRAPHIC_FEATURE_COLUMNS))
+    level_columns = level_model.get("feature_columns")
+    if not level_columns:
+        return slice(None)
+    return [model_columns.index(column) for column in level_columns]
+
+
 def _score_rows(model, table):
     """Score every row of `table` with each active level compatible with its candidate level."""
     scores_by_row = defaultdict(dict)
@@ -2003,6 +2052,7 @@ def _score_rows(model, table):
         return scores_by_row
     feature_columns = model.get("feature_columns", GEOGRAPHIC_FEATURE_COLUMNS)
     matrix = table[feature_columns].fillna(0).to_numpy(dtype=float)
+    columns_by_level = {level: _level_columns(model, entry) for level, entry in model["levels"].items()}
     for row_position, (_, row) in enumerate(table.iterrows()):
         candidate_level = row.get("candidate_level")
         if candidate_level not in _SPECIFICITY:
@@ -2011,7 +2061,9 @@ def _score_rows(model, table):
             if level_model["status"] != "active" or _SPECIFICITY[candidate_level] > _SPECIFICITY[level]:
                 continue
             scores_by_row[row_position][level] = float(
-                level_model["model"].predict_proba(matrix[row_position:row_position + 1])[0][1]
+                level_model["model"].predict_proba(
+                    matrix[row_position:row_position + 1][:, columns_by_level[level]]
+                )[0][1]
             )
     return scores_by_row
 
@@ -2277,7 +2329,9 @@ def _level_decisions(feature_row, candidate_level, model, specificity):
             continue
         if candidate_level_rank > specificity[level]:
             continue
-        probability = float(level_model["model"].predict_proba(feature_row)[0][1])
+        probability = float(
+            level_model["model"].predict_proba(feature_row[:, _level_columns(model, level_model)])[0][1]
+        )
         level_scores[level] = probability
         if probability >= level_model["threshold"]:
             decisions.append({

@@ -112,7 +112,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument(
         "--variant", nargs="+", action="append", required=True, metavar=("NAME TABLE", "OPTIONS"),
-        help="Nom, table pickle et, en option, un JSON d'options d'entraînement qui remplacent les défauts.",
+        help="Nom, table pickle et, en option, un JSON d'options d'entraînement (texte ou fichier .json) qui remplacent les défauts.",
     )
     parser.add_argument("--records", default="data/raw/gold_standard/gold_dataset.json")
     parser.add_argument("--aic-dump-dir", default=None)
@@ -127,7 +127,11 @@ def main():
         if len(variant) not in (2, 3):
             parser.error("--variant attend NOM TABLE [OPTIONS_JSON]")
         name, table_path = variant[:2]
-        options = {**TRAINING_OPTIONS, **(json.loads(variant[2]) if len(variant) == 3 else {})}
+        extra = {}
+        if len(variant) == 3:
+            # Options as a JSON string, or as the path of a JSON file (easier to quote on Windows).
+            extra = json.loads(Path(variant[2]).read_text(encoding="utf-8")) if variant[2].endswith(".json") else json.loads(variant[2])
+        options = {**TRAINING_OPTIONS, **extra}
         table = pd.read_pickle(table_path)
         repeated = evaluate_repeated_grouped_cv(
             records, table, repeats=args.repeats, n_jobs=args.jobs, n_splits=5, training_options=options

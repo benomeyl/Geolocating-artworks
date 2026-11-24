@@ -320,7 +320,8 @@ l'œuvre est `uncertain`.
 | `python scripts/compare_tables.py --variant NOM TABLE.pkl ['{options}'] … [--repeats 20]` | Compare des tables de features ou des options d'entraînement sur les mêmes découpages : faux positifs, précision par niveau, ce qui serait publié |
 | `python scripts/compare_local_llms.py --models gemma3:4b qwen3:4b [--per-group 20]` | Compare des LLM locaux (Ollama) sur les lieux exacts perdus et les œuvres sans lieu |
 | `python scripts/run_llm_places.py export / infer / import` | Inférence LLM sur une autre machine (prompts exportés, réponses rapatriées dans le cache) |
-| `python -m pytest -q` | Tests (131) |
+| `python scripts/add_llm_features.py --table … --output …` | Ajoute les features LLM (réponses en cache) à une table, et une variante « veto » |
+| `python -m pytest -q` | Tests (133) |
 
 Lancer avec `.venv/bin/python` : l'interpréteur Anaconda de base n'a pas
 `transformers`.
@@ -475,6 +476,41 @@ gold est déportée sur une machine GPU (`scripts/run_llm_places.py`,
 villes-arrondissements allemandes (Dresde, Nuremberg) le rang d'une région
 (12) ; corrigé dans `llm_places`, encore présent dans
 `gazetter._anchor_scale`.
+
+### LLM : inférence GPU et effet sur le modèle (24/11/2026)
+
+Inférence sur RTX 2070 Super (`scripts/run_llm_places.py`) : Gemma3-4B
+3,3 s par œuvre (30 min pour le gold), Qwen3-4B avec réflexion 72 s. Les
+réponses GPU et CPU diffèrent légèrement (37 sur 135, 2 changent le jugement
+« représenté ») : les réponses GPU servent de référence. Sur 20 + 20 œuvres,
+Qwen3 avec réflexion reconnaît 18/20 lieux représentés, retrouve 5/20
+monuments (Gemma 7/20) et fait 3/20 fausses alertes (Gemma 7/20). La
+vérification Wikidata/Nominatim coûte autant que l'inférence GPU à cache vide
+(≈ 30 min pour le gold), 0,4 s par œuvre à cache rempli.
+
+Features LLM dans v15 (`scripts/add_llm_features.py`,
+`llm_places.LLM_FEATURE_COLUMNS`), 20 découpages appariés :
+
+| | v15 | + features LLM | + veto LLM |
+|---|---|---|---|
+| FP par découpage | 7,7 | 8,1 (bruit) | 6,55 (−1,15, mieux 17/20) |
+| TP par découpage | 48,7 | 48,3 | 40,2 (−8,5) |
+| Précision | 0,865 | 0,857 | 0,862 |
+| Pays (publié) | 0,908 activé | 0,888 non activé | 0,908 activé |
+| Ville | 0,759 (7,8 préd.) | 0,849 (15,7 préd.) | 0,767 |
+| Lieu exact | 0,25 (0,7 préd.) | 0,85 (1,6 préd.) | 0,25 |
+
+Le veto (« pas de lieu représenté » selon le LLM → jamais publié) retire
+autant de bonnes réponses que d'erreurs en proportion : on publie 18 % de
+moins sans publier plus sûr. Les features aident la ville et le lieu exact
+mais dégradent le pays ; avec les features, le veto ne change plus rien.
+Poids appris : `llm_depicts_place` +1,30 au niveau pays (10e feature sur 41),
+`llm_role_depicted` +1,46 et `llm_role_origin` −1,53 au niveau exact. Non
+adopté. Option préparée : modèle **hybride**
+(`train_hierarchical_model(extra_feature_columns, extra_feature_levels)`),
+features LLM seulement pour ville, quartier et lieu exact ; mesure à faire
+selon `docs/hybrid_training_instructions.md`. La prédiction en production
+(`predict_with_hierarchical_model`) ne calcule pas encore les features LLM.
 
 ## 7. Fichiers de code
 

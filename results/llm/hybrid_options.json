@@ -1,0 +1,14 @@
+{
+ "extra_feature_columns": [
+  "llm_depicts_place",
+  "llm_role_depicted",
+  "llm_role_origin",
+  "llm_role_mentioned",
+  "llm_in_depicted_place"
+ ],
+ "extra_feature_levels": [
+  "exact_place",
+  "neighborhood",
+  "city"
+ ]
+}

@@ -1,0 +1,121 @@
+model,group,artwork_id,title,seconds,verify_seconds,places_checked,json_error,depicts_place,depicted,verified,verified_precise_count,target,nearest_km,exact_found,precise_wrong,exact_found_any_role
+gemma3:4b,exact_perdu,12185,"The Carrière, or Rue Neuve, at Nancy (The New Street)",3.5,0.15,2,False,True,"Carrière [other; Nancy, France] | Rue Neuve [street; Nancy, France]",place de la Carrière (wikidata) | Rue Neuve (nominatim_bounded),2,The carrière,0.03,True,0.0,True
+gemma3:4b,exact_perdu,147578,"Palais du Prince, Liege, from Facsimiles of Sketches made in Flanders and Germany",3.6,0.47,2,False,True,"Palais du Prince [building; Liège, Belgium] | Liège [city; Liège, Belgium]",Liège (nominatim_area),0,Palais des Princes-Évêques,,False,0.0,False
+gemma3:4b,exact_perdu,Q65643587,Photographie du côté de la façade occidentale en cours de construction de la cathédrale de Gap,3.1,0.06,1,False,True,"Facade occidentale [building; Gap, France]",,0,Gap Cathedral,,False,0.0,False
+gemma3:4b,exact_perdu,125527,Forsyth and East Houston Street,3.5,0.06,2,False,True,"Forsyth [street; , United States] | East Houston Street [street; New York City, United States]",Houston Street (wikidata),1,Forsyth Street and East Houston Street,0.4,True,0.0,True
+gemma3:4b,exact_perdu,199026,"Lake Superior Scenery, North Shore",3.7,0.06,2,False,True,"Lake Superior [natural site; Duluth, USA] | North Shore [natural site; Duluth, USA]",Lake Superior Railroad Museum (wikidata) | North Shore (nominatim_bounded),2,North Shore,3.1,False,0.0,False
+gemma3:4b,exact_perdu,46505,"Rue des Halles, Vannes, Brittany",3.5,0.01,2,False,True,"Rue des Halles [street; Vannes, France] | Vannes [city; Vannes, France]","Maison, 23 rue des Halles (wikidata) | Vannes (nominatim_area)",1,Rue des Halles (Vannes),0.03,True,0.0,True
+gemma3:4b,exact_perdu,242511,Chandigarh (Capitol Complex 4),3.0,0.0,1,False,True,"Chandigarh [city; Chandigarh, India]",Chandigarh (nominatim_area),0,Palace of Assembly,,False,0.0,False
+gemma3:4b,exact_perdu,120982,"Juniper, Lake Tenaya",3.7,0.06,2,False,True,"Lake Tenaya [natural site; , United States] | Juniper [natural site; , United States]",Tenaya Lake (wikidata) | Juniper (wikidata),2,Lake Tenaya,0.2,True,1.0,True
+gemma3:4b,exact_perdu,223529,Advancing across the Ansong River at the Battle of Asan (Gazan gekisen Anjo no watashi shingeki no zu),3.6,0.0,2,False,True,"Ansong River [natural site; , Korea] | Asan [city; Asan, Korea]",아산시 (nominatim_area),0,Ansong River,,False,0.0,False
+gemma3:4b,exact_perdu,84846,"New Colonnade, Central Terminus, Newcastle-on-Tyne",4.2,0.09,3,False,False,,,0,Central Station,,False,0.0,False
+gemma3:4b,exact_perdu,203601,"Peoples Savings Bank, Cedar Rapids, Iowa, Section",3.4,0.0,2,False,False,,,0,Cedar Rapids Bank & Trust,,False,0.0,False
+gemma3:4b,exact_perdu,207527,"Buffet Toyota, 1 Tsunohazu, Shinjuku-ku (Toshi-e / Tokyo-jin)",4.2,0.01,3,False,False,,,0,Tsunohazu Shyokudo,,False,0.0,False
+gemma3:4b,exact_perdu,identified-csv:dresden:440item_QLOI7TG256I4K4P4URGDISRAF624LS3I.jpg,semperoper,3.1,0.01,1,False,True,"Semperoper [building; Dresden, Germany]",Semperoper (wikidata),1,semperoper,0.0,True,0.0,True
+gemma3:4b,exact_perdu,109654,"New York City Interior, West End Ave. and 101st",3.7,0.1,2,False,True,"West End Avenue [street; New York City, United States] | 101st Street [street; New York City, United States]",510 West End Avenue (wikidata) | 329 West 101st Street (wikidata),2,West End Avenue and West 101st Street,0.12,True,0.0,True
+gemma3:4b,exact_perdu,Q65643589,Photographie de l'intérieur de la nef de la cathédrale de Gap,3.2,0.01,1,False,True,"Cathédrale de Gap [religious building; Gap, France]",Gap Cathedral (wikidata),1,Gap Cathedral,0.0,True,0.0,True
+gemma3:4b,exact_perdu,181379,"The Church of San Miguel, the Oldest in Santa Fe, N.M.",3.3,0.01,1,False,True,"Church of San Miguel [religious building; Santa Fe, United States]",,0,San Miguel Chapel,,False,0.0,False
+gemma3:4b,exact_perdu,Q47525297,"Seminário Episcopal, 1887",3.0,0.0,1,False,True,"São Paulo [city; São Paulo, Brazil]",São Paulo (nominatim_area),0,Avenida Tiradentes,,False,0.0,False
+gemma3:4b,exact_perdu,111005,"Sukiya Bridge, from the series Recollections of Tokyo",3.0,0.0,1,False,True,"Sukiya Bridge [bridge; Tokyo, Japan]",,0,Sukiyabashi,,False,0.0,False
+gemma3:4b,exact_perdu,115878,"Entrance Hall, Christchurch, Oxford",3.6,0.07,2,False,True,"Entrance Hall [building; Christchurch, England] | Christchurch [city; Christchurch, England]",Christchurch (nominatim_area),0,Christ Church,,False,0.0,False
+gemma3:4b,exact_perdu,identified-csv:dresden:188item_B3YLDDMMNBVCHUDRUM5DFYMFXYG33EIV.jpg,augustus bridge,3.1,0.0,1,False,True,"Dresden [city; Dresden, Germany]",Dresden (nominatim_area),0,augustus bridge,,False,0.0,False
+gemma3:4b,sans_lieu,136120,Miss Expanding Universe,3.5,0.0,2,False,True,,,0,,,,,
+gemma3:4b,sans_lieu,31599,Saint Catherine of Alexandria,3.7,0.0,2,False,True,"Jesuit church in Antwerp [religious building; Antwerp, Belgium]",Carolus Borromeuskerk (wikidata),1,,,,,
+gemma3:4b,sans_lieu,111091,La Main,3.0,0.0,1,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,101953,"New York, New York 1945-49, page eleven from Recollection",3.1,0.0,1,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,135708,Tureen,3.1,0.0,1,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,107249,A la pintura: Blue 1-3,4.1,0.06,3,False,True,"Prado Museum [building; Madrid, Spain] | Madrid [city; Madrid, Spain] | Prado Museum [building; Madrid, Spain]",Museo del Prado (wikidata) | Madrid (nominatim_area) | Museo del Prado (wikidata),2,,,,,
+gemma3:4b,sans_lieu,236548,Mogadibo,3.1,0.0,1,False,True,"Mogadishu [city; Mogadishu, Somalia]",Muqdisho مقديشو (nominatim_area),0,,,,,
+gemma3:4b,sans_lieu,270584,Passport Dominican Republic (Pasaporte Republica Dominica [Red]),3.5,0.0,2,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,216950,Saint Francis of Assisi; Base with Putti,3.5,0.0,2,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,229496,Wu Street,3.0,0.0,1,False,True,"Wu Street [street; Beijing, China]",,0,,,,,
+gemma3:4b,sans_lieu,11486,"The Servant, plate two from The Ranks and Conditions of Men",2.6,0.0,0,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,31816,After the Bullfight,3.5,0.0,2,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,118594,"Untitled (Subway Portrait, New York)",3.6,0.0,2,False,True,"New York [city; New York, United States] | New York [city; New York, United States]",New York (nominatim_area) | New York (nominatim_area),0,,,,,
+gemma3:4b,sans_lieu,238002,"Gender Trouble, from Human_3.0 Reading List",3.1,0.0,1,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,107030,Fourteenth Stone,3.1,0.0,1,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,238030,"Black Women in White America, from Human_3.0 Reading List",3.1,0.0,1,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,118770,"Four Courts, Dublin-A",3.1,0.03,1,False,True,"Four Courts [bridge; Dublin, Ireland]",Four Courts (wikidata),1,,,,,
+gemma3:4b,sans_lieu,102719,Nestlings,4.1,0.0,3,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,116305,Halberd,2.5,0.0,0,False,False,,,0,,,,,
+gemma3:4b,sans_lieu,11441,Working Model for UNESCO Reclining Figure,4.2,0.1,3,False,False,,,0,,,,,
+qwen3:4b,exact_perdu,12185,"The Carrière, or Rue Neuve, at Nancy (The New Street)",31.6,0.01,2,False,True,"Rue Neuve [street; Nancy, France] | Nancy [city; Nancy, France]",Rue Neuve (nominatim_bounded) | Nancy (nominatim_area),1,The carrière,6.65,False,0.0,False
+qwen3:4b,exact_perdu,147578,"Palais du Prince, Liege, from Facsimiles of Sketches made in Flanders and Germany",57.4,0.01,4,False,False,,,0,Palais des Princes-Évêques,,False,0.0,False
+qwen3:4b,exact_perdu,Q65643587,Photographie du côté de la façade occidentale en cours de construction de la cathédrale de Gap,18.3,0.0,1,False,False,,,0,Gap Cathedral,,False,0.0,False
+qwen3:4b,exact_perdu,125527,Forsyth and East Houston Street,22.1,0.0,1,False,False,,,0,Forsyth Street and East Houston Street,,False,0.0,False
+qwen3:4b,exact_perdu,199026,"Lake Superior Scenery, North Shore",27.7,0.0,2,False,True,"Lake Superior [natural site; , Canada] | North Shore [country; , Canada]",North Shore (nominatim_area),0,North Shore,,False,0.0,False
+qwen3:4b,exact_perdu,46505,"Rue des Halles, Vannes, Brittany",47.2,0.01,3,False,False,,,0,Rue des Halles (Vannes),,False,0.0,True
+qwen3:4b,exact_perdu,242511,Chandigarh (Capitol Complex 4),20.4,0.0,1,False,False,,,0,Palace of Assembly,,False,0.0,False
+qwen3:4b,exact_perdu,120982,"Juniper, Lake Tenaya",19.6,0.0,1,False,False,,,0,Lake Tenaya,,False,0.0,False
+qwen3:4b,exact_perdu,223529,Advancing across the Ansong River at the Battle of Asan (Gazan gekisen Anjo no watashi shingeki no zu),29.1,0.0,2,False,False,,,0,Ansong River,,False,0.0,False
+qwen3:4b,exact_perdu,84846,"New Colonnade, Central Terminus, Newcastle-on-Tyne",19.7,0.0,1,False,False,,,0,Central Station,,False,0.0,False
+qwen3:4b,exact_perdu,203601,"Peoples Savings Bank, Cedar Rapids, Iowa, Section",20.7,0.0,1,False,False,,,0,Cedar Rapids Bank & Trust,,False,0.0,False
+qwen3:4b,exact_perdu,207527,"Buffet Toyota, 1 Tsunohazu, Shinjuku-ku (Toshi-e / Tokyo-jin)",34.2,0.0,2,False,False,,,0,Tsunohazu Shyokudo,,False,0.0,False
+qwen3:4b,exact_perdu,identified-csv:dresden:440item_QLOI7TG256I4K4P4URGDISRAF624LS3I.jpg,semperoper,18.5,0.0,1,False,False,,,0,semperoper,,False,0.0,False
+qwen3:4b,exact_perdu,109654,"New York City Interior, West End Ave. and 101st",44.3,0.03,3,False,False,,,0,West End Avenue and West 101st Street,,False,0.0,True
+qwen3:4b,exact_perdu,Q65643589,Photographie de l'intérieur de la nef de la cathédrale de Gap,62.7,0.0,1,False,False,"Gap [city; Gap, France]",Gap (nominatim_area),0,Gap Cathedral,,False,0.0,False
+qwen3:4b,exact_perdu,181379,"The Church of San Miguel, the Oldest in Santa Fe, N.M.",30.9,0.0,2,False,False,,,0,San Miguel Chapel,,False,0.0,False
+qwen3:4b,exact_perdu,Q47525297,"Seminário Episcopal, 1887",31.0,0.0,2,False,False,,,0,Avenida Tiradentes,,False,0.0,False
+qwen3:4b,exact_perdu,111005,"Sukiya Bridge, from the series Recollections of Tokyo",31.7,0.0,2,False,False,,,0,Sukiyabashi,,False,0.0,False
+qwen3:4b,exact_perdu,115878,"Entrance Hall, Christchurch, Oxford",21.3,0.0,1,False,False,,,0,Christ Church,,False,0.0,False
+qwen3:4b,exact_perdu,identified-csv:dresden:188item_B3YLDDMMNBVCHUDRUM5DFYMFXYG33EIV.jpg,augustus bridge,19.8,0.0,1,False,False,,,0,augustus bridge,,False,0.0,False
+qwen3:4b,sans_lieu,136120,Miss Expanding Universe,32.4,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,31599,Saint Catherine of Alexandria,36.4,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,111091,La Main,16.3,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,101953,"New York, New York 1945-49, page eleven from Recollection",33.4,0.0,2,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,135708,Tureen,19.7,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,107249,A la pintura: Blue 1-3,77.8,0.06,4,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,236548,Mogadibo,20.3,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,270584,Passport Dominican Republic (Pasaporte Republica Dominica [Red]),31.6,0.0,2,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,216950,Saint Francis of Assisi; Base with Putti,26.6,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,229496,Wu Street,17.4,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,11486,"The Servant, plate two from The Ranks and Conditions of Men",27.6,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,31816,After the Bullfight,32.7,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,118594,"Untitled (Subway Portrait, New York)",20.0,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,238002,"Gender Trouble, from Human_3.0 Reading List",46.8,0.0,2,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,107030,Fourteenth Stone,28.1,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,238030,"Black Women in White America, from Human_3.0 Reading List",29.3,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,118770,"Four Courts, Dublin-A",16.8,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,102719,Nestlings,21.1,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,116305,Halberd,15.5,0.0,1,False,False,,,0,,,,,
+qwen3:4b,sans_lieu,11441,Working Model for UNESCO Reclining Figure,71.7,0.0,4,False,False,,,0,,,,,
+qwen3:4b+think,exact_perdu,12185,"The Carrière, or Rue Neuve, at Nancy (The New Street)",96.9,0.03,3,False,True,"Carrière [street; Nancy, France] | Nancy [city; Nancy, France]",place de la Carrière (wikidata) | Nancy (nominatim_area),1,The carrière,0.03,True,0.0,True
+qwen3:4b+think,exact_perdu,147578,"Palais du Prince, Liege, from Facsimiles of Sketches made in Flanders and Germany",99.2,0.01,5,False,True,"Palais du Prince [building; Liege, Belgium]",,0,Palais des Princes-Évêques,,False,0.0,False
+qwen3:4b+think,exact_perdu,Q65643587,Photographie du côté de la façade occidentale en cours de construction de la cathédrale de Gap,60.5,0.0,1,False,True,"Gap [city; Gap, France]",Gap (nominatim_area),0,Gap Cathedral,,False,0.0,False
+qwen3:4b+think,exact_perdu,125527,Forsyth and East Houston Street,47.1,0.0,2,False,True,"Forsyth [street; , ] | East Houston Street [street; , ]",,0,Forsyth Street and East Houston Street,,False,0.0,False
+qwen3:4b+think,exact_perdu,199026,"Lake Superior Scenery, North Shore",70.7,0.31,2,False,True,"Lake Superior [park or garden; , ]",,0,North Shore,,False,0.0,False
+qwen3:4b+think,exact_perdu,46505,"Rue des Halles, Vannes, Brittany",53.3,0.01,4,False,True,"Rue des Halles [street; Vannes, France] | Vannes [city; Vannes, France]","Maison, 23 rue des Halles (wikidata) | Vannes (nominatim_area)",1,Rue des Halles (Vannes),0.03,True,0.0,True
+qwen3:4b+think,exact_perdu,242511,Chandigarh (Capitol Complex 4),93.5,1.31,2,False,True,"Chandigarh [city; Chandigarh, India]",Chandigarh (nominatim_area),0,Palace of Assembly,,False,0.0,False
+qwen3:4b+think,exact_perdu,120982,"Juniper, Lake Tenaya",54.5,0.0,2,False,True,"Lake Tenaya [park or garden; , ]",,0,Lake Tenaya,,False,0.0,False
+qwen3:4b+think,exact_perdu,223529,Advancing across the Ansong River at the Battle of Asan (Gazan gekisen Anjo no watashi shingeki no zu),79.6,1.33,3,False,True,"Ansong River [bridge; , ] | Asan [city; , ]",Azzano d'Asti (nominatim_area),0,Ansong River,,False,0.0,False
+qwen3:4b+think,exact_perdu,84846,"New Colonnade, Central Terminus, Newcastle-on-Tyne",76.5,0.0,2,False,True,"Newcastle-on-Tyne [city; Newcastle-on-Tyne, United Kingdom]",Newcastle and Gateshead Chiropractor and Others (nominatim_area),0,Central Station,,False,0.0,False
+qwen3:4b+think,exact_perdu,203601,"Peoples Savings Bank, Cedar Rapids, Iowa, Section",92.4,1.52,2,False,False,,,0,Cedar Rapids Bank & Trust,,False,0.0,False
+qwen3:4b+think,exact_perdu,207527,"Buffet Toyota, 1 Tsunohazu, Shinjuku-ku (Toshi-e / Tokyo-jin)",85.0,5.5,3,False,True,"Tsunohazu [street; Tokyo, Japan]",Tsunohazu Girder (wikidata),1,Tsunohazu Shyokudo,0.92,False,0.0,False
+qwen3:4b+think,exact_perdu,identified-csv:dresden:440item_QLOI7TG256I4K4P4URGDISRAF624LS3I.jpg,semperoper,88.6,0.02,2,False,True,"Dresden [city; Dresden, Germany] | Semperoper [building; Dresden, Germany]",Dresden (nominatim_area) | Semperoper (wikidata),1,semperoper,0.0,True,0.0,True
+qwen3:4b+think,exact_perdu,109654,"New York City Interior, West End Ave. and 101st",89.3,0.03,4,False,True,"New York City [city; New York, United States] | West End Avenue [street; New York, United States] | 101st Street [street; New York, United States]",New York (nominatim_area) | 510 West End Avenue (wikidata) | 329 West 101st Street (wikidata),2,West End Avenue and West 101st Street,0.12,True,0.0,True
+qwen3:4b+think,exact_perdu,Q65643589,Photographie de l'intérieur de la nef de la cathédrale de Gap,49.6,0.0,1,False,True,"Gap [city; Gap, France]",Gap (nominatim_area),0,Gap Cathedral,,False,0.0,False
+qwen3:4b+think,exact_perdu,181379,"The Church of San Miguel, the Oldest in Santa Fe, N.M.",88.2,0.0,2,False,True,"Santa Fe [city; Santa Fe, United States]",Santa Fe (nominatim_area),0,San Miguel Chapel,,False,0.0,False
+qwen3:4b+think,exact_perdu,Q47525297,"Seminário Episcopal, 1887",82.5,14.02,2,False,False,,,0,Avenida Tiradentes,,False,0.0,False
+qwen3:4b+think,exact_perdu,111005,"Sukiya Bridge, from the series Recollections of Tokyo",65.5,0.0,3,False,True,"Sukiya Bridge [bridge; Tokyo, Japan] | Tokyo [city; Tokyo, Japan]",東京都 (nominatim_area),0,Sukiyabashi,,False,0.0,False
+qwen3:4b+think,exact_perdu,115878,"Entrance Hall, Christchurch, Oxford",83.5,0.0,3,False,True,"Christchurch [city; Oxford, England]",Christchurch (nominatim_area),0,Christ Church,,False,0.0,False
+qwen3:4b+think,exact_perdu,identified-csv:dresden:188item_B3YLDDMMNBVCHUDRUM5DFYMFXYG33EIV.jpg,augustus bridge,77.7,10.3,2,False,True,"Dresden [city; Dresden, ] | Augustus Bridge [bridge; Dresden, ]",Dresden (nominatim_area) | Augustus Bridge (wikidata),1,augustus bridge,0.0,True,0.0,True
+qwen3:4b+think,sans_lieu,136120,Miss Expanding Universe,50.7,0.0,3,False,False,,,0,,,,,
+qwen3:4b+think,sans_lieu,31599,Saint Catherine of Alexandria,84.6,0.0,2,False,False,,,0,,,,,
+qwen3:4b+think,sans_lieu,111091,La Main,34.9,0.0,1,False,False,,,0,,,,,
+qwen3:4b+think,sans_lieu,101953,"New York, New York 1945-49, page eleven from Recollection",64.0,0.0,2,False,True,"New York [city; New York, United States]",New York (nominatim_area),0,,,,,
+qwen3:4b+think,sans_lieu,135708,Tureen,73.3,0.0,1,False,False,,,0,,,,,
+qwen3:4b+think,sans_lieu,107249,A la pintura: Blue 1-3,80.9,0.0,3,False,False,,,0,,,,,
+qwen3:4b+think,sans_lieu,236548,Mogadibo,76.2,0.16,2,False,True,"Mogadibo [city; Mogadibo, ]",,0,,,,,
+qwen3:4b+think,sans_lieu,270584,Passport Dominican Republic (Pasaporte Republica Dominica [Red]),88.6,0.0,2,False,False,,,0,,,,,
+qwen3:4b+think,sans_lieu,216950,Saint Francis of Assisi; Base with Putti,87.6,0.0,2,False,False,,,0,,,,,
+qwen3:4b+think,sans_lieu,229496,Wu Street,37.8,0.0,1,False,False,,,0,,,,,
+qwen3:4b+think,sans_lieu,11486,"The Servant, plate two from The Ranks and Conditions of Men",41.8,0.0,2,False,False,,,0,,,,,
+qwen3:4b+think,sans_lieu,31816,After the Bullfight,102.9,0.0,3,False,False,,,0,,,,,
+qwen3:4b+think,sans_lieu,118594,"Untitled (Subway Portrait, New York)",82.0,0.0,2,False,False,,,0,,,,,
+qwen3:4b+think,sans_lieu,238002,"Gender Trouble, from Human_3.0 Reading List",39.0,0.0,2,False,False,,,0,,,,,
+qwen3:4b+think,sans_lieu,107030,Fourteenth Stone,62.5,0.0,1,False,False,,,0,,,,,
+qwen3:4b+think,sans_lieu,238030,"Black Women in White America, from Human_3.0 Reading List",47.7,0.0,2,False,False,,,0,,,,,
+qwen3:4b+think,sans_lieu,118770,"Four Courts, Dublin-A",58.5,1.28,3,False,True,"Four Courts [building; Dublin, Ireland] | Dublin [city; Dublin, Ireland]",Four Courts (wikidata) | Dublin (nominatim_area),1,,,,,
+qwen3:4b+think,sans_lieu,102719,Nestlings,97.8,0.0,4,False,False,,,0,,,,,
+qwen3:4b+think,sans_lieu,116305,Halberd,37.1,0.0,1,False,False,,,0,,,,,
+qwen3:4b+think,sans_lieu,11441,Working Model for UNESCO Reclining Figure,94.3,1.39,4,False,False,,,0,,,,,

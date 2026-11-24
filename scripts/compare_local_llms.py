@@ -26,6 +26,7 @@ import argparse
 import json
 import random
 import sys
+import time
 from pathlib import Path
 
 import pandas as pd
@@ -79,7 +80,9 @@ def evaluate(llm, sample, nominatim_client, wikidata_client):
     for position, (artwork_id, group, record) in enumerate(sample, start=1):
         answer, seconds = llm.read_places(record["artwork"])
         places = answer.get("places", [])
+        verify_started = time.monotonic()
         checked = [(place, verify_place(place, nominatim_client, wikidata_client)) for place in places]
+        verify_seconds = time.monotonic() - verify_started
         checked_precise = [
             (place, location) for place, location in checked
             if location is not None and place.get("type") not in ("city", "region", "country")
@@ -90,6 +93,7 @@ def evaluate(llm, sample, nominatim_client, wikidata_client):
         row = {
             "model": llm.label, "group": group, "artwork_id": artwork_id,
             "title": record["artwork"].get("title"), "seconds": round(seconds or 0.0, 1),
+            "verify_seconds": round(verify_seconds, 2), "places_checked": len(places),
             "json_error": "error" in answer,
             "depicts_place": bool(answer.get("depicts_place")),
             "depicted": " | ".join(f"{p.get('name')} [{p.get('type')}; {p.get('city')}, {p.get('country')}]" for p in depicted),
@@ -122,6 +126,7 @@ def summarize(results):
         aic = lost[lost["artwork_id"].str.isdigit()]
         summary[model] = {
             "secondes_par_oeuvre": round(rows["seconds"].mean(), 1),
+            "verification_secondes_par_oeuvre": round(rows["verify_seconds"].mean(), 2),
             "json_invalide": int(rows["json_error"].sum()),
             "exact_perdu_oeuvres": len(lost),
             "exact_perdu_lieu_represente": int(lost["depicts_place"].sum()),
