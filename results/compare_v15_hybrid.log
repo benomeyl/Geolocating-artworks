@@ -1,0 +1,36 @@
+[info] 547 œuvres chargées depuis data/raw/gold_standard/gold_dataset.json.
+[info] 447 œuvres enrichies depuis le dump AIC.
+
+=== v15 ===
+  precision          0.865 ± 0.031  (min 0.804, max 0.933)
+  recall             0.174 ± 0.031  (min 0.112, max 0.248)
+  true_positives    48.500 ± 8.657  (min 31.000, max 69.000)
+  false_positives    7.700 ± 2.492  (min 3.000, max 12.000)
+  niveau          précision moy. (min)   prédictions/découpage   FP total
+  exact_place     0.219 (0.000)            0.7                    9
+  neighborhood    0.167 (0.000)            0.2                    3
+  city            0.752 (0.500)            7.8                   38
+  region          0.821 (0.400)            9.9                   46
+  country         0.909 (0.868)           56.8                  106  déployé
+  publié (niveaux country): 1030 TP / 106 FP sur 20 découpages, précision 0.907 [0.89 – 0.92]
+
+=== v15+llm-fin ===
+  precision          0.869 ± 0.023  (min 0.828, max 0.918)
+  recall             0.196 ± 0.028  (min 0.133, max 0.270)
+  true_positives    54.600 ± 7.826  (min 37.000, max 75.000)
+  false_positives    8.300 ± 2.238  (min 5.000, max 13.000)
+  niveau          précision moy. (min)   prédictions/découpage   FP total
+  exact_place     0.851 (0.500)            1.6                    6
+  neighborhood    0.736 (0.000)            1.6                   10
+  city            0.848 (0.700)           15.8                   47
+  region          0.821 (0.400)            9.9                   46
+  country         0.909 (0.868)           56.8                  106  déployé
+  publié (niveaux country): 1030 TP / 106 FP sur 20 découpages, précision 0.907 [0.89 – 0.92]
+
+--- v15+llm-fin − v15 (apparié, 20 découpages) ---
+  false_positives   +0.600 ± 1.241   mieux 4/20, moins bien 13/20
+  precision         +0.005 ± 0.017   mieux 10/20, moins bien 10/20
+  true_positives    +6.100 ± 3.345   mieux 20/20, moins bien 0/20
+  recall            +0.022 ± 0.012   mieux 20/20, moins bien 0/20
+
+[ok] Métriques par découpage dans results\compare_v15_hybrid.json
