@@ -83,7 +83,8 @@ def file_sha256(path):
 
 
 def load_ner_pipeline():
-    """Load the multilingual NER pipeline shared by every command."""
+    """Load the multilingual NER pipeline shared by every command (on the GPU if CUDA is available)."""
+    import torch
     from transformers import AutoTokenizer, AutoModelForTokenClassification, pipeline
 
     model_name = "Babelscape/wikineural-multilingual-ner"
@@ -100,6 +101,7 @@ def load_ner_pipeline():
         # "first" labels each word from its first sub-token; "simple" split
         # words into fragments ("##kirche", "sonnen").
         aggregation_strategy="first",
+        device=0 if torch.cuda.is_available() else -1,
     )
 
 

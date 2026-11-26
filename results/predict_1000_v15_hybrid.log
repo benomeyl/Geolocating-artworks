@@ -1,0 +1,8 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[info] 1000 œuvres tirées (seed=42), hors gold standard.
+[info] 1000 œuvres enrichies depuis le dump AIC.
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights:  37%|███▋      | 73/199 [00:00<00:00, 705.15it/s]Loading weights: 100%|██████████| 199/199 [00:00<00:00, 1445.38it/s]
+[transformers] You seem to be using the pipelines sequentially on GPU. In order to maximize efficiency please use a dataset
+[info] Statuts: {'uncertain': 316, 'no_candidate': 631, 'depicted': 53}
+[info] Niveaux prédits: {'country': 42, 'region': 7, 'city': 4}
+[ok] Résultats écrits dans results\test_sample_1000_v15_hybrid.csv

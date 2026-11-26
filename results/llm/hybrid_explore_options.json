@@ -1,0 +1,21 @@
+{
+ "extra_feature_columns": [
+  "llm_depicts_place",
+  "llm_role_depicted",
+  "llm_role_origin",
+  "llm_role_mentioned",
+  "llm_in_depicted_place"
+ ],
+ "extra_feature_levels": [
+  "exact_place",
+  "neighborhood",
+  "city"
+ ],
+ "target_precisions": {
+  "exact_place": 0.80,
+  "neighborhood": 0.80,
+  "city": 0.90,
+  "region": 0.90,
+  "country": 0.90
+ }
+}

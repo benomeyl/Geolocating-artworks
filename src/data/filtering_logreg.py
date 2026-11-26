@@ -39,8 +39,10 @@ from sklearn.metrics import precision_recall_curve
 from sklearn.model_selection import GroupKFold, StratifiedGroupKFold
 
 try:
+    from src.data.llm_places import LLM_FEATURE_COLUMNS, candidate_llm_features
     from src.geolocation.gazetter import haversine_distance_km, resolve_artwork_places, resolve_location
 except ModuleNotFoundError:
+    from data.llm_places import LLM_FEATURE_COLUMNS, candidate_llm_features
     from geolocation.gazetter import haversine_distance_km, resolve_artwork_places, resolve_location
 
 
@@ -2355,6 +2357,11 @@ def model_uses_nli(model):
     return bool(set(model.get("feature_columns") or []) & set(NLI_FEATURE_COLUMNS))
 
 
+def model_uses_llm(model):
+    """True if a saved hierarchical model reads the LLM features (hybrid models, data/llm_places.py)."""
+    return bool(set(model.get("feature_columns") or []) & set(LLM_FEATURE_COLUMNS))
+
+
 def predict_with_hierarchical_model(
     records,
     candidates_by_artwork,
@@ -2364,6 +2371,7 @@ def predict_with_hierarchical_model(
     nominatim_client=None,
     geocode_top_k=3,
     nli_scorer=None,
+    llm=None,
 ):
     """Predict the most specific sufficiently precise geographic level.
 
@@ -2371,7 +2379,9 @@ def predict_with_hierarchical_model(
     jointly so that they disambiguate each other.
     For each artwork, returns `place_status_predicted`, the accepted
     `prediction` (or None) and every scored candidate. A model trained with
-    NLI features needs `nli_scorer`.
+    NLI features needs `nli_scorer`; one trained with the LLM features needs
+    `llm` (a data/llm_places.LocalLlm), which reads only the artworks that
+    have candidates. Its answer is returned as `llm_answer`.
     """
     if geocode_top_k < 1:
         raise ValueError("geocode_top_k must be at least 1.")
@@ -2379,6 +2389,9 @@ def predict_with_hierarchical_model(
     feature_columns = model["feature_columns"]
     if nli_scorer is None and model_uses_nli(model):
         raise ValueError("This model uses NLI features: pass an nli_scorer (data/nli.py).")
+    uses_llm = model_uses_llm(model)
+    if llm is None and uses_llm:
+        raise ValueError("This model uses LLM features: pass an llm (data/llm_places.LocalLlm).")
     specificity = {level: index for index, level in enumerate(model["specificity_order"])}
     alternatives_cache = {}
     results = {}
@@ -2395,11 +2408,14 @@ def predict_with_hierarchical_model(
         geocoded = grouped_candidates[:geocode_top_k]
         locations = _geocode_artwork(geocoded, alternatives_cache, gazetteer_conn, nominatim_client)
         locations += [None] * (len(grouped_candidates) - len(geocoded))
+        llm_answer = llm.read_places(artwork)[0] if uses_llm and grouped_candidates else None
 
         scored_candidates = []
         for occurrences, location in zip(grouped_candidates, locations):
             place_name = occurrences[0]["place"]
             features = _hierarchical_candidate_features(occurrences, location, artwork, nli_scorer)
+            if uses_llm:
+                features.update(candidate_llm_features(place_name, llm_answer))
             feature_row =np.asarray([[features[column] for column in feature_columns]], dtype=float)
             candidate_level = _candidate_geographic_level(location)
             level_scores, decisions = _level_decisions(feature_row, candidate_level, model, specificity)
@@ -2425,6 +2441,7 @@ def predict_with_hierarchical_model(
             "place_status_predicted": bool(accepted),
             "prediction": accepted[0] if accepted else None,
             "candidates": scored_candidates,
+            "llm_answer": llm_answer,
         }
     return results
 

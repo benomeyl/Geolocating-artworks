@@ -40,11 +40,13 @@ class NliScorer:
         return hashlib.sha1(f"{self.model_name}\n{premise}\n{hypothesis}".encode("utf-8")).hexdigest()
 
     def _load(self):
-        """Load the model on first use (scores already cached need no model)."""
+        """Load the model on first use (scores already cached need no model), on the GPU if CUDA is available."""
+        import torch
         from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
+        self._device = "cuda" if torch.cuda.is_available() else "cpu"
         self._tokenizer = AutoTokenizer.from_pretrained(self.model_name)
-        self._model = AutoModelForSequenceClassification.from_pretrained(self.model_name)
+        self._model = AutoModelForSequenceClassification.from_pretrained(self.model_name).to(self._device)
         self._model.eval()
         labels = {label.lower(): index for index, label in self._model.config.id2label.items()}
         self._entailment_index = labels["entailment"]
@@ -65,7 +67,7 @@ class NliScorer:
                 max_length=self.max_length,
                 padding=True,
                 return_tensors="pt",
-            )
+            ).to(self._device)
             with torch.no_grad():
                 logits = self._model(**inputs).logits
             probabilities.extend(torch.softmax(logits, dim=-1)[:, self._entailment_index].tolist())

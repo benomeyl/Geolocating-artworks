@@ -320,8 +320,9 @@ l'œuvre est `uncertain`.
 | `python scripts/compare_tables.py --variant NOM TABLE.pkl ['{options}'] … [--repeats 20]` | Compare des tables de features ou des options d'entraînement sur les mêmes découpages : faux positifs, précision par niveau, ce qui serait publié |
 | `python scripts/compare_local_llms.py --models gemma3:4b qwen3:4b [--per-group 20]` | Compare des LLM locaux (Ollama) sur les lieux exacts perdus et les œuvres sans lieu |
 | `python scripts/run_llm_places.py export / infer / import` | Inférence LLM sur une autre machine (prompts exportés, réponses rapatriées dans le cache) |
+| `python scripts/train_from_table.py --table … [--options ….json] --model-out ….joblib` | Entraîne et valide un modèle à partir d'une table existante (même validation que `train`, sans NER ni géocodage) |
 | `python scripts/add_llm_features.py --table … --output …` | Ajoute les features LLM (réponses en cache) à une table, et une variante « veto » |
-| `python -m pytest -q` | Tests (133) |
+| `python -m pytest -q` | Tests (134) |
 
 Lancer avec `.venv/bin/python` : l'interpréteur Anaconda de base n'a pas
 `transformers`.
@@ -508,9 +509,33 @@ Poids appris : `llm_depicts_place` +1,30 au niveau pays (10e feature sur 41),
 `llm_role_depicted` +1,46 et `llm_role_origin` −1,53 au niveau exact. Non
 adopté. Option préparée : modèle **hybride**
 (`train_hierarchical_model(extra_feature_columns, extra_feature_levels)`),
-features LLM seulement pour ville, quartier et lieu exact ; mesure à faire
-selon `docs/hybrid_training_instructions.md`. La prédiction en production
-(`predict_with_hierarchical_model`) ne calcule pas encore les features LLM.
+features LLM seulement pour ville, quartier et lieu exact.
+
+Mesure de l'hybride (`results/compare_v15_hybrid.log`, 20 découpages
+appariés) :
+
+- Œuvres justes : +6,1 par découpage (mieux 20/20).
+- Faux positifs : +0,6 ± 1,2 par découpage (moins bien 13/20).
+- Pays : identique (0,909).
+- Ville : 0,752 → 0,848, avec 15,8 prédictions par découpage au lieu de 7,8.
+  Toujours sous la cible de 0,90.
+
+### Test sur 1 000 œuvres AIC, tous niveaux actifs (27/11/2026)
+
+v15, hybride LLM (`model_hierarchical_v15_hybrid.joblib`) et hybride
+exploratoire (cibles du lieu exact et du quartier à 0,80) sur les mêmes
+1 000 œuvres aléatoires hors gold. Le détail est dans
+`results/test_sample_1000_report.md`.
+
+- Prédictions : v15 52, hybride 53, exploratoire 59.
+- L'hybride n'ajoute qu'une ville.
+- L'exploratoire publie 7 lieux exacts qui paraissent justes, mais déplace
+  aussi des décisions de pays.
+- Rien n'est encore relu.
+
+La prédiction calcule maintenant les features LLM
+(`predict_with_hierarchical_model(llm=...)`). Le NER et le NLI tournent sur
+le GPU quand CUDA est disponible.
 
 ## 7. Fichiers de code
 

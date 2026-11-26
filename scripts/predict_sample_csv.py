@@ -2,6 +2,9 @@
 
 With --keywords, the sample is drawn only among artworks whose title,
 subjects or themes contain one of the keywords (config/keywords.json).
+A hybrid model (LLM features) reads each artwork that has candidates with a
+local LLM served by Ollama (--llm-model, Gemma3-4B by default); its answer
+is added to the CSV (llm_* columns).
 """
 
 import argparse
@@ -21,9 +24,11 @@ from api.aic import enrich_records_from_dump  # noqa: E402
 from data.filtering_logreg import (  # noqa: E402
     extract_all_candidates,
     filter_by_keywords,
+    model_uses_llm,
     model_uses_nli,
     predict_with_hierarchical_model,
 )
+from data.llm_places import LocalLlm  # noqa: E402
 from data.nli import NliScorer  # noqa: E402
 from geolocation.gazetter import NominatimClient  # noqa: E402
 from run_pipeline import load_ner_pipeline  # noqa: E402
@@ -94,6 +99,11 @@ def prediction_row(record, result, model, matched_keywords=None, validated_level
     decision = (prediction or {}).get("decision") or {}
     near_miss = None if prediction else _best_abstention(candidates, model)
     image_id = artwork.get("image_id")
+    llm_answer = result.get("llm_answer") or {}
+    llm_places = [
+        f"{place.get('name')} [{place.get('role')}; {place.get('type')}; {place.get('city')}, {place.get('country')}]"
+        for place in llm_answer.get("places", [])
+    ]
     return {
         "artwork_id": artwork.get("id"),
         "aic_url": f"https://www.artic.edu/artworks/{artwork.get('id')}",
@@ -125,6 +135,8 @@ def prediction_row(record, result, model, matched_keywords=None, validated_level
             f"{candidate['place']} [{candidate.get('candidate_level') or '?'}]"
             for candidate in candidates
         ),
+        "llm_depicts_place": llm_answer.get("depicts_place") if llm_answer else None,
+        "llm_places": " | ".join(llm_places),
         "subject_titles": json.dumps(artwork.get("subject_titles") or [], ensure_ascii=False),
         "matched_keywords": ", ".join(matched_keywords or []),
         "review_is_correct": "",
@@ -158,6 +170,11 @@ def main():
         help="Utiliser tous les niveaux actifs, même non validés par la validation externe "
         "(colonne level_validated). Pour exploration uniquement.",
     )
+    parser.add_argument(
+        "--llm-model",
+        default="gemma3:4b",
+        help="Modèle Ollama qui lit les œuvres pour les features LLM (modèles hybrides seulement).",
+    )
     args = parser.parse_args()
 
     model = joblib.load(args.model)
@@ -189,6 +206,8 @@ def main():
             nominatim_client=NominatimClient(user_agent=args.nominatim_user_agent),
             geocode_top_k=args.geocode_top_k,
             nli_scorer=NliScorer() if model_uses_nli(model) else None,
+            llm=LocalLlm(args.llm_model, think=False if args.llm_model.startswith("qwen3") else None)
+            if model_uses_llm(model) else None,
         )
     finally:
         if gazetteer_conn is not None:

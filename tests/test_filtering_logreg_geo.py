@@ -911,3 +911,78 @@ def test_hybrid_model_gives_the_extra_columns_only_to_the_chosen_levels():
     assert "llm_flag" not in model["levels"]["country"]["feature_columns"]
     scores = _score_rows(model, table)
     assert scores and all(0.0 <= value <= 1.0 for row in scores.values() for value in row.values())
+
+
+def test_prediction_computes_llm_features_for_hybrid_models():
+    import numpy as np
+    import pytest
+    from src.data.llm_places import LLM_FEATURE_COLUMNS
+
+    class RecordingModel:
+        """Probability = llm_role_depicted, the last column of the level."""
+
+        def __init__(self):
+            self.rows = []
+
+        def predict_proba(self, features):
+            self.rows.append(np.asarray(features)[0].tolist())
+            return [[1 - features[0][-1], features[0][-1]]]
+
+    class CityGeocoder:
+        def search(self, query):
+            return [{
+                "name": "Rouen", "country_code": "FR", "latitude": 49.44, "longitude": 1.10,
+                "feature_code": "city", "place_class": "place", "addresstype": "city", "place_rank": 16,
+                "importance": 0.7, "source": "Nominatim",
+                "hierarchy": {"neighborhood": None, "city": "Rouen", "region": "Normandy", "country": "France"},
+            }]
+
+    class FixedLlm:
+        def __init__(self):
+            self.calls = 0
+
+        def read_places(self, artwork):
+            self.calls += 1
+            return {"depicts_place": True, "places": [{
+                "mention": "Rouen", "name": "Rouen", "type": "city", "city": "Rouen",
+                "region": "Normandy", "country": "France", "role": "depicted",
+            }]}, 1.0
+
+    columns = GEOGRAPHIC_FEATURE_COLUMNS + LLM_FEATURE_COLUMNS
+    city_columns = GEOGRAPHIC_FEATURE_COLUMNS + ["llm_role_depicted"]
+    city_model = RecordingModel()
+    levels = {level: {"status": "insufficient_positive_groups"} for level in
+              ("exact_place", "neighborhood", "region", "country")}
+    levels["city"] = {
+        "status": "active", "model": city_model, "threshold": 0.5, "oof_precision": 0.9,
+        "target_precision": 0.9, "feature_columns": city_columns,
+    }
+    model = {
+        "feature_columns": columns,
+        "levels": levels,
+        "specificity_order": ["exact_place", "neighborhood", "city", "region", "country"],
+        "deployable_levels": ["city"],
+    }
+    records = [{"artwork": {"id": 1, "title": "Rouen"}}, {"artwork": {"id": 2, "title": "Vase"}}]
+    candidates = {1: [{
+        "place": "Rouen", "score_ner": 0.95, "field": "title", "start": 0, "end": 5, "source_text": "Rouen",
+    }]}
+
+    class ConstantNli:
+        def entailment(self, pairs):
+            return [0.5] * len(pairs)
+
+    with pytest.raises(ValueError, match="LLM"):
+        predict_with_hierarchical_model(
+            records, candidates, model, nominatim_client=CityGeocoder(), nli_scorer=ConstantNli(),
+        )
+
+    llm = FixedLlm()
+    predictions = predict_with_hierarchical_model(
+        records, candidates, model, nominatim_client=CityGeocoder(), nli_scorer=ConstantNli(), llm=llm,
+    )
+    assert llm.calls == 1  # the artwork without candidates is not read
+    assert predictions[1]["prediction"]["decision"]["level"] == "city"
+    assert predictions[1]["llm_answer"]["depicts_place"] is True
+    assert predictions[2]["llm_answer"] is None
+    assert city_model.rows[0][-1] == 1
