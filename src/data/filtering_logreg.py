@@ -2100,8 +2100,14 @@ def evaluate_hierarchical_grouped_cv(
     random_state=42,
     training_options=None,
     shuffle_seed=None,
+    fold_callback=None,
 ):
     """Evaluate a full level/threshold selection process on outer grouped folds.
+
+    `fold_callback(test_table, scores_by_row, model)`, if given, is called
+    for every outer fold: it receives the out-of-fold scores of the test
+    artworks (used by scripts/export_comparison_package.py to export one
+    honest prediction per artwork).
 
     Without `shuffle_seed`, the folds come from GroupKFold, which always
     splits the same way. With a seed, stable_group_folds spreads the
@@ -2164,6 +2170,8 @@ def evaluate_hierarchical_grouped_cv(
             model = train_hierarchical_model(train_table, **training_options)
 
         scores_by_row = _score_rows(model, test_table)
+        if fold_callback is not None:
+            fold_callback(test_table, scores_by_row, model)
         metrics = evaluate_hierarchical_work_predictions(
             test_table,
             scores_by_row,
